@@ -468,6 +468,7 @@ $('go').onclick=()=>{if(!names().length){$('gomsg').textContent='סמן לפחו
 function gatesUI(){$('gates').innerHTML=['24','25','29'].map(k=>`<button class="gate${GATES[k]?' on':''}" data-k="${k}"><b>${k}</b><small>${GATES[k]?'צריך מוסמך':'לא צריך מוסמך'}</small></button>`).join('');
 $('gsum').textContent=[['24','r5'],['25','r6'],['29','r4']].map(([k,r])=>k+(GATES[k]?' מוסמך'+($(r).value?' עד '+$(r).value:''):' כולם')).join(' · ');document.querySelectorAll('#gates button').forEach(b=>b.onclick=()=>{GATES[b.dataset.k]=GATES[b.dataset.k]?0:1;gatesUI();save()})}
 
+function shLbl(idx){if(!last||!idx||!idx.length)return T0;const{a,L,S,e}=last,i0=Math.min(...idx),i1=Math.max(...idx);return '\u200E'+fm(a+i0*L)+' – '+fm(i1===S-1?e:a+(i1+1)*L)}
 function drawImg(idx){const{a,L,S,e,rm,best}=last,W0=720,pad=24,rh=46;
 const bl=idx.map(i=>{const r=best.rows[i];return{t:fm(a+i*L)+' – '+fm(i===S-1?e:a+(i+1)*L),rows:DISP.filter(d=>!rm[i].includes(d)).map(d=>[PM[d].lab,r.asg[d]||'—',PM[d].t==='si']),br:r.br.join(', ')||'—'}});
 const H=90+bl.reduce((q,b)=>q+50+(b.rows.length+1)*rh+22,0)+10;
@@ -485,7 +486,7 @@ o.innerHTML=`<div style="max-width:560px;margin:0 auto"><img src="${u}" style="w
 const M=t=>{$('imgmsg').textContent=t};
 $('imgx').onclick=()=>o.remove();$('imgwa').onclick=()=>{try{navigator.clipboard.write([new ClipboardItem({'image/png':b})]).then(()=>{},()=>{})}catch(e){}};
 $('imgsv').onclick=async()=>{try{const d=window.claude&&window.claude.use?await window.claude.use('downloads'):null;if(!d){M('השמירה לא זמינה כאן. נסה "העתק תמונה".');return}await d.save({filename:'seder.png',data:b});M('✔ נשמר')}catch(e){M(e&&e.code==='declined'?'בוטל':'לא הצלחתי לשמור. נסה "העתק תמונה".')}};
-if(cs)$('imgsh').onclick=()=>{navigator.share({files:[f],title:T0}).catch(()=>{})};
+if(cs)$('imgsh').onclick=()=>{navigator.share({files:[f],title:shLbl(idx),text:shLbl(idx)}).catch(()=>{})};
 $('imgcp').onclick=async()=>{try{await navigator.clipboard.write([new ClipboardItem({'image/png':b})]);M('✔ התמונה הועתקה. הדבק אותה בווצאפ.')}catch(e){M('לא הצלחתי להעתיק. בדפדפן אפשר ללחוץ והחזק על התמונה.')}}})}
 function autoRec(){const{g,W}=last,key=today()+'|'+$('st').value+'-'+$('en').value,lp=[...fin].filter(x=>g.includes(x)&&!NITE.has(x)&&!W.noLast.has(x));
 const sig=key+'|'+lp.slice().sort().join();if(skipRec===sig)return;
@@ -496,7 +497,7 @@ function bindX(){}
 function toast(t,idx){let o=$('toast');if(!o){o=document.createElement('div');o.id='toast';o.style.cssText='position:fixed;left:12px;right:12px;bottom:calc(14px + env(safe-area-inset-bottom,0px));z-index:30;background:#10231a;color:#fff;border-radius:14px;padding:12px 14px;max-width:560px;margin:0 auto;box-shadow:0 6px 20px rgba(0,0,0,.3);font-size:.95rem';document.body.appendChild(o)}
 o.innerHTML=`<span>${t}</span> <button class="lnk" id="tmore" style="color:#9fe3c0">עוד אפשרויות</button>`;$('tmore').onclick=()=>{o.remove();shareImg(idx)};clearTimeout(o._t);o._t=setTimeout(()=>o.remove(),9000)}
 function sendWA(idx,ev){if(!last)return;ev.preventDefault();const cv=drawImg(idx);
-cv.toBlob(async b=>{if(!b)return;try{const f=new File([b],'seder.png',{type:'image/png'});if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f],title:T0});return}}catch(e){if(e&&e.name==='AbortError')return}
+cv.toBlob(async b=>{if(!b)return;try{const f=new File([b],'seder.png',{type:'image/png'});if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f],title:shLbl(idx),text:shLbl(idx)});return}}catch(e){if(e&&e.name==='AbortError')return}
 if(window.matchMedia&&matchMedia('(pointer:coarse)').matches)shareImg(idx);else cp(cv,idx)},'image/png')}
 function cp(cv,idx){try{const pr=new Promise(r=>cv.toBlob(r,'image/png'));navigator.clipboard.write([new ClipboardItem({'image/png':pr})]).then(()=>toast('✔ התמונה הועתקה. בווצאפ: בחר קבוצה והדבק (Ctrl+V או לחיצה ארוכה). <a href="https://wa.me/" target="_blank" rel="noopener" style="color:#9fe3c0">פתח ווצאפ</a>',idx)).catch(()=>shareImg(idx))}catch(e){shareImg(idx)}}
 document.addEventListener('click',e=>{const t=e.target,h=t.closest&&t.closest('.slot>header');if(h&&!t.closest('button,a')){const a=h.parentElement,i=+a.dataset.s;if(openSet){openSet.has(i)?openSet.delete(i):openSet.add(i);a.classList.toggle('col',!openSet.has(i))}return}
@@ -508,7 +509,7 @@ const t=T0+' · '+d.getDate()+'.'+(d.getMonth()+1)+'.'+d.getFullYear()+' · '+(c
 L.unshift({k,d:d.getDate()+'.'+(d.getMonth()+1),m:curMode==='m'?'בוקר':'צהריים',t});localStorage.setItem('shiftHist',JSON.stringify(L.slice(0,14)))}catch(e){}histUI()}
 function histUI(){const L=histGet();$('hist2').innerHTML=L.length?`<details class="card hh"><summary>🗂️ סידורים קודמים (${L.length})</summary>${L.map((z,i)=>`<details><summary>${esc(z.d)} · ${esc(z.m)}</summary><pre>${esc(z.t)}</pre><a class="wa" target="_blank" rel="noopener" href="${waUrl(z.t)}">שלח בווצאפ</a></details>`).join('')}</details>`:''}
 load();chips();gatesUI();setLogo();histUI();['r4','r5','r6'].forEach(id=>{$(id).oninput=gatesUI});
-const VER='15.10.2026 · גרסה 23';$('ver').textContent='גרסה: '+VER+' · אם זה נראה לך לא מעודכן, פתח את הקישור עצמו (לא עותק שמור) ורענן את הדף';let wipeArm=false;$('wipe').onclick=()=>{if(!wipeArm){wipeArm=true;$('wipe').textContent='בטוח? לחץ שוב למחיקה';setTimeout(()=>{wipeArm=false;$('wipe').textContent='🗑️ מחק את כל הנתונים במכשיר הזה'},4000);return}try{localStorage.removeItem('shiftRoster');localStorage.removeItem('shift');localStorage.removeItem('shiftPal');localStorage.removeItem('shiftHist')}catch(e){}location.reload()};pre(new Date().getHours()>=13?'a':'m',true);setInterval(tick,30000);
+const VER='15.10.2026 · גרסה 24';$('ver').textContent='גרסה: '+VER+' · אם זה נראה לך לא מעודכן, פתח את הקישור עצמו (לא עותק שמור) ורענן את הדף';let wipeArm=false;$('wipe').onclick=()=>{if(!wipeArm){wipeArm=true;$('wipe').textContent='בטוח? לחץ שוב למחיקה';setTimeout(()=>{wipeArm=false;$('wipe').textContent='🗑️ מחק את כל הנתונים במכשיר הזה'},4000);return}try{localStorage.removeItem('shiftRoster');localStorage.removeItem('shift');localStorage.removeItem('shiftPal');localStorage.removeItem('shiftHist')}catch(e){}location.reload()};pre(new Date().getHours()>=13?'a':'m',true);setInterval(tick,30000);
 </script>
 </body>
 </html>
