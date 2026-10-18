@@ -156,9 +156,9 @@ nav.main button.on{background:var(--ink);color:#fff}
 .slot.col .pt,.slot.col .pkr{display:none}
 #pg2,#pg3{max-width:720px;margin-inline:auto}
 @media(min-width:900px){body{max-width:1000px}
-#pg1{display:grid;grid-template-columns:minmax(300px,1fr) 1.5fr;grid-template-rows:min-content min-content 1fr;gap:0 16px;align-items:start}
+#pg1{display:grid;grid-template-columns:minmax(300px,1fr) 1.5fr;grid-template-rows:min-content min-content min-content 1fr;gap:0 16px;align-items:start}
 #pg1>*{grid-column:1}
-#pg1>.rosterc{grid-column:2;grid-row:1/span 3}
+#pg1>.rosterc{grid-column:2;grid-row:1/span 4}#pg1>#sumc{display:block;grid-column:1;grid-row:4}#sumg{grid-template-columns:1fr 1fr 1fr 1fr}
 #pg1>.adv,#pg1>#gomsg,#pg1>.stick,#pg1>#ver{grid-column:1/-1}
 #chips{display:grid;grid-template-columns:1fr 1fr;column-gap:12px;align-content:start;align-items:start}
 #chips>.sec,#chips>p{grid-column:1/-1}}
@@ -199,6 +199,12 @@ body{max-width:none;padding:0 0 40px}
 @keyframes bar{to{width:min(52vw,260px)}}
 @keyframes fade{to{opacity:1}}
 @media(prefers-reduced-motion:reduce){#splash *{animation-duration:.01s!important;animation-delay:0s!important}}
+#sumc{display:none}
+.sumg{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.sumg>div{background:var(--bg);border-radius:14px;padding:10px 12px}
+.sumg b{display:block;font-size:1.6rem;line-height:1.1;color:var(--ink);font-variant-numeric:tabular-nums}
+.sumg span{font-size:.85rem;color:var(--mut)}
+.sumn{margin:10px 2px 0;font-size:.9rem;color:var(--mut)}
 </style>
 <link rel="apple-touch-icon" href="apple-touch-icon.png"><link rel="icon" href="icon-192.png"><link rel="manifest" href="manifest.webmanifest">
 <meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="סידור עמדות"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="theme-color" content="#1b6b4a">
@@ -211,10 +217,11 @@ body{max-width:none;padding:0 0 40px}
 <details class="card help"><summary>❓ איך משתמשים?</summary><ol><li>בחר בוקר או צהריים.</li><li>הקש על שם כדי לסמן מי נמצא במשמרת. מי שנבחר עולה למעלה.</li><li>הכוכב ליד השם = מוסמך (הקש כדי לשנות).</li><li>מתחת לכל שם שנבחר: "שילדי יום", "שילדי לילה" (בצהריים) ו"אחרונה" (הקשה חוזרת מחליפה בין 🏠 ל-🌙).</li><li>הלשונית "אחרונות" מראה כמה אחרונות קיבל כל אחד החודש.</li><li>לחץ "בנה סידור".</li></ol></details>
 <section class="card"><h2>איזו משמרת?</h2>
 <p id="cmsg" class="hint" style="color:var(--ink);font-weight:600;margin:0 0 10px"></p><div class="modes"><button id="pm" class="mode on">☀️ בוקר<small>06:50 - 14:50</small></button><button id="pa" class="mode">🌤️ צהריים<small>14:50 - 21:50</small></button></div></section>
-<details class="card"><summary>כניסות: <span id="gsum" style="font-weight:400;color:var(--mut)"></span></summary>
+<details class="card" id="entd"><summary>כניסות: <span id="gsum" style="font-weight:400;color:var(--mut)"></span></summary>
 <p class="hint" style="margin:8px 0 10px">הקש על כניסה כדי לשנות אם היא צריכה מוסמך. אפשר גם לקבוע שעה שמאותה שעה הכניסה לא צריכה מוסמך.</p>
 <div class="gates" id="gates"></div>
 <div class="gates" style="margin-top:8px"><div><label>24 בלי מוסמך מ־</label><input type="time" id="r5"></div><div><label>25 בלי מוסמך מ־</label><input type="time" id="r6"></div><div><label>29 בלי מוסמך מ־</label><input type="time" id="r4"></div></div></details>
+<section class="card" id="sumc"><h2>סיכום המשמרת</h2><div class="sumg" id="sumg"></div><p class="sumn" id="sumn"></p></section>
 <section class="card rosterc"><h2>מי במשמרת?</h2>
 <div class="addrow"><input id="nm" placeholder="חפש או הוסף מאבטח" enterkeyhint="done"><button id="add">הוסף</button></div>
 <div class="bar"><span id="cnt"></span><span><button class="lnk" id="all1">בחר הכל</button><button class="lnk" id="none1">נקה</button><button class="lnk" id="edm">✎ עריכה</button></span></div>
@@ -267,7 +274,11 @@ const he=(a,b)=>a.localeCompare(b,'he');
 const mk=()=>{const d=new Date();return d.getFullYear()+'-'+(d.getMonth()+1)};
 let MO=mk(),OPEN=null,skipRec=null,openSet=null;
 function monthCheck(){if(MO!==mk()){Object.keys(hist).forEach(k=>delete hist[k]);recd=null;MO=mk();save()}}
-function chips(){
+function sumUI(){const g=document.getElementById('sumg');if(!g)return;const nm=roster.filter(n=>!off.has(n)),c=nm.filter(n=>cert.has(n)).length,ls=nm.filter(n=>fin.has(n)),a=hm($('st').value||'0:0'),e=hm($('en').value||'0:0'),L=Math.min(120,Math.max(10,+$('len').value||40)),S=Math.max(0,Math.floor((e-a)/L));
+g.innerHTML=[[nm.length,'מאבטחים במשמרת'],[c,'מוסמכים ★'],[ls.length,'אחרונים'],[S,'איקסים של '+L+' דקות']].map(([v,t])=>`<div><b>${v}</b><span>${t}</span></div>`).join('');
+document.getElementById('sumn').textContent=($('st').value&&$('en').value?'משמרת '+$('st').value+'–'+$('en').value:'')+(ls.length?' · אחרונים: '+ls.join(', '):'')}
+function chips(){chips0();sumUI()}
+function chips0(){
 monthCheck();
 const A=curMode==='a';
 const vis=roster.filter(n=>!srch||n.includes(srch));
@@ -547,7 +558,7 @@ const t=T0+' · '+d.getDate()+'.'+(d.getMonth()+1)+'.'+d.getFullYear()+' · '+(c
 L.unshift({k,d:d.getDate()+'.'+(d.getMonth()+1),m:curMode==='m'?'בוקר':'צהריים',t});localStorage.setItem('shiftHist',JSON.stringify(L.slice(0,14)))}catch(e){}histUI()}
 function histUI(){const L=histGet();$('hist2').innerHTML=L.length?`<details class="card hh"><summary>🗂️ סידורים קודמים (${L.length})</summary>${L.map((z,i)=>`<details><summary>${esc(z.d)} · ${esc(z.m)}</summary><pre>${esc(z.t)}</pre><a class="wa" target="_blank" rel="noopener" href="${waUrl(z.t)}">שלח בווצאפ</a></details>`).join('')}</details>`:''}
 load();chips();gatesUI();setLogo();histUI();['r4','r5','r6'].forEach(id=>{$(id).oninput=gatesUI});
-const VER='15.10.2026 · גרסה 31';$('ver').textContent='גרסה: '+VER+' · אם זה נראה לך לא מעודכן, פתח את הקישור עצמו (לא עותק שמור) ורענן את הדף';let wipeArm=false;$('wipe').onclick=()=>{if(!wipeArm){wipeArm=true;$('wipe').textContent='בטוח? לחץ שוב למחיקה';setTimeout(()=>{wipeArm=false;$('wipe').textContent='🗑️ מחק את כל הנתונים במכשיר הזה'},4000);return}try{localStorage.removeItem('shiftRoster');localStorage.removeItem('shift');localStorage.removeItem('shiftPal');localStorage.removeItem('shiftHist')}catch(e){}location.reload()};pre(new Date().getHours()>=13?'a':'m',true);setInterval(tick,30000);
+const VER='15.10.2026 · גרסה 32';$('ver').textContent='גרסה: '+VER+' · אם זה נראה לך לא מעודכן, פתח את הקישור עצמו (לא עותק שמור) ורענן את הדף';let wipeArm=false;$('wipe').onclick=()=>{if(!wipeArm){wipeArm=true;$('wipe').textContent='בטוח? לחץ שוב למחיקה';setTimeout(()=>{wipeArm=false;$('wipe').textContent='🗑️ מחק את כל הנתונים במכשיר הזה'},4000);return}try{localStorage.removeItem('shiftRoster');localStorage.removeItem('shift');localStorage.removeItem('shiftPal');localStorage.removeItem('shiftHist')}catch(e){}location.reload()};pre(new Date().getHours()>=13?'a':'m',true);setInterval(tick,30000);
 
 
 (function(){const sp=document.getElementById('splash');if(!sp)return;let seen=false;try{seen=!!sessionStorage.getItem('splashSeen')}catch(e){}
@@ -557,6 +568,8 @@ document.getElementById('splashlogo').src=LOGO;
 const t=document.getElementById('splashT');'סידור עמדות'.split('').forEach((ch,i)=>{const e=document.createElement('span');e.textContent=ch===' '?'\u00a0':ch;e.style.animationDelay=(.95+i*.035)+'s';t.appendChild(e)});
 sp.hidden=false;let done=false;const close=()=>{if(done)return;done=true;sp.classList.add('out');setTimeout(()=>sp.remove(),450)};
 sp.onclick=close;setTimeout(close,2100)})();
+
+try{if(window.innerWidth>=900)document.getElementById('entd').open=true}catch(e){}
 </script>
 </body>
 </html>
