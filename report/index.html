@@ -76,6 +76,7 @@ textarea{min-height:110px;resize:vertical}
  <label class="f" for="date">תאריך</label><input type="date" id="date" name="date">
  <label class="f" for="time">שעה</label><input type="time" id="time" name="time">
  <label class="f" for="shift">סוג משמרת</label><select id="shift" name="shift"><option value="">בחירה</option></select>
+ <input id="shiftOther" name="shiftOther" placeholder="כתבו את סוג המשמרת" style="margin-top:10px" hidden>
  <label class="f" for="vehicle">מספר רכב</label><input id="vehicle" name="vehicle" inputmode="numeric">
  <label class="f" for="giver">מאבטח מוסר</label><input id="giver" name="giver" autocomplete="name">
  <label class="f" for="receiver">מאבטח מקבל</label><input id="receiver" name="receiver">
@@ -136,7 +137,9 @@ textarea{min-height:110px;resize:vertical}
 <script src="common.js"></script>
 <script>
 $('org').textContent=ORG;$('ttl').textContent=TITLE;$('sub').textContent=SUBTITLE;
-SHIFTS.forEach(s=>$('shift').add(new Option(s,s)));
+SHIFTS.forEach(s=>$('shift').add(new Option(s,s)));$('shift').add(new Option(OTHER,OTHER));
+function paintShift(focus){const o=$('shift').value===OTHER;$('shiftOther').hidden=!o;if(o&&focus)$('shiftOther').focus()}
+$('shift').addEventListener('change',()=>paintShift(true));
 $('rem').innerHTML=REMINDERS.map(t=>`<li>${esc(t)}</li>`).join('');
 
 // ----- שורות בדיקה -----
@@ -183,21 +186,21 @@ makePad('padGiver','sgGiver');makePad('padReceiver','sgReceiver');
 document.querySelectorAll('.clear').forEach(b=>b.onclick=()=>pads[b.dataset.pad].clear());
 
 // ----- טיוטה (רק במכשיר הזה, בלי חתימות) -----
-const TXT=['shift','vehicle','giver','receiver','vNotes','details','reportedTo','reportTime','reportMethod'];
+const TXT=['shift','shiftOther','vehicle','giver','receiver','vNotes','details','reportedTo','reportTime','reportMethod'];
 function saveDraft(){try{const d={ans,fuel,status:(document.querySelector('[name=status]:checked')||{}).value};TXT.forEach(k=>d[k]=$(k).value);localStorage.setItem('handoverDraft',JSON.stringify(d))}catch(e){}}
 function loadDraft(){try{const d=JSON.parse(localStorage.getItem('handoverDraft')||'null');if(!d)return;
   TXT.forEach(k=>{if(d[k])$(k).value=d[k]});Object.assign(ans,d.ans||{});fuel=d.fuel||'';
   if(d.status){const r=document.querySelector(`[name=status][value="${d.status}"]`);if(r)r.checked=true}}catch(e){}}
 function resetForm(){$('form').reset();for(const k in ans)delete ans[k];fuel='';Object.values(pads).forEach(p=>p.clear());
-  $('date').value=todayISO();$('time').value=nowHM();try{localStorage.removeItem('handoverDraft')}catch(e){}paintRows()}
+  $('date').value=todayISO();$('time').value=nowHM();try{localStorage.removeItem('handoverDraft')}catch(e){}paintRows();paintShift()}
 $('form').addEventListener('input',e=>{e.target.classList.remove('invalid');saveDraft()});
 $('form').addEventListener('change',saveDraft);
-$('date').value=todayISO();$('time').value=nowHM();loadDraft();paintRows();
+$('date').value=todayISO();$('time').value=nowHM();loadDraft();paintRows();paintShift();
 
 // ----- בדיקה ושליחה -----
 function validate(){
   const miss=[];const need=(id,name)=>{if(!$(id).value.trim()){$(id).classList.add('invalid');miss.push(name)}};
-  need('date','תאריך');need('time','שעה');need('shift','סוג משמרת');need('vehicle','מספר רכב');need('giver','מאבטח מוסר');need('receiver','מאבטח מקבל');
+  need('date','תאריך');need('time','שעה');need('shift','סוג משמרת');if($('shift').value===OTHER)need('shiftOther','סוג המשמרת (אחר)');need('vehicle','מספר רכב');need('giver','מאבטח מוסר');need('receiver','מאבטח מקבל');
   const open=CHECKS.filter(c=>!ans[c.k]);open.forEach(c=>$('row_'+c.k).classList.add('invalid'));
   if(open.length)miss.push(`סימון תקין/לא תקין ב-${open.length} סעיפים`);
   if(!fuel){$('row_fuel').classList.add('invalid');miss.push('מצב מיכל הדלק')}
@@ -225,7 +228,7 @@ $('form').addEventListener('submit',async e=>{
   const{miss,status}=validate();
   if(miss.length){$('err').innerHTML='יש להשלים לפני השליחה:<ul>'+miss.map(m=>`<li>${esc(m)}</li>`).join('')+'</ul>';$('err').hidden=false;
     const first=document.querySelector('.invalid');(first||$('err')).scrollIntoView({behavior:'smooth',block:'center'});return}
-  const r={date:$('date').value,time:$('time').value,shift:$('shift').value,vehicle:$('vehicle').value.trim(),giver:$('giver').value.trim(),receiver:$('receiver').value.trim(),
+  const r={date:$('date').value,time:$('time').value,shift:$('shift').value===OTHER?$('shiftOther').value.trim():$('shift').value,vehicle:$('vehicle').value.trim(),giver:$('giver').value.trim(),receiver:$('receiver').value.trim(),
     checks:{...ans},fuel,vNotes:$('vNotes').value.trim(),details:$('details').value.trim(),reportedTo:$('reportedTo').value.trim(),reportTime:$('reportTime').value,reportMethod:$('reportMethod').value.trim(),
     status,giverOk:true,receiverOk:true,sigGiver:pads.padGiver.data,sigReceiver:pads.padReceiver.data,createdAt:Date.now()};
   r.defects=CHECKS.filter(c=>r.checks[c.k]==='bad').length;
