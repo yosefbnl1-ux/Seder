@@ -24,6 +24,11 @@ nav.main button.on{background:var(--ink);color:var(--inkfg)}
 h2{font-size:1.05rem;margin:0 0 12px;display:flex;align-items:center;gap:10px;font-weight:800}
 .stepn{width:28px;height:28px;border-radius:50%;background:var(--ink);color:var(--inkfg);display:inline-flex;align-items:center;justify-content:center;font-size:.9rem}
 summary{cursor:pointer;font-weight:700}
+.hg{display:grid;grid-template-columns:1fr;gap:10px;margin-top:12px}
+.hs{display:flex;gap:12px;align-items:flex-start;background:var(--bg);border-radius:14px;padding:12px 14px}
+.hs>b{flex:0 0 28px;height:28px;border-radius:50%;background:var(--ink);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.9rem}
+.hs h4{margin:0 0 2px;font-size:1rem;color:var(--ink)}.hs p{margin:0;font-size:.9rem;color:var(--mut);line-height:1.5}
+@media(min-width:900px){.hg{grid-template-columns:1fr 1fr}}
 .help ol{margin:10px 0 0;padding-inline-start:22px;color:var(--mut)}
 .modes{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .mode{border:2px solid var(--line);background:var(--card);color:var(--fg);border-radius:16px;padding:14px 8px;font-weight:800;font-size:1.05rem;display:flex;flex-direction:column;align-items:center;gap:2px}
@@ -214,7 +219,15 @@ body{max-width:none;padding:0 0 40px}
 <header class="top"><div id="logo"></div><h1>סידור עמדות מערך חוץ</h1></header>
 <nav class="main"><button id="n1" class="on">משמרת</button><button id="n2">סידור</button><button id="n3">אחרונות</button></nav>
 <main id="pg1" class="page">
-<details class="card help"><summary>❓ איך משתמשים?</summary><ol><li>בחר בוקר או צהריים.</li><li>הקש על שם כדי לסמן מי נמצא במשמרת. מי שנבחר עולה למעלה.</li><li>הכוכב ליד השם = מוסמך (הקש כדי לשנות).</li><li>מתחת לכל שם שנבחר: "שילדי יום", "שילדי לילה" (בצהריים) ו"אחרונה" (הקשה חוזרת מחליפה בין 🏠 ל-🌙).</li><li>הלשונית "אחרונות" מראה כמה אחרונות קיבל כל אחד החודש.</li><li>לחץ "בנה סידור".</li></ol></details>
+<details class="card help"><summary>❓ איך משתמשים?</summary><div class="hg">
+<div class="hs"><b>1</b><div><h4>בוחרים משמרת</h4><p>בוקר או צהריים. השעות והאיקסים מתעדכנים לבד.</p></div></div>
+<div class="hs"><b>2</b><div><h4>מסמנים מי במשמרת</h4><p>הקש על שם כדי להוסיף אותו. מי שנבחר עולה למעלה. שם חדש? כתוב בשורת החיפוש ולחץ "הוסף".</p></div></div>
+<div class="hs"><b>3</b><div><h4>מגדירים מי מיוחד</h4><p>★ ליד השם = מוסמך (הקש להחלפה). הקש ⋯ ליד מאבטח שנבחר: שילדי יום, שילדי לילה (בצהריים) ו"אחרונה" (הקשה חוזרת מחליפה בין 🏠 ל־🌙).</p></div></div>
+<div class="hs"><b>4</b><div><h4>כניסות ועמדות</h4><p>בכרטיס "כניסות" הקש על 24/25/29 כדי לקבוע אם צריך מוסמך, ואפשר לקבוע שעה שממנה כבר לא צריך. בהגדרות מתקדמות אפשר להוריד עמדה או להגדיר סנ"ח.</p></div></div>
+<div class="hs"><b>5</b><div><h4>בונים סידור</h4><p>לחץ "בנה סידור" והסידור מופיע בלשונית "סידור".</p></div></div>
+<div class="hs"><b>6</b><div><h4>משהו השתנה באמצע?</h4><p>בלשונית "סידור" תחת "שינויים באמצע משמרת": מאבטח שיוצא וחוזר, מצטרף באמצע, או הוספת עמדה. הסידור נבנה מחדש.</p></div></div>
+<div class="hs"><b>7</b><div><h4>שולחים בווצאפ</h4><p>בלשונית "סידור" לחץ על כפתור הווצאפ כדי לשלוח תמונה של הסידור. בלשונית "אחרונות" רואים כמה פעמים כל אחד היה אחרון החודש.</p></div></div>
+</div></details>
 <section class="card"><h2>איזו משמרת?</h2>
 <p id="cmsg" class="hint" style="color:var(--ink);font-weight:600;margin:0 0 10px"></p><div class="modes"><button id="pm" class="mode on">☀️ בוקר<small>06:50 - 14:50</small></button><button id="pa" class="mode">🌤️ צהריים<small>14:50 - 21:50</small></button></div></section>
 <details class="card" id="entd"><summary>כניסות: <span id="gsum" style="font-weight:400;color:var(--mut)"></span></summary>
