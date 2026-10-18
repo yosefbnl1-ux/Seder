@@ -1,15 +1,10 @@
-// הגדרות חיבור למסד הנתונים (Firebase).
-// כל עוד FIREBASE_CONFIG ריק (null) - הדוחות נשמרים רק במכשיר שבו מילאו אותם (מצב ניסיון).
-// להפעלה אמיתית: הדביקו כאן את האובייקט מ-Firebase Console > Project settings > Your apps > Config
-// ראו הוראות מלאות ב-README.md
-window.FIREBASE_CONFIG = null;
-/* דוגמה:
+// הגדרות חיבור למסד הנתונים (Firebase). ראו הוראות ב-README.md
+// הערכים האלה אינם סודיים - ההגנה על הדוחות היא בכללי האבטחה (firestore.rules)
 window.FIREBASE_CONFIG = {
-  apiKey: "...",
-  authDomain: "my-project.firebaseapp.com",
-  projectId: "my-project",
-  storageBucket: "my-project.appspot.com",
-  messagingSenderId: "...",
-  appId: "..."
+  apiKey: "AIzaSyCgMOuYOWemCdWbu5648xxOydoaCLLlPT8",
+  authDomain: "seder-reports.firebaseapp.com",
+  projectId: "seder-reports",
+  storageBucket: "seder-reports.firebasestorage.app",
+  messagingSenderId: "324031854032",
+  appId: "1:324031854032:web:a37a432b93e848cf3035d5"
 };
-*/
