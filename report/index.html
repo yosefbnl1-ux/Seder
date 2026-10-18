@@ -128,17 +128,13 @@ textarea{min-height:110px;resize:vertical}
  <h2>הדיווח נשלח בהצלחה</h2>
  <p id="doneMsg"></p>
  <p class="wait" id="wait" hidden></p>
- <button class="btn2" id="myPdf" type="button">הורדת הדוח כ-PDF</button>
  <button class="send" id="again" type="button">דיווח חדש</button>
 </div>
 </div>
 
 <script src="config.js"></script>
-<script src="lib/html2canvas.min.js"></script>
-<script src="lib/jspdf.umd.min.js"></script>
 <script src="common.js"></script>
 <script>
-const st=document.createElement('style');st.textContent=REPORT_CSS;document.head.appendChild(st);
 $('org').textContent=ORG;$('ttl').textContent=TITLE;$('sub').textContent=SUBTITLE;
 SHIFTS.forEach(s=>$('shift').add(new Option(s,s)));
 $('rem').innerHTML=REMINDERS.map(t=>`<li>${esc(t)}</li>`).join('');
@@ -219,7 +215,7 @@ function validate(){
 const COOLDOWN=60*60*1000;
 let lastReport=null;try{lastReport=JSON.parse(localStorage.getItem('handoverLast')||'null')}catch(e){}
 function lockLeft(){return lastReport?.createdAt?lastReport.createdAt+COOLDOWN-Date.now():0}
-function showDone(msg){$('doneMsg').textContent=msg;$('form').hidden=true;$('done').hidden=false;$('myPdf').hidden=!lastReport;paintLock();scrollTo(0,0)}
+function showDone(msg){$('doneMsg').textContent=msg;$('form').hidden=true;$('done').hidden=false;paintLock();scrollTo(0,0)}
 function paintLock(){const left=lockLeft();$('again').hidden=left>0;$('wait').hidden=left<=0;
   if(left>0){const t=new Date(lastReport.createdAt+COOLDOWN);
     $('wait').textContent=`ניתן לשלוח דיווח נוסף בעוד ${Math.ceil(left/60000)} דקות (בשעה ${pad(t.getHours())}:${pad(t.getMinutes())})`}}
@@ -235,13 +231,12 @@ $('form').addEventListener('submit',async e=>{
   r.defects=CHECKS.filter(c=>r.checks[c.k]==='bad').length;
   $('send').disabled=true;$('send').textContent='שולח...';
   try{await ready;const res=await Store.add(r);lastReport=r;
-    try{localStorage.setItem('handoverLast',JSON.stringify(r))}catch(e){}
+    try{localStorage.setItem('handoverLast',JSON.stringify({createdAt:r.createdAt}))}catch(e){}
     resetForm();
     showDone(res==='queued'?'אין כרגע חיבור לרשת – הדיווח נשמר בטלפון ויישלח אוטומטית כשהחיבור יחזור. אל תמחקו את נתוני הדפדפן עד אז.':'הדיווח התקבל ונשמר במערכת.')}
   catch(err){$('err').textContent='השליחה נכשלה: '+(err.message||err)+'. הנתונים לא נמחקו – נסו שוב.';$('err').hidden=false}
   finally{$('send').disabled=false;$('send').textContent='שליחת הדיווח'}});
 $('again').onclick=()=>{if(lockLeft()>0)return paintLock();$('done').hidden=true;$('form').hidden=false;Object.values(pads).forEach(p=>p.size());scrollTo(0,0)};
-$('myPdf').onclick=async()=>{const b=$('myPdf');b.disabled=true;b.textContent='מכין PDF...';try{await reportsToPDF([lastReport],pdfName(lastReport))}finally{b.disabled=false;b.textContent='הורדת הדוח כ-PDF'}};
 
 if(lockLeft()>0)showDone('כבר נשלח דיווח מהמכשיר הזה בשעה האחרונה.');
 const ready=Store.init(false).catch(e=>{$('err').textContent='אין חיבור למערכת הדיווחים: '+e.message;$('err').hidden=false;throw e});ready.catch(()=>{});
