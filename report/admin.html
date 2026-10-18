@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1f3a5c">
+<meta name="robots" content="noindex">
+<title>ניהול דוחות העברת משמרת</title>
+<link rel="icon" href="logo.jpg">
+<style>
+:root{color-scheme:light;--bg:#eef2f6;--card:#fff;--fg:#14233a;--mut:#6b7a8f;--line:#dde4ec;--ink:#1f3a5c;--acc:#3d6a9e;--ok:#17683f;--okbg:#e3f4ea;--bad:#b3261e;--badbg:#fde6e3;--warn:#8a5a00;--warnbg:#fff1d1;--field:#f7f9fc}
+*{box-sizing:border-box}[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.5 "Segoe UI",Arial,"Helvetica Neue",system-ui,sans-serif}
+button{font:inherit;cursor:pointer;color:inherit}
+.top{background:var(--ink);color:#fff;padding:calc(env(safe-area-inset-top,0px) + 12px) 16px 12px}
+.top .in{max-width:1100px;margin:0 auto;display:flex;align-items:center;gap:12px}
+.top img{width:44px;height:44px;background:#fff;border-radius:10px;padding:3px;object-fit:contain}
+.top h1{margin:0;font-size:1.15rem;flex:1;line-height:1.2}.top h1 small{display:block;font-weight:400;opacity:.75;font-size:.8rem}
+.top button{background:rgba(255,255,255,.14);border:0;color:#fff;border-radius:10px;padding:8px 12px;font-weight:700;font-size:.85rem}
+main{max-width:1100px;margin:0 auto;padding:16px 16px 60px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px}
+.login{max-width:380px;margin:40px auto}
+.login h2{margin:0 0 12px;color:var(--ink)}
+input,select{width:100%;font:inherit;color:inherit;background:var(--field);border:1.5px solid var(--line);border-radius:12px;padding:10px 12px;min-height:44px;outline:0}
+input:focus,select:focus{border-color:var(--acc);background:#fff}
+label.f{display:block;font-weight:700;font-size:.85rem;margin:10px 0 4px;color:#2c3e57}
+.btn{border:0;border-radius:12px;background:var(--ink);color:#fff;font-weight:800;padding:0 16px;min-height:44px;white-space:nowrap}
+.btn.sec{background:#fff;color:var(--ink);border:1.5px solid var(--ink)}
+.btn.red{background:#fff;color:var(--bad);border:1.5px solid var(--bad)}
+.btn:disabled{opacity:.5;cursor:default}
+.msg{margin-top:10px;color:var(--bad);font-weight:700;font-size:.9rem}
+.banner{background:var(--warnbg);color:var(--warn);border-radius:12px;padding:10px 14px;margin-bottom:14px;font-size:.9rem;font-weight:600}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px 14px}
+.stat b{display:block;font-size:1.7rem;line-height:1.1;color:var(--ink);font-variant-numeric:tabular-nums}
+.stat span{color:var(--mut);font-size:.85rem;font-weight:600}
+.stat.bad b{color:var(--bad)}
+.filters{display:grid;grid-template-columns:2fr 1fr 1fr 1fr auto;gap:10px;align-items:end;margin-bottom:12px}
+.filters label.f{margin-top:0}
+.tog{display:flex;align-items:center;gap:8px;min-height:44px;font-weight:700;font-size:.9rem;white-space:nowrap;cursor:pointer}
+.tog input{width:20px;height:20px;min-height:0}
+.bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.bar .cnt{flex:1;color:var(--mut);font-size:.9rem;font-weight:600}
+table.list{width:100%;border-collapse:separate;border-spacing:0;background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.list th{background:#f6f8fb;color:#4a5a70;font-size:.8rem;text-align:right;padding:10px;font-weight:700;border-bottom:1px solid var(--line)}
+.list td{padding:10px;border-bottom:1px solid var(--line);font-size:.92rem;vertical-align:middle}
+.list tr:last-child td{border-bottom:0}
+.list tbody tr{cursor:pointer}.list tbody tr:hover{background:#f6f9fd}
+.list td.cb,.list th.cb{width:36px;text-align:center}.cb input{width:18px;height:18px;min-height:0}
+.num{font-variant-numeric:tabular-nums}
+.tag{display:inline-block;padding:3px 10px;border-radius:14px;font-size:.78rem;font-weight:800;white-space:nowrap}
+.tag.ok{background:var(--okbg);color:var(--ok)}.tag.bad{background:var(--badbg);color:var(--bad)}.tag.warn{background:var(--warnbg);color:var(--warn)}
+.empty{text-align:center;color:var(--mut);padding:40px 10px}
+.sub2{color:var(--mut);font-size:.8rem}
+dialog{border:0;border-radius:18px;padding:0;max-width:min(860px,96vw);width:100%;max-height:94vh;background:#e8edf3}
+dialog::backdrop{background:rgba(10,20,35,.55)}
+.dh{position:sticky;top:0;display:flex;gap:8px;align-items:center;padding:10px 12px;background:#fff;border-bottom:1px solid var(--line);z-index:1;flex-wrap:wrap}
+.dh .sp{flex:1}
+.dview{padding:14px;overflow:auto;display:flex;justify-content:center}
+.busy{position:fixed;inset:0;background:rgba(255,255,255,.7);display:flex;align-items:center;justify-content:center;font-weight:800;color:var(--ink);font-size:1.1rem;z-index:50}
+@media (max-width:760px){
+ .dh .btn{padding:0 11px;min-height:40px;font-size:.88rem}
+ .stats{grid-template-columns:repeat(2,1fr)}
+ .filters{grid-template-columns:1fr 1fr}.filters .q{grid-column:1/-1}
+ .list thead{display:none}.list,.list tbody,.list tr,.list td{display:block}
+ .list tr{position:relative;padding:10px 46px 10px 12px;border-bottom:1px solid var(--line)}
+ .list td{border:0;padding:1px 0}.list td.cb{position:absolute;right:10px;top:12px;width:auto}
+ .list td.st{position:absolute;left:12px;top:10px}
+ .list td[data-l]::before{content:attr(data-l) ": ";color:var(--mut);font-size:.8rem}
+}
+</style>
+</head>
+<body>
+<header class="top"><div class="in"><img src="logo.jpg" alt=""><h1>ניהול דוחות העברת משמרת<small id="who"></small></h1>
+ <button id="logout" hidden>יציאה</button></div></header>
+<main>
+ <div class="banner" id="localBanner" hidden>⚠️ מצב ניסיון: לא הוגדר Firebase בקובץ config.js, ולכן מוצגים רק דוחות שמולאו בדפדפן הזה. ראו README.md להפעלה.</div>
+
+ <form class="card login" id="login" hidden>
+  <h2>כניסת מנהל</h2>
+  <label class="f" for="email">אימייל</label><input id="email" type="email" autocomplete="username" dir="ltr" required>
+  <label class="f" for="pass">סיסמה</label><input id="pass" type="password" autocomplete="current-password" dir="ltr" required>
+  <button class="btn" style="width:100%;margin-top:14px">כניסה</button>
+  <div class="msg" id="loginMsg"></div>
+ </form>
+
+ <div id="app" hidden>
+  <div class="stats">
+   <div class="stat"><b id="sAll">0</b><span>דוחות בטווח</span></div>
+   <div class="stat"><b id="sToday">0</b><span>דוחות היום</span></div>
+   <div class="stat bad"><b id="sBad">0</b><span>דוחות עם ליקויים</span></div>
+   <div class="stat bad"><b id="sUnrep">0</b><span>ליקויים שטרם דווחו</span></div>
+  </div>
+  <div class="filters">
+   <div class="q"><label class="f" for="q">חיפוש</label><input id="q" type="search" placeholder="מספר רכב, שם מאבטח, טקסט חופשי"></div>
+   <div><label class="f" for="from">מתאריך</label><input id="from" type="date"></div>
+   <div><label class="f" for="to">עד תאריך</label><input id="to" type="date"></div>
+   <div><label class="f" for="fShift">משמרת</label><select id="fShift"><option value="">הכל</option></select></div>
+   <label class="tog"><input type="checkbox" id="onlyBad">רק עם ליקויים</label>
+  </div>
+  <div class="bar">
+   <span class="cnt" id="cnt"></span>
+   <button class="btn sec" id="csv">ייצוא לאקסל (CSV)</button>
+   <button class="btn" id="pdfSel" disabled>הורדת PDF</button>
+  </div>
+  <table class="list">
+   <thead><tr><th class="cb"><input type="checkbox" id="all" aria-label="בחירת הכל"></th><th>תאריך ושעה</th><th>משמרת</th><th>רכב</th><th>מוסר ← מקבל</th><th>ליקויים</th><th>סטטוס</th></tr></thead>
+   <tbody id="rows"></tbody>
+  </table>
+  <div class="empty" id="empty" hidden>אין דוחות שתואמים לסינון</div>
+ </div>
+</main>
+
+<dialog id="dlg">
+ <div class="dh"><button class="btn" id="dPdf">הורדת PDF</button><button class="btn sec" id="dPrint">הדפסה</button><span class="sp"></span><button class="btn red" id="dDel">מחיקה</button><button class="btn sec" id="dClose">סגירה</button></div>
+ <div class="dview"><div class="scaler" id="dBody"></div></div>
+</dialog>
+<div class="busy" id="busy" hidden></div>
+
+<script src="config.js"></script>
+<script src="lib/html2canvas.min.js"></script>
+<script src="lib/jspdf.umd.min.js"></script>
+<script src="common.js"></script>
+<script>
+const st=document.createElement('style');st.textContent=REPORT_CSS;document.head.appendChild(st);
+SHIFTS.forEach(s=>$('fShift').add(new Option(s,s)));
+let ALL=[],VIEW=[],sel=new Set(),cur=null;
+// ברירת מחדל: 30 הימים האחרונים
+(()=>{const d=new Date();d.setDate(d.getDate()-30);$('from').value=d.toISOString().slice(0,10)})();
+
+const defects=r=>r.defects??badList(r).length;
+function statusTag(r){
+  const n=defects(r);
+  if(r.status==='unreported')return'<span class="tag bad">טרם דווח</span>';
+  if(r.status==='reported')return'<span class="tag warn">דווח</span>';
+  return n?'<span class="tag warn">ליקויים</span>':'<span class="tag ok">תקין</span>'}
+function render(){
+  const q=$('q').value.trim().toLowerCase(),f=$('from').value,t=$('to').value,sh=$('fShift').value,ob=$('onlyBad').checked;
+  VIEW=ALL.filter(r=>(!f||r.date>=f)&&(!t||r.date<=t)&&(!sh||r.shift===sh)&&(!ob||defects(r)||r.status!=='ok')
+    &&(!q||[r.vehicle,r.giver,r.receiver,r.vNotes,r.details,r.reportedTo].join(' ').toLowerCase().includes(q)))
+    .sort((a,b)=>(b.date+b.time).localeCompare(a.date+a.time)||b.createdAt-a.createdAt);
+  const ids=new Set(VIEW.map(r=>r.id));sel.forEach(id=>{if(!ids.has(id))sel.delete(id)});
+  $('sAll').textContent=VIEW.length;$('sToday').textContent=ALL.filter(r=>r.date===todayISO()).length;
+  $('sBad').textContent=VIEW.filter(r=>defects(r)).length;$('sUnrep').textContent=VIEW.filter(r=>r.status==='unreported').length;
+  $('rows').innerHTML=VIEW.map(r=>`<tr data-id="${esc(r.id)}">
+   <td class="cb"><input type="checkbox" data-sel="${esc(r.id)}" ${sel.has(r.id)?'checked':''} aria-label="בחירה"></td>
+   <td class="num"><b>${fmtDate(r.date)}</b> ${esc(r.time)}</td><td data-l="משמרת">${esc(r.shift)}</td>
+   <td data-l="רכב" class="num">${esc(r.vehicle)}</td><td>${esc(r.giver)} ← ${esc(r.receiver)}</td>
+   <td data-l="ליקויים">${defects(r)?`<span class="sub2">${badList(r).map(c=>esc(c.t.split(' – ')[0])).join(', ')}</span>`:'—'}</td>
+   <td class="st">${statusTag(r)}</td></tr>`).join('');
+  $('empty').hidden=VIEW.length>0;
+  $('cnt').textContent=`${VIEW.length} דוחות`+(sel.size?` · ${sel.size} נבחרו`:'');
+  $('pdfSel').disabled=!VIEW.length;$('pdfSel').textContent=sel.size?`הורדת PDF (${sel.size} נבחרים)`:`הורדת PDF (כל ה-${VIEW.length})`;
+  $('all').checked=VIEW.length>0&&sel.size===VIEW.length}
+['q','from','to','fShift','onlyBad'].forEach(id=>$(id).addEventListener('input',render));
+$('all').onchange=()=>{sel=new Set($('all').checked?VIEW.map(r=>r.id):[]);render()};
+$('rows').addEventListener('click',e=>{
+  const c=e.target.closest('[data-sel]');
+  if(c){c.checked?sel.add(c.dataset.sel):sel.delete(c.dataset.sel);render();return}
+  const tr=e.target.closest('tr[data-id]');if(tr)openReport(ALL.find(r=>r.id===tr.dataset.id))});
+
+async function busy(text,fn){$('busy').textContent=text;$('busy').hidden=false;try{await fn()}catch(e){alert('שגיאה: '+(e.message||e))}finally{$('busy').hidden=true}}
+$('pdfSel').onclick=()=>{
+  const list=sel.size?VIEW.filter(r=>sel.has(r.id)):VIEW;
+  if(list.length>60&&!confirm(`להכין PDF של ${list.length} דוחות? זה עשוי לקחת זמן.`))return;
+  busy(`מכין PDF של ${list.length} דוחות...`,()=>reportsToPDF(list,list.length===1?pdfName(list[0]):`shift-handover-reports_${todayISO()}.pdf`))};
+$('csv').onclick=()=>{
+  const head=['תאריך','שעה','משמרת','רכב','מאבטח מוסר','מאבטח מקבל',...VEHICLE.map(c=>c.t),...EQUIP.map(c=>c.t),'הערות רכב','פירוט ליקוי','דווח ל','שעת דיווח','אופן דיווח','סטטוס','נשלח'];
+  const v=x=>x==='ok'?'תקין':x==='bad'?'לא תקין':'';
+  const lines=VIEW.map(r=>[fmtDate(r.date),r.time,r.shift,r.vehicle,r.giver,r.receiver,...VEHICLE.map(c=>c.type==='fuel'?r.fuel:v(r.checks?.[c.k])),...EQUIP.map(c=>v(r.checks?.[c.k])),
+    r.vNotes,r.details,r.reportedTo,r.reportTime,r.reportMethod,statusText(r.status),r.createdAt?new Date(r.createdAt).toLocaleString('he-IL'):'']);
+  const csv='﻿'+[head,...lines].map(l=>l.map(x=>'"'+String(x??'').replace(/"/g,'""')+'"').join(',')).join('\r\n');
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.download=`shift-handover-reports_${todayISO()}.csv`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),2000)};
+
+// ----- צפייה בדוח -----
+function fit(){const s=Math.min(1,($('dlg').clientWidth-28)/794);$('dBody').style.zoom=s}
+function openReport(r){if(!r)return;cur=r;$('dBody').innerHTML=reportHTML(r);$('dlg').showModal();fit();$('dlg').scrollTop=0}
+addEventListener('resize',()=>{if($('dlg').open)fit()});
+$('dClose').onclick=()=>$('dlg').close();
+$('dPdf').onclick=()=>busy('מכין PDF...',()=>reportsToPDF([cur],pdfName(cur)));
+$('dPrint').onclick=()=>{const w=open('','_blank');if(!w)return alert('הדפדפן חסם חלון קופץ');
+  w.document.write(`<!DOCTYPE html><html lang="he" dir="rtl"><head><meta charset="utf-8"><base href="${location.href}"><title>${esc(pdfName(cur))}</title><style>${REPORT_CSS}@page{size:A4;margin:0}body{margin:0}.rep{width:auto}</style></head><body>${reportHTML(cur)}<script>onload=()=>{print()}<\/script></body></html>`);w.document.close()};
+$('dDel').onclick=async()=>{if(!confirm(`למחוק לצמיתות את הדוח מ-${fmtDate(cur.date)} ${cur.time} (רכב ${cur.vehicle})?`))return;
+  await busy('מוחק...',async()=>{await Store.remove(cur.id);if(!Store.cloud){ALL=localGet();render()}});$('dlg').close()};
+
+// ----- התחברות וטעינה -----
+let unsub=null;
+function start(){$('login').hidden=true;$('app').hidden=false;
+  unsub=Store.subscribe(list=>{ALL=list;render()},e=>{
+    $('app').hidden=true;$('login').hidden=false;
+    $('loginMsg').textContent=e.code==='permission-denied'?'למשתמש הזה אין הרשאת מנהל (יש להוסיף את האימייל לכללי האבטחה ב-Firebase).':'שגיאה בטעינת הדוחות: '+e.message})}
+(async()=>{
+  if(!Store.cloud){$('localBanner').hidden=false;start();return}
+  try{await Store.init(true)}catch(e){$('localBanner').hidden=false;$('localBanner').textContent='אין חיבור למערכת: '+e.message;return}
+  Store.auth.onAuthStateChanged(u=>{
+    if(unsub){unsub();unsub=null}
+    $('logout').hidden=!u;$('who').textContent=u?u.email:'';
+    if(u)start();else{$('app').hidden=true;$('login').hidden=false}});
+  $('login').onsubmit=async e=>{e.preventDefault();$('loginMsg').textContent='';
+    try{await Store.auth.signInWithEmailAndPassword($('email').value.trim(),$('pass').value)}
+    catch(err){$('loginMsg').textContent=/invalid|wrong|not-found|credential/.test(err.code||'')?'אימייל או סיסמה שגויים':'הכניסה נכשלה: '+err.message}};
+  $('logout').onclick=()=>Store.auth.signOut();
+})();
+</script>
+</body>
+</html>

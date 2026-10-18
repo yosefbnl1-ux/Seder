@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1f3a5c">
+<title>טופס העברת משמרת</title>
+<link rel="icon" href="logo.jpg">
+<link rel="apple-touch-icon" href="../apple-touch-icon.png">
+<style>
+:root{color-scheme:light;--bg:#eef2f6;--card:#fff;--fg:#14233a;--mut:#6b7a8f;--line:#dde4ec;--ink:#1f3a5c;--acc:#3d6a9e;--ok:#17683f;--okbg:#e3f4ea;--bad:#b3261e;--badbg:#fde6e3;--field:#f7f9fc}
+*{box-sizing:border-box}[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--fg);font:17px/1.5 "Segoe UI",Arial,"Helvetica Neue",system-ui,sans-serif;-webkit-tap-highlight-color:transparent}
+.wrap{max-width:640px;margin:0 auto;padding:calc(env(safe-area-inset-top,0px) + 18px) 16px calc(env(safe-area-inset-bottom,0px) + 40px)}
+button{font:inherit;cursor:pointer;color:inherit}
+header{display:flex;align-items:center;gap:16px;padding-bottom:18px;border-bottom:1px solid var(--line)}
+header img{width:76px;height:76px;object-fit:contain;background:#fff;border-radius:16px;padding:4px;flex:none}
+.org{color:var(--mut);font-size:.82rem;font-weight:700;letter-spacing:.02em}
+h1{margin:2px 0;font-size:1.45rem;font-weight:800;color:var(--ink);line-height:1.2}
+.sub{color:var(--acc);font-weight:700;font-size:.95rem}
+.pill{display:inline-block;margin:18px 0 8px;padding:6px 16px;border:1.5px solid #c7d1dd;border-radius:22px;font-weight:700;font-size:.9rem;background:#fff}
+.intro{color:var(--mut);font-size:.95rem;margin:0 0 18px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:20px 18px;margin-bottom:16px}
+h2{margin:0 0 6px;font-size:1.2rem;font-weight:800;color:var(--ink);display:flex;gap:12px;align-items:baseline}
+h2 span{color:#7d97b5;font-size:.9rem;font-weight:700;letter-spacing:.05em}
+label.f{display:block;font-weight:700;font-size:.92rem;margin:16px 0 6px;color:#2c3e57}
+input,select,textarea{width:100%;font:inherit;color:inherit;background:var(--field);border:1.5px solid var(--line);border-radius:14px;padding:13px 14px;outline:0;min-height:52px;-webkit-appearance:none;appearance:none}
+input:focus,select:focus,textarea:focus{border-color:var(--acc);background:#fff}
+select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='16' viewBox='0 0 12 16'%3E%3Cpath d='M2 6l4-4 4 4M2 10l4 4 4-4' fill='none' stroke='%2314233a' stroke-width='1.6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:left 16px center;padding-left:40px}
+textarea{min-height:110px;resize:vertical}
+.row{display:flex;align-items:center;gap:12px;padding:14px 0;border-top:1px solid var(--line)}
+.row:first-of-type{margin-top:12px}
+.row .q{flex:1;font-size:.98rem}
+.opts{display:flex;gap:8px;flex:none}
+.opts button{min-width:62px;min-height:46px;padding:0 12px;border:1.5px solid var(--line);border-radius:14px;background:#fff;font-weight:700;font-size:.95rem;color:#3a4a60}
+.opts button.on.ok,.opts button.on.n{background:var(--okbg);border-color:var(--ok);color:var(--ok)}
+.opts button.on.bad{background:var(--badbg);border-color:var(--bad);color:var(--bad)}
+.opts button.on.n{background:#e6eef8;border-color:var(--acc);color:var(--ink)}
+.chk{display:flex;align-items:flex-start;gap:14px;padding:10px 0;font-size:.98rem;cursor:pointer}
+.chk input{position:absolute;opacity:0;width:0;height:0;min-height:0;padding:0;border:0;margin:0}
+.box{flex:none;width:30px;height:30px;border:2px solid #8a96a6;border-radius:9px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;margin-top:-1px}
+.chk input:checked+.box{background:var(--ink);border-color:var(--ink)}
+.chk input:checked+.box::after{content:"✓"}
+.chk input:focus-visible+.box{outline:3px solid #9cc0ea}
+.sighead{display:flex;justify-content:space-between;align-items:center;margin:14px 0 6px}
+.sighead label.f{margin:0}.signed{color:var(--ok);font-weight:800;font-size:.9rem}
+.pad{display:block;width:100%;height:170px;border:1.5px dashed #9fb0c4;border-radius:14px;background:var(--field);touch-action:none}
+.clear{background:none;border:0;color:var(--acc);font-weight:800;padding:8px 0;margin-bottom:6px}
+.rem h3{font-size:1.05rem;margin:22px 0 8px;color:var(--ink)}
+.rem ul{margin:0;padding-inline-start:22px;color:#4a5a70}.rem li{margin:6px 0}
+.send{display:block;width:100%;margin-top:22px;min-height:58px;border:0;border-radius:16px;background:var(--ink);color:#fff;font-weight:800;font-size:1.1rem}
+.send:disabled{opacity:.6}
+.err{background:var(--badbg);color:var(--bad);border-radius:14px;padding:12px 14px;margin-top:14px;font-weight:700;font-size:.95rem}
+.err ul{margin:6px 0 0;padding-inline-start:20px;font-weight:400}
+.invalid{border-color:var(--bad)!important;box-shadow:0 0 0 3px var(--badbg)}
+.done{text-align:center;padding:40px 18px}
+.done .big{font-size:3.2rem;line-height:1}
+.done h2{justify-content:center;margin:12px 0}
+.done p{color:var(--mut)}
+.btn2{display:block;width:100%;min-height:52px;border:1.5px solid var(--ink);border-radius:16px;background:#fff;color:var(--ink);font-weight:800;margin-top:12px}
+.mode{margin-top:16px;font-size:.8rem;color:var(--mut);text-align:center}
+.mode a{color:var(--acc)}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header><img src="logo.jpg" alt="משמר הכנסת"><div><div class="org" id="org"></div><h1 id="ttl"></h1><div class="sub" id="sub"></div></div></header>
+
+<form id="form" novalidate autocomplete="off">
+<div class="pill">מילוי דיווח</div>
+<p class="intro">הבדיקה תתבצע במשותף על ידי המאבטח המוסר והמאבטח המקבל.<br>כל ליקוי יתועד וידווח בהתאם לנוהלי היחידה.</p>
+
+<section class="card">
+ <h2><span>01</span>פרטי העברת המשמרת</h2>
+ <label class="f" for="date">תאריך</label><input type="date" id="date" name="date">
+ <label class="f" for="time">שעה</label><input type="time" id="time" name="time">
+ <label class="f" for="shift">סוג משמרת</label><select id="shift" name="shift"><option value="">בחירה</option></select>
+ <label class="f" for="vehicle">מספר רכב</label><input id="vehicle" name="vehicle" inputmode="numeric">
+ <label class="f" for="giver">מאבטח מוסר</label><input id="giver" name="giver" autocomplete="name">
+ <label class="f" for="receiver">מאבטח מקבל</label><input id="receiver" name="receiver">
+</section>
+
+<section class="card">
+ <h2><span>02</span>בדיקת תקינות הרכב</h2>
+ <div id="vehicleRows"></div>
+ <label class="f" for="vNotes">הערות במידה ולא תקין / נזקים קיימים ברכב</label><textarea id="vNotes" name="vNotes"></textarea>
+</section>
+
+<section class="card">
+ <h2><span>03</span>בדיקת ציוד ואמצעים</h2>
+ <div id="equipRows"></div>
+</section>
+
+<section class="card">
+ <h2><span>04</span>תיעוד ליקויים והעברת מידע</h2>
+ <label class="f" for="details">פירוט התקלה / הליקוי, מועד גילוי ופעולות שננקטו</label><textarea id="details" name="details"></textarea>
+ <label class="f" for="reportedTo">גורם שאליו דווח</label><input id="reportedTo" name="reportedTo">
+ <label class="f" for="reportTime">שעת הדיווח</label><input type="time" id="reportTime" name="reportTime">
+ <label class="f" for="reportMethod">אופן הדיווח</label><input id="reportMethod" name="reportMethod">
+</section>
+
+<section class="card" id="statusCard">
+ <h2><span>05</span>סטטוס כשירות והעברת המשמרת</h2>
+ <div id="statusRows" style="margin-top:10px"></div>
+</section>
+
+<section class="card">
+ <h2><span>06</span>אישור העברת משמרת</h2>
+ <label class="chk"><input type="checkbox" id="giverOk"><span class="box"></span><span>המאבטח המוסר מאשר שהציג את כלל הליקויים הידועים לו</span></label>
+ <div class="sighead"><label class="f">חתימת המאבטח המוסר</label><span class="signed" id="sgGiver" hidden>נחתם</span></div>
+ <canvas class="pad" id="padGiver"></canvas>
+ <button type="button" class="clear" data-pad="padGiver">ניקוי חתימה</button>
+ <label class="chk"><input type="checkbox" id="receiverOk"><span class="box"></span><span>המאבטח המקבל מאשר שביצע את הבדיקות וקיבל את המידע הנדרש</span></label>
+ <div class="sighead"><label class="f">חתימת המאבטח המקבל</label><span class="signed" id="sgReceiver" hidden>נחתם</span></div>
+ <canvas class="pad" id="padReceiver"></canvas>
+ <button type="button" class="clear" data-pad="padReceiver">ניקוי חתימה</button>
+</section>
+
+<div class="rem"><h3>תזכורות חשובות</h3><ul id="rem"></ul></div>
+<div class="err" id="err" hidden></div>
+<button class="send" id="send" type="submit">שליחת הדיווח</button>
+<div class="mode" id="mode"></div>
+</form>
+
+<div class="card done" id="done" hidden>
+ <div class="big">✅</div>
+ <h2>הדיווח נשלח בהצלחה</h2>
+ <p id="doneMsg"></p>
+ <button class="btn2" id="myPdf" type="button">הורדת הדוח כ-PDF</button>
+ <button class="send" id="again" type="button">דיווח חדש</button>
+</div>
+</div>
+
+<script src="config.js"></script>
+<script src="lib/html2canvas.min.js"></script>
+<script src="lib/jspdf.umd.min.js"></script>
+<script src="common.js"></script>
+<script>
+const st=document.createElement('style');st.textContent=REPORT_CSS;document.head.appendChild(st);
+$('org').textContent=ORG;$('ttl').textContent=TITLE;$('sub').textContent=SUBTITLE;
+SHIFTS.forEach(s=>$('shift').add(new Option(s,s)));
+$('rem').innerHTML=REMINDERS.map(t=>`<li>${esc(t)}</li>`).join('');
+
+// ----- שורות בדיקה -----
+const ans={};let fuel='';
+function rowHTML(c){
+  const btns=c.type==='fuel'?FUEL.map(f=>`<button type="button" class="n" data-fuel="${f}">${f}</button>`).join('')
+    :`<button type="button" class="ok" data-k="${c.k}" data-v="ok">תקין</button><button type="button" class="bad" data-k="${c.k}" data-v="bad">לא תקין</button>`;
+  return `<div class="row" id="row_${c.k}"><div class="q">${esc(c.t)}</div><div class="opts">${btns}</div></div>`}
+$('vehicleRows').innerHTML=VEHICLE.map(rowHTML).join('');
+$('equipRows').innerHTML=EQUIP.map(rowHTML).join('');
+$('statusRows').innerHTML=STATUS.map(s=>`<label class="chk"><input type="radio" name="status" value="${s.k}"><span class="box"></span><span>${esc(s.t)}</span></label>`).join('');
+function paintRows(){
+  document.querySelectorAll('[data-k]').forEach(b=>b.classList.toggle('on',ans[b.dataset.k]===b.dataset.v));
+  document.querySelectorAll('[data-fuel]').forEach(b=>b.classList.toggle('on',fuel===b.dataset.fuel))}
+document.addEventListener('click',e=>{
+  const b=e.target.closest('[data-k],[data-fuel]');if(!b)return;
+  if(b.dataset.fuel){fuel=fuel===b.dataset.fuel?'':b.dataset.fuel;$('row_fuel').classList.remove('invalid')}
+  else{ans[b.dataset.k]=ans[b.dataset.k]===b.dataset.v?undefined:b.dataset.v;$('row_'+b.dataset.k).classList.remove('invalid')}
+  paintRows();saveDraft()});
+
+// ----- חתימות -----
+const pads={};
+function makePad(id,flag){
+  const cv=$(id),ctx=cv.getContext('2d');let drawing=false,last=null;
+  const p={cv,empty:true,data:null};pads[id]=p;
+  function size(){const r=cv.getBoundingClientRect(),d=window.devicePixelRatio||1;
+    if(!r.width||(cv.width===Math.round(r.width*d)&&cv.height===Math.round(r.height*d)))return;
+    const keep=p.empty?null:cv.toDataURL();cv.width=r.width*d;cv.height=r.height*d;ctx.setTransform(d,0,0,d,0,0);
+    ctx.lineWidth=2.4;ctx.lineCap=ctx.lineJoin='round';ctx.strokeStyle='#14233a';
+    if(keep){const im=new Image();im.onload=()=>ctx.drawImage(im,0,0,r.width,r.height);im.src=keep}}
+  const pt=e=>{const r=cv.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top}};
+  cv.addEventListener('pointerdown',e=>{drawing=true;last=pt(e);cv.setPointerCapture(e.pointerId);ctx.beginPath();ctx.arc(last.x,last.y,1.2,0,7);ctx.fillStyle='#14233a';ctx.fill();mark()});
+  cv.addEventListener('pointermove',e=>{if(!drawing)return;const q=pt(e);ctx.beginPath();ctx.moveTo(last.x,last.y);ctx.lineTo(q.x,q.y);ctx.stroke();last=q});
+  const end=()=>{if(drawing){drawing=false;p.data=trimmed(cv)}};
+  cv.addEventListener('pointerup',end);cv.addEventListener('pointercancel',end);
+  function mark(){p.empty=false;$(flag).hidden=false;cv.classList.remove('invalid')}
+  p.clear=()=>{ctx.clearRect(0,0,cv.width,cv.height);p.empty=true;p.data=null;$(flag).hidden=true};
+  p.size=size;size();addEventListener('resize',size);
+}
+// מקטין את החתימה לגודל סביר (PNG שקוף) כדי שהדוח יישמר מהר
+function trimmed(cv){const o=document.createElement('canvas'),s=Math.min(1,600/cv.width);o.width=cv.width*s;o.height=cv.height*s;
+  o.getContext('2d').drawImage(cv,0,0,o.width,o.height);return o.toDataURL('image/png')}
+makePad('padGiver','sgGiver');makePad('padReceiver','sgReceiver');
+document.querySelectorAll('.clear').forEach(b=>b.onclick=()=>pads[b.dataset.pad].clear());
+
+// ----- טיוטה (רק במכשיר הזה, בלי חתימות) -----
+const TXT=['shift','vehicle','giver','receiver','vNotes','details','reportedTo','reportTime','reportMethod'];
+function saveDraft(){try{const d={ans,fuel,status:(document.querySelector('[name=status]:checked')||{}).value};TXT.forEach(k=>d[k]=$(k).value);localStorage.setItem('handoverDraft',JSON.stringify(d))}catch(e){}}
+function loadDraft(){try{const d=JSON.parse(localStorage.getItem('handoverDraft')||'null');if(!d)return;
+  TXT.forEach(k=>{if(d[k])$(k).value=d[k]});Object.assign(ans,d.ans||{});fuel=d.fuel||'';
+  if(d.status){const r=document.querySelector(`[name=status][value="${d.status}"]`);if(r)r.checked=true}}catch(e){}}
+function resetForm(){$('form').reset();for(const k in ans)delete ans[k];fuel='';Object.values(pads).forEach(p=>p.clear());
+  $('date').value=todayISO();$('time').value=nowHM();try{localStorage.removeItem('handoverDraft')}catch(e){}paintRows()}
+$('form').addEventListener('input',e=>{e.target.classList.remove('invalid');saveDraft()});
+$('form').addEventListener('change',saveDraft);
+$('date').value=todayISO();$('time').value=nowHM();loadDraft();paintRows();
+
+// ----- בדיקה ושליחה -----
+function validate(){
+  const miss=[];const need=(id,name)=>{if(!$(id).value.trim()){$(id).classList.add('invalid');miss.push(name)}};
+  need('date','תאריך');need('time','שעה');need('shift','סוג משמרת');need('vehicle','מספר רכב');need('giver','מאבטח מוסר');need('receiver','מאבטח מקבל');
+  const open=CHECKS.filter(c=>!ans[c.k]);open.forEach(c=>$('row_'+c.k).classList.add('invalid'));
+  if(open.length)miss.push(`סימון תקין/לא תקין ב-${open.length} סעיפים`);
+  if(!fuel){$('row_fuel').classList.add('invalid');miss.push('מצב מיכל הדלק')}
+  const status=(document.querySelector('[name=status]:checked')||{}).value;
+  if(!status)miss.push('סטטוס כשירות (סעיף 05)');
+  const bad=CHECKS.filter(c=>ans[c.k]==='bad');
+  if(bad.length&&status==='ok')miss.push('סומן "לא תקין" אבל הסטטוס הוא "ללא ליקויים חדשים" – יש לתקן');
+  if(bad.length&&!$('vNotes').value.trim()&&!$('details').value.trim()){$('details').classList.add('invalid');miss.push('פירוט הליקויים שסומנו "לא תקין"')}
+  if(!$('giverOk').checked)miss.push('אישור המאבטח המוסר');
+  if(!$('receiverOk').checked)miss.push('אישור המאבטח המקבל');
+  if(pads.padGiver.empty){$('padGiver').classList.add('invalid');miss.push('חתימת המאבטח המוסר')}
+  if(pads.padReceiver.empty){$('padReceiver').classList.add('invalid');miss.push('חתימת המאבטח המקבל')}
+  return{miss,status}}
+let lastReport=null;
+$('form').addEventListener('submit',async e=>{
+  e.preventDefault();$('err').hidden=true;
+  const{miss,status}=validate();
+  if(miss.length){$('err').innerHTML='יש להשלים לפני השליחה:<ul>'+miss.map(m=>`<li>${esc(m)}</li>`).join('')+'</ul>';$('err').hidden=false;
+    const first=document.querySelector('.invalid');(first||$('err')).scrollIntoView({behavior:'smooth',block:'center'});return}
+  const r={date:$('date').value,time:$('time').value,shift:$('shift').value,vehicle:$('vehicle').value.trim(),giver:$('giver').value.trim(),receiver:$('receiver').value.trim(),
+    checks:{...ans},fuel,vNotes:$('vNotes').value.trim(),details:$('details').value.trim(),reportedTo:$('reportedTo').value.trim(),reportTime:$('reportTime').value,reportMethod:$('reportMethod').value.trim(),
+    status,giverOk:true,receiverOk:true,sigGiver:pads.padGiver.data,sigReceiver:pads.padReceiver.data,createdAt:Date.now()};
+  r.defects=CHECKS.filter(c=>r.checks[c.k]==='bad').length;
+  $('send').disabled=true;$('send').textContent='שולח...';
+  try{await ready;const res=await Store.add(r);lastReport=r;
+    $('doneMsg').textContent=res==='queued'?'אין כרגע חיבור לרשת – הדיווח נשמר בטלפון ויישלח אוטומטית כשהחיבור יחזור. אל תמחקו את נתוני הדפדפן עד אז.':'הדיווח התקבל ונשמר במערכת.';
+    resetForm();$('form').hidden=true;$('done').hidden=false;scrollTo(0,0)}
+  catch(err){$('err').textContent='השליחה נכשלה: '+(err.message||err)+'. הנתונים לא נמחקו – נסו שוב.';$('err').hidden=false}
+  finally{$('send').disabled=false;$('send').textContent='שליחת הדיווח'}});
+$('again').onclick=()=>{$('done').hidden=true;$('form').hidden=false;Object.values(pads).forEach(p=>p.size());scrollTo(0,0)};
+$('myPdf').onclick=async()=>{const b=$('myPdf');b.disabled=true;b.textContent='מכין PDF...';try{await reportsToPDF([lastReport],pdfName(lastReport))}finally{b.disabled=false;b.textContent='הורדת הדוח כ-PDF'}};
+
+const ready=Store.init(false).catch(e=>{$('err').textContent='אין חיבור למערכת הדיווחים: '+e.message;$('err').hidden=false;throw e});ready.catch(()=>{});
+$('mode').innerHTML=Store.cloud?'':'⚠️ מצב ניסיון: הדוחות נשמרים רק בטלפון הזה (לא הוגדר Firebase ב-config.js)';
+</script>
+</body>
+</html>

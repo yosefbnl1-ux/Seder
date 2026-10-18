@@ -1,0 +1,18 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isAdmin() {
+      // החליפו באימיילים של המנהלים (אותם אימיילים שהוגדרו ב-Authentication)
+      return request.auth != null && request.auth.token.email in [
+        'admin@example.com'
+      ];
+    }
+    match /reports/{id} {
+      // כל מי שיש לו את הקישור לטופס יכול לשלוח דוח, אבל לא לקרוא דוחות של אחרים
+      allow create: if request.resource.data.keys().hasAll(['date', 'time', 'vehicle', 'giver', 'receiver', 'checks', 'createdAt'])
+                    && request.resource.data.vehicle is string && request.resource.data.vehicle.size() < 40;
+      allow read, delete: if isAdmin();
+      allow update: if false;
+    }
+  }
+}
