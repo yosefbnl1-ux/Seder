@@ -65,6 +65,14 @@ dialog{border:0;border-radius:18px;padding:0;max-width:min(860px,96vw);width:100
 dialog::backdrop{background:rgba(10,20,35,.55)}
 .dh{position:sticky;top:0;display:flex;gap:8px;align-items:center;padding:10px 12px;background:#fff;border-bottom:1px solid var(--line);z-index:1;flex-wrap:wrap}
 .dh .sp{flex:1}
+#accDlg{max-width:min(520px,96vw);background:#fff}
+.acc{padding:16px}.acc h3{margin:0 0 4px;color:var(--ink)}.acc p{margin:0 0 12px;color:var(--mut);font-size:.9rem}
+.addrow{display:flex;gap:8px}.addrow input{flex:1}
+.alist{list-style:none;margin:14px 0 0;padding:0}
+.alist li{display:flex;align-items:center;gap:8px;padding:10px 0;border-top:1px solid var(--line);direction:ltr;justify-content:flex-end}
+.alist li>span:last-child{flex:1;text-align:right;overflow:hidden;text-overflow:ellipsis}
+.alist .tag{direction:rtl}
+.okmsg{color:var(--ok);font-weight:700;font-size:.9rem;margin-top:10px}
 .dview{padding:14px;overflow:auto;display:flex;justify-content:center}
 .busy{position:fixed;inset:0;background:rgba(255,255,255,.7);display:flex;align-items:center;justify-content:center;font-weight:800;color:var(--ink);font-size:1.1rem;z-index:50}
 @media (max-width:760px){
@@ -82,7 +90,7 @@ dialog::backdrop{background:rgba(10,20,35,.55)}
 </head>
 <body>
 <header class="top"><div class="in"><img src="logo.jpg" alt=""><h1>ניהול דוחות העברת משמרת<small id="who"></small></h1>
- <button id="logout" hidden>יציאה</button></div></header>
+ <button id="accBtn" hidden>ניהול גישה</button><button id="logout" hidden>יציאה</button></div></header>
 <main>
  <div class="banner" id="localBanner" hidden>⚠️ מצב ניסיון: לא הוגדר Firebase בקובץ config.js, ולכן מוצגים רק דוחות שמולאו בדפדפן הזה. ראו README.md להפעלה.</div>
 
@@ -92,6 +100,7 @@ dialog::backdrop{background:rgba(10,20,35,.55)}
   <label class="f" for="pass">סיסמה</label><input id="pass" type="password" autocomplete="current-password" dir="ltr" required>
   <button class="btn" style="width:100%;margin-top:14px">כניסה</button>
   <div class="msg" id="loginMsg"></div>
+  <button type="button" class="lnk" id="forgot" style="margin-top:8px">שכחתי סיסמה / קביעת סיסמה ראשונה</button>
  </form>
 
  <div id="app" hidden>
@@ -129,6 +138,16 @@ dialog::backdrop{background:rgba(10,20,35,.55)}
 <dialog id="dlg">
  <div class="dh"><button class="btn" id="dPdf">הורדת PDF</button><button class="btn sec" id="dPrint">הדפסה</button><span class="sp"></span><button class="btn red" id="dDel">מחיקה</button><button class="btn sec" id="dClose">סגירה</button></div>
  <div class="dview"><div class="scaler" id="dBody"></div></div>
+</dialog>
+<dialog id="accDlg">
+ <div class="dh"><b>ניהול גישה לאתר המנהל</b><span class="sp"></span><button class="btn sec" id="accClose">סגירה</button></div>
+ <div class="acc">
+  <h3>הוספת מנהל</h3>
+  <p>כותבים את האימייל של האדם. נשלח אליו מייל עם קישור לקביעת סיסמה (אם לא הגיע - לבדוק בספאם), ואחרי זה הוא נכנס לאתר הזה עם האימייל והסיסמה שקבע.</p>
+  <form class="addrow" id="accForm"><input id="accEmail" type="email" dir="ltr" placeholder="name@gmail.com" required><button class="btn">הוספה</button></form>
+  <div class="msg" id="accMsg"></div><div class="okmsg" id="accOk"></div>
+  <ul class="alist" id="accList"></ul>
+ </div>
 </dialog>
 <div class="busy" id="busy" hidden></div>
 
@@ -216,19 +235,53 @@ let unsub=null;
 function start(){$('login').hidden=true;$('app').hidden=false;
   unsub=Store.subscribe(list=>{ALL=list;render()},e=>{
     $('app').hidden=true;$('login').hidden=false;
-    $('loginMsg').textContent=e.code==='permission-denied'?'למשתמש הזה אין הרשאת מנהל (יש להוסיף את האימייל לכללי האבטחה ב-Firebase).':'שגיאה בטעינת הדוחות: '+e.message})}
+    $('loginMsg').textContent=e.code==='permission-denied'?'למשתמש הזה אין הרשאה לאתר המנהל. בקשו ממנהל להוסיף אתכם ב"ניהול גישה".':'שגיאה בטעינת הדוחות: '+e.message})}
 (async()=>{
   if(!Store.cloud){$('localBanner').hidden=false;start();return}
   try{await Store.init(true)}catch(e){$('localBanner').hidden=false;$('localBanner').textContent='אין חיבור למערכת: '+e.message;return}
   Store.auth.onAuthStateChanged(u=>{
     if(unsub){unsub();unsub=null}
-    $('logout').hidden=!u;$('who').textContent=u?u.email:'';
+    $('logout').hidden=$('accBtn').hidden=!u;$('who').textContent=u?u.email:'';
+    if(!u&&accUnsub){accUnsub();accUnsub=null;ADMINS=[]}
     if(u)start();else{$('app').hidden=true;$('login').hidden=false}});
   $('login').onsubmit=async e=>{e.preventDefault();$('loginMsg').textContent='';
     try{await Store.auth.signInWithEmailAndPassword($('email').value.trim(),$('pass').value)}
     catch(err){$('loginMsg').textContent=/invalid|wrong|not-found|credential/.test(err.code||'')?'אימייל או סיסמה שגויים':'הכניסה נכשלה: '+err.message}};
   $('logout').onclick=()=>Store.auth.signOut();
+  Store.auth.languageCode='he';
+  $('forgot').onclick=async()=>{const em=$('email').value.trim();
+    if(!em){$('loginMsg').textContent='כתבו קודם את האימייל בשדה למעלה';return}
+    try{await Store.auth.sendPasswordResetEmail(em)}catch(e){}
+    $('loginMsg').textContent='אם האימייל רשום במערכת, נשלח אליו קישור לקביעת סיסמה (לבדוק גם בספאם).'};
 })();
+
+// ----- ניהול גישה: רשימת מנהלים נשמרת ב-Firestore (admins/<email>) -----
+const OWNERS=(window.OWNER_EMAILS||[]).map(e=>e.toLowerCase());
+let accUnsub=null,ADMINS=[];
+function me(){return(Store.auth?.currentUser?.email||'').toLowerCase()}
+function paintAdmins(){
+  const rows=[...OWNERS.map(e=>({e,owner:true})),...ADMINS.filter(a=>!OWNERS.includes(a.e))];
+  $('accList').innerHTML=rows.map(a=>`<li>${a.owner?'<span class="tag ok">בעלים</span>':a.e===me()?'<span class="tag">זה אתה</span>':`<button class="btn red" data-rm="${esc(a.e)}" style="min-height:36px">הסרה</button>`}<span>${esc(a.e)}</span></li>`).join('')}
+$('accBtn').onclick=()=>{$('accMsg').textContent=$('accOk').textContent='';$('accDlg').showModal();
+  if(!accUnsub)accUnsub=Store.db.collection('admins').onSnapshot(s=>{ADMINS=s.docs.map(d=>({e:d.id}));paintAdmins()},
+    e=>{$('accMsg').textContent=e.code==='permission-denied'?'כדי לנהל גישה צריך לעדכן את כללי האבטחה ב-Firebase (ראו README).':e.message});
+  paintAdmins()};
+$('accClose').onclick=()=>$('accDlg').close();
+let side=null; // מופע נוסף של Firebase - כדי ליצור משתמש חדש בלי לנתק את המנהל המחובר
+$('accForm').onsubmit=async e=>{e.preventDefault();$('accMsg').textContent=$('accOk').textContent='';
+  const em=$('accEmail').value.trim().toLowerCase();
+  if(OWNERS.includes(em)||ADMINS.some(a=>a.e===em)){$('accMsg').textContent='האימייל הזה כבר ברשימה';return}
+  await busy('מוסיף...',async()=>{
+    side??=firebase.initializeApp(window.FIREBASE_CONFIG,'side');
+    try{const pw=crypto.getRandomValues(new Uint32Array(4)).join('-')+'Aa!';
+      await side.auth().createUserWithEmailAndPassword(em,pw);await side.auth().signOut()}
+    catch(err){if(err.code!=='auth/email-already-in-use')throw new Error(err.code==='auth/invalid-email'?'כתובת אימייל לא תקינה':err.message)}
+    await Store.db.collection('admins').doc(em).set({addedBy:me(),addedAt:Date.now()});
+    await Store.auth.sendPasswordResetEmail(em);
+    $('accEmail').value='';$('accOk').textContent=`${em} נוסף. נשלח אליו מייל לקביעת סיסמה.`})};
+$('accList').addEventListener('click',async e=>{const b=e.target.closest('[data-rm]');if(!b)return;
+  if(!confirm(`להסיר את הגישה של ${b.dataset.rm}?`))return;
+  await busy('מסיר...',()=>Store.db.collection('admins').doc(b.dataset.rm).delete())});
 </script>
 </body>
 </html>

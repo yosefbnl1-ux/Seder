@@ -8,3 +8,6 @@ window.FIREBASE_CONFIG = {
   messagingSenderId: "324031854032",
   appId: "1:324031854032:web:a37a432b93e848cf3035d5"
 };
+
+// בעלי האתר - תמיד מנהלים, ואי אפשר להסיר אותם מהאתר (חייב להתאים ל-firestore.rules)
+window.OWNER_EMAILS = ['noam0600@gmail.com'];
