@@ -57,6 +57,7 @@ textarea{min-height:110px;resize:vertical}
 .done .big{font-size:3.2rem;line-height:1}
 .done h2{justify-content:center;margin:12px 0}
 .done p{color:var(--mut)}
+.done .wait{color:var(--ink);font-weight:700;background:#e6eef8;border-radius:14px;padding:12px}
 .btn2{display:block;width:100%;min-height:52px;border:1.5px solid var(--ink);border-radius:16px;background:#fff;color:var(--ink);font-weight:800;margin-top:12px}
 .mode{margin-top:16px;font-size:.8rem;color:var(--mut);text-align:center}
 .mode a{color:var(--acc)}
@@ -126,6 +127,7 @@ textarea{min-height:110px;resize:vertical}
  <div class="big">✅</div>
  <h2>הדיווח נשלח בהצלחה</h2>
  <p id="doneMsg"></p>
+ <p class="wait" id="wait" hidden></p>
  <button class="btn2" id="myPdf" type="button">הורדת הדוח כ-PDF</button>
  <button class="send" id="again" type="button">דיווח חדש</button>
 </div>
@@ -213,7 +215,15 @@ function validate(){
   if(pads.padGiver.empty){$('padGiver').classList.add('invalid');miss.push('חתימת המאבטח המוסר')}
   if(pads.padReceiver.empty){$('padReceiver').classList.add('invalid');miss.push('חתימת המאבטח המקבל')}
   return{miss,status}}
-let lastReport=null;
+// אחרי דיווח, אפשר לשלוח דיווח נוסף מאותו מכשיר רק אחרי שעה
+const COOLDOWN=60*60*1000;
+let lastReport=null;try{lastReport=JSON.parse(localStorage.getItem('handoverLast')||'null')}catch(e){}
+function lockLeft(){return lastReport?.createdAt?lastReport.createdAt+COOLDOWN-Date.now():0}
+function showDone(msg){$('doneMsg').textContent=msg;$('form').hidden=true;$('done').hidden=false;$('myPdf').hidden=!lastReport;paintLock();scrollTo(0,0)}
+function paintLock(){const left=lockLeft();$('again').hidden=left>0;$('wait').hidden=left<=0;
+  if(left>0){const t=new Date(lastReport.createdAt+COOLDOWN);
+    $('wait').textContent=`ניתן לשלוח דיווח נוסף בעוד ${Math.ceil(left/60000)} דקות (בשעה ${pad(t.getHours())}:${pad(t.getMinutes())})`}}
+setInterval(()=>{if(!$('done').hidden)paintLock()},20000);
 $('form').addEventListener('submit',async e=>{
   e.preventDefault();$('err').hidden=true;
   const{miss,status}=validate();
@@ -225,13 +235,15 @@ $('form').addEventListener('submit',async e=>{
   r.defects=CHECKS.filter(c=>r.checks[c.k]==='bad').length;
   $('send').disabled=true;$('send').textContent='שולח...';
   try{await ready;const res=await Store.add(r);lastReport=r;
-    $('doneMsg').textContent=res==='queued'?'אין כרגע חיבור לרשת – הדיווח נשמר בטלפון ויישלח אוטומטית כשהחיבור יחזור. אל תמחקו את נתוני הדפדפן עד אז.':'הדיווח התקבל ונשמר במערכת.';
-    resetForm();$('form').hidden=true;$('done').hidden=false;scrollTo(0,0)}
+    try{localStorage.setItem('handoverLast',JSON.stringify(r))}catch(e){}
+    resetForm();
+    showDone(res==='queued'?'אין כרגע חיבור לרשת – הדיווח נשמר בטלפון ויישלח אוטומטית כשהחיבור יחזור. אל תמחקו את נתוני הדפדפן עד אז.':'הדיווח התקבל ונשמר במערכת.')}
   catch(err){$('err').textContent='השליחה נכשלה: '+(err.message||err)+'. הנתונים לא נמחקו – נסו שוב.';$('err').hidden=false}
   finally{$('send').disabled=false;$('send').textContent='שליחת הדיווח'}});
-$('again').onclick=()=>{$('done').hidden=true;$('form').hidden=false;Object.values(pads).forEach(p=>p.size());scrollTo(0,0)};
+$('again').onclick=()=>{if(lockLeft()>0)return paintLock();$('done').hidden=true;$('form').hidden=false;Object.values(pads).forEach(p=>p.size());scrollTo(0,0)};
 $('myPdf').onclick=async()=>{const b=$('myPdf');b.disabled=true;b.textContent='מכין PDF...';try{await reportsToPDF([lastReport],pdfName(lastReport))}finally{b.disabled=false;b.textContent='הורדת הדוח כ-PDF'}};
 
+if(lockLeft()>0)showDone('כבר נשלח דיווח מהמכשיר הזה בשעה האחרונה.');
 const ready=Store.init(false).catch(e=>{$('err').textContent='אין חיבור למערכת הדיווחים: '+e.message;$('err').hidden=false;throw e});ready.catch(()=>{});
 $('mode').innerHTML=Store.cloud?'':'⚠️ מצב ניסיון: הדוחות נשמרים רק בטלפון הזה (לא הוגדר Firebase ב-config.js)';
 </script>
