@@ -167,11 +167,44 @@ nav.main button.on{background:var(--ink);color:#fff}
 .row3{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
 .btn2{padding:9px 16px;border:0;border-radius:12px;background:var(--ink);color:#fff;font-weight:700;font-size:.95rem}
 @media(min-width:900px){.advg{grid-template-columns:1fr 1fr;gap:22px 32px}}
+@media(min-width:1100px){
+body{max-width:none;padding:0 0 40px}
+.top,nav.main{margin:0;padding-inline:max(28px,calc((100vw - 1320px)/2))}
+.page{max-width:1320px;margin-inline:auto;padding:14px 0 0}
+#pg2{max-width:1320px}#pg3{max-width:760px}
+#out{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:14px;align-items:stretch}
+#out>*{grid-column:1/-1}
+#out>.slot,#out>.gc{grid-column:auto;margin:0}
+#out>.gc:has(.sc){grid-column:1/-1}
+#out>.slot:not(.col){min-height:0}
+}
+#splash{position:fixed;inset:0;z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 42%,#fff 0%,#f3f8f5 55%,#e3efe8 100%);cursor:pointer;overflow:hidden;transition:opacity .4s ease,transform .4s ease}
+#splash.out{opacity:0;transform:scale(1.04);pointer-events:none}
+#splash .stage{position:relative;width:min(62vw,300px);aspect-ratio:1;display:grid;place-items:center}
+#splash svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+#splash .ring{fill:none;stroke:#1b6b4a;stroke-width:2.5;stroke-linecap:round;stroke-dasharray:810;stroke-dashoffset:810;transform:rotate(-90deg);transform-origin:50% 50%;animation:draw .8s .1s cubic-bezier(.6,.05,.2,1) forwards}
+#splash .ring2{fill:none;stroke:#1b6b4a;stroke-width:1;opacity:0;transform-origin:50% 50%;animation:pulse 1.1s .7s ease-out forwards}
+#splash .logo{position:relative;height:62%;width:auto;aspect-ratio:165/180;opacity:0;filter:blur(14px);transform:scale(.82);animation:logoin .6s .3s cubic-bezier(.2,.7,.2,1) forwards;overflow:hidden}
+#splash .logo img{height:100%;width:100%;display:block;mix-blend-mode:multiply}
+#splash .logo::after{content:"";position:absolute;top:0;bottom:0;width:45%;left:-60%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.95),transparent);transform:skewX(-18deg);animation:shine .6s .95s ease-in-out forwards}
+#splash h2{margin:30px 0 0;font-size:clamp(1.9rem,6vw,2.7rem);font-weight:800;color:#124d36;display:flex;gap:.04em;direction:rtl}
+#splash h2 span{display:inline-block;opacity:0;transform:translateY(22px);animation:letter .35s cubic-bezier(.2,.8,.2,1) forwards}
+#splash .bar{height:3px;width:0;margin-top:14px;border-radius:3px;background:linear-gradient(90deg,transparent,#1b6b4a,transparent);animation:bar .5s 1.35s ease-out forwards}
+#splash p{margin:10px 0 0;color:#5a6e62;font-size:1rem;letter-spacing:.12em;opacity:0;animation:fade .45s 1.45s ease forwards}
+@keyframes draw{to{stroke-dashoffset:0}}
+@keyframes pulse{0%{opacity:.5;transform:scale(1)}100%{opacity:0;transform:scale(1.35)}}
+@keyframes logoin{to{opacity:1;filter:blur(0);transform:scale(1)}}
+@keyframes shine{to{left:130%}}
+@keyframes letter{to{opacity:1;transform:none}}
+@keyframes bar{to{width:min(52vw,260px)}}
+@keyframes fade{to{opacity:1}}
+@media(prefers-reduced-motion:reduce){#splash *{animation-duration:.01s!important;animation-delay:0s!important}}
 </style>
 <link rel="apple-touch-icon" href="apple-touch-icon.png"><link rel="icon" href="icon-192.png"><link rel="manifest" href="manifest.webmanifest">
 <meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="סידור עמדות"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="theme-color" content="#1b6b4a">
 </head>
 <body>
+<div id="splash" hidden><div class="stage"><svg viewBox="0 0 300 300"><circle class="ring" cx="150" cy="150" r="129"/><circle class="ring2" cx="150" cy="150" r="129"/></svg><div class="logo"><img id="splashlogo" alt="משמר הכנסת"></div></div><h2 id="splashT" aria-label="סידור עמדות"></h2><div class="bar"></div><p>מערך חוץ</p></div>
 <header class="top"><div id="logo"></div><h1>סידור עמדות מערך חוץ</h1></header>
 <nav class="main"><button id="n1" class="on">משמרת</button><button id="n2">סידור</button><button id="n3">אחרונות</button></nav>
 <main id="pg1" class="page">
@@ -313,7 +346,7 @@ const nl=x=>fin.has(x)&&!nol.has(x)&&win[x][1]===s+2;
 const snAct=!!act.find(p=>p.id==='סנח'),keepP=x=>!(snAct&&st[x].lp==='סיור'&&G.filter(y=>st[y].lp==='סיור'&&!br.includes(y)).length<=1),ok=x=>(!cert.has(x)||cb<lim)&&st[x].lb!==s-1&&!nl(x)&&keepP(x),ok2=x=>(!cert.has(x)||cb<lim)&&!nl(x),ok3=x=>!cert.has(x)||cb<lim;
 const take=x=>{br.push(x);if(cert.has(x))cb++;if(st[x].lb===s-1)DB++};fz.forEach(take);const PB=(s===0&&W.first)?G.filter(x=>W.first.has(x)):[];for(const x of srt(PB)){if(br.length>=nb)break;if(!br.includes(x)&&(!cert.has(x)||cb<lim))take(x)}
 for(const f of [ok,ok2,ok3,x=>true])for(const x of srt(G.filter(x=>st[x].ate<0&&!br.includes(x)))){if(br.length>=need)break;if(f(x))take(x)}
-const AR=s>0?G.filter(x=>win[x][0]===s):[],nA=x=>!AR.includes(x);for(const f of [x=>ok(x)&&nA(x),ok,x=>ok2(x)&&nA(x),ok2,x=>ok3(x)&&nA(x),ok3])for(const x of srt(G.filter(x=>!br.includes(x)))){if(br.length>=nb)break;if(f(x))take(x)}
+const AR=s>0?G.filter(x=>win[x][0]===s||((W.gap||{})[x]||[]).some(([,b2])=>b2===s)):[],nA=x=>!AR.includes(x);for(const f of [x=>ok(x)&&nA(x),ok,x=>ok2(x)&&nA(x),ok2,x=>ok3(x)&&nA(x),ok3])for(const x of srt(G.filter(x=>!br.includes(x)))){if(br.length>=nb)break;if(f(x))take(x)}
 const av=G.filter(x=>!br.includes(x));
 let ps=act.slice();
 for(const d of DROP){if(ps.length<=av.length)break;ps=ps.filter(p=>p.id!==d)}
@@ -347,6 +380,9 @@ const score=6*rng(nv('si'))+2*rng(nv('sd'))+4*rng(nv('br'))+3*Math.abs(avg(cv)-a
 return{rows,st,score,uneaten,miss}}
 
 const PM={};POS.forEach(q=>PM[q.id]=q);
+let EXTRA=[];
+function regExtra(x){const q={id:x.id,k:x.lab,t:x.t,lab:x.lab,ex:1};POS.push(q);PM[q.id]=q;DISP.push(q.id);DROP.push(q.id)}
+function clearExtra(){EXTRA.forEach(x=>{[POS,DISP,DROP].forEach(A=>{const i=A.findIndex(y=>(y.id||y)===x.id);if(i>=0)A.splice(i,1)});delete PM[x.id]});EXTRA=[]}
 function polish(best,g,f0,S,rm,W){
 if(f0>=S)return;const rows=best.rows,win=W.win;
 const gp=(x,s)=>((W.gap||{})[x]||[]).some(([a,b])=>s>=a&&s<b),wl=x=>{let c=0;for(let s=win[x][0];s<Math.min(S,win[x][1]);s++)if(!gp(x,s))c++;return Math.max(1,c)},Wt=g.reduce((a,x)=>a+wl(x),0);
@@ -378,8 +414,8 @@ const a=hm($('st').value),e=hm($('en').value),L=Math.min(120,Math.max(10,+$('len
 const S=Math.max(e>a?1:0,Math.floor((e-a)/L)),useL=$('ls').value&&$('le').value,ls=useL?hm($('ls').value):0,le=useL?hm($('le').value):0;
 if(S<1){out.innerHTML='<p class="warn">שעת הסיום חייבת להיות אחרי שעת ההתחלה</p>';return}
 const isL=[...Array(S)].map((_,i)=>!!useL&&a+i*L>=ls&&(i===S-1?e:a+(i+1)*L)<=le);
-const r1=$('r1').value?hm($('r1').value):1e9,r2=$('r2').value?hm($('r2').value):1e9,r3=$('r3').value?hm($('r3').value):1e9,r4=$('r4').value?hm($('r4').value):1e9,r5=$('r5').value?hm($('r5').value):1e9,r6=$('r6').value?hm($('r6').value):1e9;const p26=$('p26').value?hm($('p26').value):0,sn0=$('snf').value?hm($('snf').value):null,snI=sn0!=null?Math.floor((sn0-a)/L):-1;const rm=[...Array(S)].map((_,i)=>{const t=a+i*L,o=[];if(t>=r1)o.push('23 ב');if(t>=r3)o.push('26');if(t>=r2)o.push('27');if(t>=r4)o.push('29c');if(t>=r5)o.push('24c');if(t>=r6)o.push('25c');const te=i===S-1?e:a+(i+1)*L;if(p26&&t<p26)o.push('26');if(i!==snI)o.push('סנח');return o});
-const W=Wov||mkW(g,S,a,L);g.forEach(x=>{if(!W.win[x])W.win[x]=[0,S]});
+const r1=$('r1').value?hm($('r1').value):1e9,r2=$('r2').value?hm($('r2').value):1e9,r3=$('r3').value?hm($('r3').value):1e9,r4=$('r4').value?hm($('r4').value):1e9,r5=$('r5').value?hm($('r5').value):1e9,r6=$('r6').value?hm($('r6').value):1e9;const p26=$('p26').value?hm($('p26').value):0,sn0=$('snf').value?hm($('snf').value):null,snI=sn0!=null?Math.floor((sn0-a)/L):-1;const rm=[...Array(S)].map((_,i)=>{const t=a+i*L,o=[];if(t>=r1)o.push('23 ב');if(t>=r3)o.push('26');if(t>=r2)o.push('27');if(t>=r4)o.push('29c');if(t>=r5)o.push('24c');if(t>=r6)o.push('25c');const te=i===S-1?e:a+(i+1)*L;if(p26&&t<p26)o.push('26');if(i!==snI)o.push('סנח');EXTRA.forEach(x=>{if(i<x.from||i>=x.to)o.push(x.id)});return o});
+const W=Wov||mkW(g,S,a,L);g.forEach(x=>{if(!W.win[x])W.win[x]=[0,S]});if(!W.gate)W.gate={...GATES};EXTRA.forEach(x=>{W.gate[x.id]=x.cert?1:0});
 let best=null;for(let i=0;i<120;i++){const r=gen(g,S,isL,rm,fx||[],W);if(!best||r.score<best.score)best=r}
 polish(best,g,(fx||[]).length,S,rm,W);last={g,S,a,e,L,isL,rm,best,W};recalc();openSet=null;autoRec();render();histSave()}
 
@@ -424,7 +460,7 @@ const dur=i=>i===S-1?e-a-i*L:L;const nowM=new Date().getHours()*60+new Date().ge
 const winTxt=x=>{const w=W.win[x];if(!w)return'';const q=[];if(w[0]>0)q.push('מ-'+fm(a+w[0]*L));if(w[1]<S)q.push('עד '+fm(a+Math.min(S,w[1])*L));((W.gap||{})[x]||[]).forEach(([p,r])=>q.push('לא היה '+fm(a+p*L)+'–'+fm(a+r*L)));return q.length?` <small class="mut">(${q.join(' ')})</small>`:''};
 const opts=[...new Set([...all,...roster])];
 const ni=(()=>{const d=new Date(),now=d.getHours()*60+d.getMinutes();for(let k=0;k<S;k++)if(a+k*L>=now)return k;return 0})();
-const panel=`<details class="card"><summary>✏️ שינויים באמצע משמרת</summary><div class="row" style="margin-top:8px"><div><label>מאבטח</label><select id="gs">${opts.map(x=>`<option>${esc(x)}</option>`).join('')}</select></div><div><label>יוצא מהאיקס</label><select id="fs">${Array.from({length:S},(_,k)=>`<option value="${k}"${k===ni?' selected':''}>${fm(a+k*L)}</option>`).join('')}</select></div><div><label>חוזר באיקס (אפשר להשאיר ריק)</label><select id="rs"><option value="">לא חוזר</option>${Array.from({length:S},(_,k)=>`<option value="${k}">${fm(a+k*L)}</option>`).join('')}</select></div></div><div class="row" style="margin-top:8px"><button class="go" id="lv" style="margin:0">יצא מהסידור</button><button class="go" id="jn" style="margin:0">הצטרף למשמרת</button></div><p class="hint">יצא לזמן קצר? בחר את האיקס שבו הוא יוצא ואת האיקס שבו הוא חוזר, והוא ימשיך אחר כך מאותה נקודה בלי להתחיל מחדש. הסידור יחושב מחדש מהאיקס הזה והלאה, ומה שכבר עבר לא ישתנה.</p></details>`;
+const panel=`<details class="card"><summary>✏️ שינויים באמצע משמרת</summary><h3 style="margin:12px 0 2px;font-size:1rem">👤 מאבטח יוצא או מצטרף</h3><div class="row" style="margin-top:8px"><div><label>מאבטח</label><select id="gs">${opts.map(x=>`<option>${esc(x)}</option>`).join('')}</select></div><div><label>יוצא מהאיקס</label><select id="fs">${Array.from({length:S},(_,k)=>`<option value="${k}"${k===ni?' selected':''}>${fm(a+k*L)}</option>`).join('')}</select></div><div><label>חוזר באיקס (אפשר להשאיר ריק)</label><select id="rs"><option value="">לא חוזר</option>${Array.from({length:S},(_,k)=>`<option value="${k}">${fm(a+k*L)}</option>`).join('')}</select></div></div><div class="row" style="margin-top:8px"><div style="flex:1 1 100%"><label>מאבטח חדש שלא ברשימה (אם מצטרף מישהו חדש)</label><input id="jname" placeholder="שם (אפשר * אחרי השם למוסמך)" style="width:100%"></div><button class="go" id="lv" style="margin:0">יצא מהסידור</button><button class="go" id="jn" style="margin:0">הצטרף למשמרת</button></div><hr style="border:0;border-top:1px solid var(--line);margin:18px 0 6px"><h3 style="margin:10px 0 2px;font-size:1rem">➕ הוספת עמדה</h3><div class="row"><div><label>שם העמדה</label><input id="exn" placeholder="למשל: תגבור כניסה 31"></div><div><label>מהאיקס</label><select id="exf">${Array.from({length:S},(_,k)=>`<option value="${k}"${k===ni?' selected':''}>${fm(a+k*L)}</option>`).join('')}</select></div><div><label>עד (לא כולל)</label><select id="ext"><option value="">עד סוף המשמרת</option>${Array.from({length:S},(_,k)=>`<option value="${k}">${fm(a+k*L)}</option>`).join('')}</select></div><div><label>סוג</label><select id="exk"><option value="sd">עומדת</option><option value="si">יושבת</option></select></div></div><div class="row" style="margin-top:8px;align-items:center"><label style="display:flex;gap:8px;align-items:center;flex:1;font-size:1rem"><input type="checkbox" id="exc" style="width:20px;height:20px;flex:none"> צריך מוסמך בעמדה הזו</label><button class="go" id="exa" style="margin:0">הוסף עמדה</button></div>${EXTRA.length?'<div class="hint" style="margin-top:8px">עמדות שהוספת: '+EXTRA.map((x,j)=>`${esc(x.lab)} (${fm(a+x.from*L)}${x.to<S?'–'+fm(a+x.to*L):' עד הסוף'}) <button class="lnk exr" data-j="${j}">סגור מהאיקס שבחרת למעלה</button>`).join(' · ')+'</div>':''}<p class="hint">יצא לזמן קצר? בחר את האיקס שבו הוא יוצא ואת האיקס שבו הוא חוזר, והוא ימשיך אחר כך מאותה נקודה בלי להתחיל מחדש. הסידור יחושב מחדש מהאיקס הזה והלאה, ומה שכבר עבר לא ישתנה.</p></details>`;
 let h=w+'<div id="nx" class="nx"></div><a class="wa" data-img="all" role="button" tabindex="0" style="display:block;text-align:center;margin:0 0 10px;width:100%;padding:12px">📷 שלח את כל הסידור (תמונה)</a>'+'<p class="tip">💡 הקש על שם בטבלה כדי להחליף אותו עם מאבטח אחר. הקש על כותרת של איקס כדי לפתוח או לסגור אותו. <button class="lnk" id="opall">פתח/סגור הכל</button></p>'+panel+'<nav class="tabs2">'+[['post','לפי עמדה'],['guard','לפי מאבטח'],['fair','הוגנות']].map(([v,t])=>`<button data-v="${v}" class="${view===v?'on':''}">${t}</button>`).join('')+'</nav>';
 if(view==='post'){
 h+=best.rows.map((r,i)=>{
@@ -432,7 +468,7 @@ const trs=DISP.filter(d=>!rm[i].includes(d)).map(d=>{const q=PM[d],x=r.asg[d];re
 const pk=pick===i?'<div class="pkr"><span>להוריד מכאן:</span><button data-w="r1">מאבטח מ־23</button><button data-w="r3">עמדה 26</button><button data-w="r2">עמדה 27</button></div><div class="pkr"><span>בלי מוסמך מכאן:</span><button data-w="r5">24</button><button data-w="r6">25</button><button data-w="r4">29</button><button data-w="x">ביטול</button></div>':'';
 let ep='';if(edit&&edit.i===i){const xOnBreak=r.br.includes(edit.x);const ot=[...Object.entries(r.asg).map(([id,y])=>[y,PM[id].lab]),...(xOnBreak?[]:r.br.map(y=>[y,'☕']))].filter(([y])=>y!==edit.x);
 ep=`<div class="pkr"><span>להחליף את ${esc(edit.x)} עם:</span>${ot.map(([y,l])=>`<button class="sw" data-y="${esc(y)}">${esc(y)} (${l})</button>`).join('')}<button class="cx">ביטול</button></div>`}
-if(!openSet){const base=curI>=0?curI:Math.min(ni,S-1);openSet=new Set([base,base+1].filter(k=>k<S))}
+if(!openSet){const base=curI>=0?curI:Math.min(ni,S-1);openSet=window.innerWidth>=1100?new Set([...Array(S).keys()]):new Set([base,base+1].filter(k=>k<S))}
 return `<article class="slot${isL[i]?' l':''}${i===curI?' now':''}${(openSet.has(i)||pick===i||(edit&&edit.i===i))?'':' col'}" data-s="${i}"><header><b>${fm(a+i*L)}</b>${i===curI?'<em class="nowb">עכשיו</em>':''}${dur(i)!==L?`<em>${dur(i)} דק׳</em>`:''}${isL[i]?'<em>🍽 ארוחה</em>':''}<button class="cutb" data-i="${i}">הורדת עמדות</button><a class="wa sm" data-img="${i}" role="button" tabindex="0">📷 שלח</a></header>${pk}${ep}<table class="pt">${trs}<tr class="bkr"><th>☕ הפסקה</th><td>${r.br.length?r.br.map(x=>`<span class="ed" data-i="${i}" data-x="${esc(x)}">${nm(x)}</span>`).join(' · '):'—'}</td></tr></table></article>`}).join('')}
 else if(view==='guard'){
 h+=all.map(x=>`<article class="gc"><header>${nm(x)}${winTxt(x)}</header><div class="ms">`+best.rows.map((r,i)=>{const id=Object.keys(r.asg).find(k=>r.asg[k]===x),t=fm(a+i*L);return id?`<span class="m${PM[id].t==='si'?' si':''}"><small>${t}</small>${PM[id].lab}</span>`:r.br.includes(x)?`<span class="m b${isL[i]?' l':''}"><small>${t}</small>☕</span>`:`<span class="m b" style="opacity:.4"><small>${t}</small>—</span>`}).join('')+'</div></article>').join('')}
@@ -452,11 +488,13 @@ document.querySelectorAll('.sw').forEach(b=>b.onclick=()=>{swapG(edit.i,edit.x,b
 document.querySelectorAll('.cx').forEach(b=>b.onclick=()=>{edit=null;render()});
 const cw=()=>({win:{...W.win},noLast:new Set(W.noLast),gate:W.gate,gap:{...(W.gap||{})},first:W.first});
 $('lv').onclick=()=>{const x=$('gs').value,i=+$('fs').value,rv=$('rs').value;if(!g.includes(x))return;const w2=cw();if(rv!==''&&+rv>i)w2.gap[x]=[...(w2.gap[x]||[]),[i,+rv]];else w2.win[x]=[w2.win[x][0],Math.min(w2.win[x][1],i)];build(last.best.rows.slice(0,i),g,w2)};
-$('jn').onclick=()=>{const x=$('gs').value,i=+$('fs').value;const w2=cw(),w0=w2.win[x];if(w0&&g.includes(x)){if(w0[1]>=S)return;if(i>=w0[1]){w2.gap[x]=[...(w2.gap[x]||[]),[w0[1],i]];w2.win[x]=[w0[0],S]}else w2.win[x]=[i,S]}else w2.win[x]=[i,S];build(last.best.rows.slice(0,i),g.includes(x)?g:[...g,x],w2)};
+$('jn').onclick=()=>{const nr=($('jname').value||'').trim(),nn=nr?nr.replace(/\s*[*!]*$/,'').trim():'';if(nr)addNames(nr);const x=nn||$('gs').value,i=+$('fs').value;const w2=cw(),w0=w2.win[x];if(w0&&g.includes(x)){if(w0[1]>=S)return;if(i>=w0[1]){w2.gap[x]=[...(w2.gap[x]||[]),[w0[1],i]];w2.win[x]=[w0[0],S]}else w2.win[x]=[i,S]}else w2.win[x]=[i,S];build(last.best.rows.slice(0,i),g.includes(x)?g:[...g,x],w2)};
+$('exa').onclick=()=>{const nm0=($('exn').value||'').trim();if(!nm0){$('exn').focus();return}const f=+$('exf').value,tv=$('ext').value,t=tv===''?last.S:+tv;if(t<=f)return;const x={id:'ex'+Date.now()%1e7,lab:nm0,t:$('exk').value,cert:$('exc').checked,from:f,to:t};EXTRA.push(x);regExtra(x);build(last.best.rows.slice(0,f),last.g,cw())};
+document.querySelectorAll('.exr').forEach(b=>b.onclick=()=>{const x=EXTRA[+b.dataset.j],i=+$('exf').value;if(!x||i<=x.from)return;x.to=Math.min(x.to,i);build(last.best.rows.slice(0,i),last.g,cw())});
 if($('again'))$('again').onclick=()=>{pick=null;edit=null;$('again').textContent='⏳ מחשב סידור...';setTimeout(()=>build(),40)};
 if($('rec'))$('rec').onclick=()=>{lp.forEach(n=>{hist[n]=(hist[n]||0)+1});recd={k:key,n:lp};save();chips();render()};
 if($('unrec'))$('unrec').onclick=()=>{recd.n.forEach(n=>{hist[n]=Math.max(0,(hist[n]||0)-1)});skipRec=recd.k+'|'+recd.n.slice().sort().join();recd=null;save();chips();render()};bindX()}
-function pre(m,init){const was=curMode,A=m==='m';curMode=m;$('st').value=A?'06:50':'14:50';$('en').value=A?'14:50':'21:50';$('ls').value=A?'11:30':'';$('le').value=A?'14:10':'';$('r1').value='';$('r3').value='';$('r4').value='';$('r5').value='';$('r6').value='';$('p26').value=A?'07:30':'';$('snf').value=A?'07:30':'';$('r2').value=A?'':'18:50';$('pm').classList.toggle('on',A);$('pa').classList.toggle('on',!A);
+function pre(m,init){clearExtra();const was=curMode,A=m==='m';curMode=m;$('st').value=A?'06:50':'14:50';$('en').value=A?'14:50':'21:50';$('ls').value=A?'11:30':'';$('le').value=A?'14:10':'';$('r1').value='';$('r3').value='';$('r4').value='';$('r5').value='';$('r6').value='';$('p26').value=A?'07:30':'';$('snf').value=A?'07:30':'';$('r2').value=A?'':'18:50';$('pm').classList.toggle('on',A);$('pa').classList.toggle('on',!A);
 if(!init&&was==='m'&&!A&&LNG.size){roster.forEach(n=>{(LNG.has(n)||JOIN.has(n))?off.delete(n):off.add(n)});$('cmsg').textContent='הועברו '+[...LNG].filter(n=>roster.includes(n)).length+' מאבטחי שילדי יום מהבוקר. סמן עכשיו את מי שמגיע לצהריים.';save()}else $('cmsg').textContent='';modeUI();chips()}
 $('pm').onclick=()=>pre('m');$('pa').onclick=()=>pre('a');
 function cut(i,w){$(w).value=fm(last.a+i*last.L);pick=null;build(last.best.rows.slice(0,i),last.g,last.W)}
@@ -464,7 +502,7 @@ function addName(){const v=$('nm').value.trim();if(!v)return;addNames(v);$('nm')
 $('add').onclick=addName;$('nm').oninput=()=>{srch=$('nm').value.trim();chips()};$('nm').onkeydown=ev=>{if(ev.key==='Enter'){ev.preventDefault();addName()}};
 function show(p){if(p==='setup'){remUI();gatesUI()}$('pg1').hidden=p!=='setup';$('pg2').hidden=p!=='result';$('pg3').hidden=p!=='lasts';$('n1').classList.toggle('on',p==='setup');$('n2').classList.toggle('on',p==='result');$('n3').classList.toggle('on',p==='lasts');window.scrollTo(0,0)}
 $('n1').onclick=()=>show('setup');$('n2').onclick=()=>show('result');$('n3').onclick=()=>show('lasts');
-$('go').onclick=()=>{if(!names().length){$('gomsg').textContent='סמן לפחות מאבטח אחד שנמצא במשמרת';return}$('gomsg').textContent='';pick=null;edit=null;$('go').textContent='⏳ מחשב סידור...';setTimeout(()=>{try{build();show('result')}catch(e){$('gomsg').textContent='משהו השתבש בחישוב. נסה שוב.'}chips()},40)};
+$('go').onclick=()=>{clearExtra();if(!names().length){$('gomsg').textContent='סמן לפחות מאבטח אחד שנמצא במשמרת';return}$('gomsg').textContent='';pick=null;edit=null;$('go').textContent='⏳ מחשב סידור...';setTimeout(()=>{try{build();show('result')}catch(e){$('gomsg').textContent='משהו השתבש בחישוב. נסה שוב.'}chips()},40)};
 function gatesUI(){$('gates').innerHTML=['24','25','29'].map(k=>`<button class="gate${GATES[k]?' on':''}" data-k="${k}"><b>${k}</b><small>${GATES[k]?'צריך מוסמך':'לא צריך מוסמך'}</small></button>`).join('');
 $('gsum').textContent=[['24','r5'],['25','r6'],['29','r4']].map(([k,r])=>k+(GATES[k]?' מוסמך'+($(r).value?' עד '+$(r).value:''):' כולם')).join(' · ');document.querySelectorAll('#gates button').forEach(b=>b.onclick=()=>{GATES[b.dataset.k]=GATES[b.dataset.k]?0:1;gatesUI();save()})}
 
@@ -509,7 +547,16 @@ const t=T0+' · '+d.getDate()+'.'+(d.getMonth()+1)+'.'+d.getFullYear()+' · '+(c
 L.unshift({k,d:d.getDate()+'.'+(d.getMonth()+1),m:curMode==='m'?'בוקר':'צהריים',t});localStorage.setItem('shiftHist',JSON.stringify(L.slice(0,14)))}catch(e){}histUI()}
 function histUI(){const L=histGet();$('hist2').innerHTML=L.length?`<details class="card hh"><summary>🗂️ סידורים קודמים (${L.length})</summary>${L.map((z,i)=>`<details><summary>${esc(z.d)} · ${esc(z.m)}</summary><pre>${esc(z.t)}</pre><a class="wa" target="_blank" rel="noopener" href="${waUrl(z.t)}">שלח בווצאפ</a></details>`).join('')}</details>`:''}
 load();chips();gatesUI();setLogo();histUI();['r4','r5','r6'].forEach(id=>{$(id).oninput=gatesUI});
-const VER='15.10.2026 · גרסה 24';$('ver').textContent='גרסה: '+VER+' · אם זה נראה לך לא מעודכן, פתח את הקישור עצמו (לא עותק שמור) ורענן את הדף';let wipeArm=false;$('wipe').onclick=()=>{if(!wipeArm){wipeArm=true;$('wipe').textContent='בטוח? לחץ שוב למחיקה';setTimeout(()=>{wipeArm=false;$('wipe').textContent='🗑️ מחק את כל הנתונים במכשיר הזה'},4000);return}try{localStorage.removeItem('shiftRoster');localStorage.removeItem('shift');localStorage.removeItem('shiftPal');localStorage.removeItem('shiftHist')}catch(e){}location.reload()};pre(new Date().getHours()>=13?'a':'m',true);setInterval(tick,30000);
+const VER='15.10.2026 · גרסה 31';$('ver').textContent='גרסה: '+VER+' · אם זה נראה לך לא מעודכן, פתח את הקישור עצמו (לא עותק שמור) ורענן את הדף';let wipeArm=false;$('wipe').onclick=()=>{if(!wipeArm){wipeArm=true;$('wipe').textContent='בטוח? לחץ שוב למחיקה';setTimeout(()=>{wipeArm=false;$('wipe').textContent='🗑️ מחק את כל הנתונים במכשיר הזה'},4000);return}try{localStorage.removeItem('shiftRoster');localStorage.removeItem('shift');localStorage.removeItem('shiftPal');localStorage.removeItem('shiftHist')}catch(e){}location.reload()};pre(new Date().getHours()>=13?'a':'m',true);setInterval(tick,30000);
+
+
+(function(){const sp=document.getElementById('splash');if(!sp)return;let seen=false;try{seen=!!sessionStorage.getItem('splashSeen')}catch(e){}
+if(seen){sp.remove();return}
+try{sessionStorage.setItem('splashSeen','1')}catch(e){}
+document.getElementById('splashlogo').src=LOGO;
+const t=document.getElementById('splashT');'סידור עמדות'.split('').forEach((ch,i)=>{const e=document.createElement('span');e.textContent=ch===' '?'\u00a0':ch;e.style.animationDelay=(.95+i*.035)+'s';t.appendChild(e)});
+sp.hidden=false;let done=false;const close=()=>{if(done)return;done=true;sp.classList.add('out');setTimeout(()=>sp.remove(),450)};
+sp.onclick=close;setTimeout(close,2100)})();
 </script>
 </body>
 </html>
