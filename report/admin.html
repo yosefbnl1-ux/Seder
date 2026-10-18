@@ -35,7 +35,7 @@ label.f{display:block;font-weight:700;font-size:.85rem;margin:10px 0 4px;color:#
 .stat b{display:block;font-size:1.7rem;line-height:1.1;color:var(--ink);font-variant-numeric:tabular-nums}
 .stat span{color:var(--mut);font-size:.85rem;font-weight:600}
 .stat.bad b{color:var(--bad)}
-.filters{display:grid;grid-template-columns:2fr 1fr auto;gap:10px;align-items:end;margin-bottom:12px}
+.filters{display:grid;grid-template-columns:2fr 1fr 1fr 1fr auto;gap:10px;align-items:end;margin-bottom:12px}
 .folders{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px}
 .folder{display:flex;align-items:center;gap:12px;text-align:right;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 16px;min-height:76px}
 .folder:hover{border-color:var(--acc);background:#f6f9fd}
@@ -103,6 +103,8 @@ dialog::backdrop{background:rgba(10,20,35,.55)}
   </div>
   <div class="filters">
    <div class="q"><label class="f" for="q">חיפוש</label><input id="q" type="search" placeholder="מספר רכב, שם מאבטח, טקסט חופשי"></div>
+   <div><label class="f" for="from">מתאריך</label><input id="from" type="date"></div>
+   <div><label class="f" for="to">עד תאריך</label><input id="to" type="date"></div>
    <div><label class="f" for="fShift">משמרת</label><select id="fShift"><option value="">הכל</option></select></div>
    <label class="tog"><input type="checkbox" id="onlyBad">רק עם ליקויים</label>
   </div>
@@ -141,7 +143,7 @@ let ALL=[],VIEW=[],sel=new Set(),cur=null,curMonth=null;
 // תיקייה לכל חודש לפי תאריך הדוח
 const monthOf=r=>(r.date||'').slice(0,7);
 const monthName=m=>{const[y,mo]=m.split('-');return new Date(+y,mo-1,1).toLocaleDateString('he-IL',{month:'long',year:'numeric'})};
-const fileTag=()=>curMonth||todayISO();
+const fileTag=()=>curMonth||[$('from').value,$('to').value].filter(Boolean).join('_to_')||todayISO();
 
 const defects=r=>r.defects??badList(r).length;
 function statusTag(r){
@@ -150,13 +152,13 @@ function statusTag(r){
   if(r.status==='reported')return'<span class="tag warn">דווח</span>';
   return n?'<span class="tag warn">ליקויים</span>':'<span class="tag ok">תקין</span>'}
 function render(){
-  const q=$('q').value.trim().toLowerCase(),sh=$('fShift').value,ob=$('onlyBad').checked;
-  const base=ALL.filter(r=>(!sh||r.shift===sh)&&(!ob||defects(r)||r.status!=='ok')
+  const q=$('q').value.trim().toLowerCase(),f=$('from').value,t=$('to').value,sh=$('fShift').value,ob=$('onlyBad').checked;
+  const base=ALL.filter(r=>(!f||r.date>=f)&&(!t||r.date<=t)&&(!sh||r.shift===sh)&&(!ob||defects(r)||r.status!=='ok')
     &&(!q||[r.vehicle,r.giver,r.receiver,r.vNotes,r.details,r.reportedTo].join(' ').toLowerCase().includes(q)));
-  // בלי חודש נבחר ובלי חיפוש - מציגים תיקיות; חיפוש מחפש בכל החודשים
-  const folderMode=!curMonth&&!q;
+  // בלי חודש נבחר ובלי חיפוש/תאריכים - מציגים תיקיות; חיפוש ותאריכים מחפשים בכל החודשים
+  const folderMode=!curMonth&&!q&&!f&&!t;
   $('folders').hidden=!folderMode;$('listWrap').hidden=folderMode;$('crumbs').hidden=folderMode;
-  $('crumbName').textContent=curMonth?monthName(curMonth):'תוצאות חיפוש בכל החודשים';
+  $('crumbName').textContent=curMonth?monthName(curMonth):(f||t)?`דוחות ${f?'מ-'+fmtDate(f):''} ${t?'עד '+fmtDate(t):''}`.trim():'תוצאות חיפוש בכל החודשים';
   const groups={};base.forEach(r=>{(groups[monthOf(r)]??=[]).push(r)});
   $('folders').innerHTML=Object.keys(groups).sort().reverse().map(m=>{const L=groups[m],nb=L.filter(r=>defects(r)).length;
     return`<button class="folder" data-month="${esc(m)}"><span class="ic">📁</span><div><b>${esc(monthName(m))}</b><span>${L.length} דוחות</span>${nb?` · <span class="bd">${nb} עם ליקויים</span>`:''}</div></button>`}).join('');
@@ -176,9 +178,9 @@ function render(){
   $('cnt').textContent=`${VIEW.length} דוחות`+(sel.size?` · ${sel.size} נבחרו`:'');
   $('pdfSel').disabled=!VIEW.length;$('pdfSel').textContent=sel.size?`הורדת PDF (${sel.size} נבחרים)`:`הורדת PDF (כל ה-${VIEW.length})`;
   $('all').checked=VIEW.length>0&&sel.size===VIEW.length}
-['q','fShift','onlyBad'].forEach(id=>$(id).addEventListener('input',render));
+['q','from','to','fShift','onlyBad'].forEach(id=>$(id).addEventListener('input',render));
 $('folders').addEventListener('click',e=>{const f=e.target.closest('[data-month]');if(!f)return;curMonth=f.dataset.month;sel.clear();render();scrollTo(0,0)});
-$('back').onclick=()=>{curMonth=null;$('q').value='';sel.clear();render()};
+$('back').onclick=()=>{curMonth=null;$('q').value=$('from').value=$('to').value='';sel.clear();render()};
 $('all').onchange=()=>{sel=new Set($('all').checked?VIEW.map(r=>r.id):[]);render()};
 $('rows').addEventListener('click',e=>{
   const c=e.target.closest('[data-sel]');
