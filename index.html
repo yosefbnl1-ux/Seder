@@ -248,6 +248,7 @@ body{max-width:none;padding:0 0 40px}
 <details class="card" id="mand"><summary>✋ שיבוץ ידני לאיקס הראשון <span id="mans" style="font-weight:400;color:var(--mut)"></span></summary><p class="hint" style="margin:10px 0">אופציונלי. בחר מי עומד בכל עמדה באיקס הראשון, והאפליקציה תסדר את כל האיקסים שאחריו. מי שלא שובץ יוצא להפסקה באיקס הראשון.</p><div class="mang" id="mang"></div><button class="btn2" id="manc" type="button" style="margin-top:10px">נקה שיבוץ ידני</button></details>
 <details class="card adv"><summary>⚙️ הגדרות מתקדמות</summary>
 <div class="advg">
+<div><h3>🚧 עבודות תשתית בכנסת</h3><label style="display:flex;gap:10px;align-items:flex-start;color:var(--mut);font-size:.92rem"><input type="checkbox" id="farc" checked style="margin-top:4px"><span>המעבר מסיור ל־23, 27 ו־29 ארוך עכשיו. העדף העברה מסיור ל־24, 25 ו־26 (ולהפך).</span></label></div>
 <section><h3>שעות המשמרת</h3><div class="row3">
 <div><label>תחילה</label><input type="time" id="st" value="06:50"></div>
 <div><label>סיום</label><input type="time" id="en" value="14:50"></div>
@@ -281,7 +282,7 @@ const $=id=>document.getElementById(id);
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const POS=[
 {id:'24',k:'24',t:'sd',cert:1,lab:'24'},{id:'29',k:'29',t:'sd',cert:1,lab:'29'},
-{id:'25',k:'25',t:'si',lab:'25'},{id:'סיור א',k:'סיור',t:'si',lab:'סיור'},{id:'סיור ב',k:'סיור',t:'si',lab:'סיור'},
+{id:'25',k:'25',t:'sd',lab:'25'},{id:'סיור א',k:'סיור',t:'si',lab:'סיור'},{id:'סיור ב',k:'סיור',t:'si',lab:'סיור'},
 {id:'23 א',k:'23',t:'sd',lab:'23'},{id:'23 ב',k:'23',t:'sd',lab:'23'},{id:'26',k:'26',t:'sd',lab:'26'},{id:'27',k:'27',t:'sd',lab:'27'},{id:'סנח',k:'סנח',t:'sd',lab:'סנ"ח'}];
 const DISP=['23 א','23 ב','24','25','26','27','29','סיור א','סיור ב','סנח'];
 const DROP=['סנח','סיור ב','23 ב','סיור א','27','26','25'];
@@ -395,7 +396,7 @@ const needC=ps.filter(p=>p.cert).length;
 const place=(p,res,only)=>{let best=null,bc=1e9;
 for(const x of av){if(used.has(x)||(p.cert&&!cert.has(x))||(only&&!only(x)))continue;
 if(res&&!p.cert&&cert.has(x)&&av.filter(y=>cert.has(y)&&!used.has(y)).length<=needC)continue;
-const c=1.5*(st[x].pk[p.k]||0)+3*st[x][p.t]+(st[x].lp===p.k?(p.t==='sd'?-6:2):0)+(p.t==='si'&&st[x].lb===s-1?50:0)+(p.t==='si'?(st[x].lt==='sd'?-3:st[x].lt==='si'?3:0):0)+Math.random();
+const c=1.5*(st[x].pk[p.k]||0)+3*st[x][p.t]+(st[x].lp===p.k?(p.t==='sd'?-6:2):0)+(p.t==='si'&&st[x].lb===s-1?50:0)+(farMv(st[x].lp,p.k)?14:0)+(p.t==='si'?(st[x].lt==='sd'?-3:st[x].lt==='si'?3:0):0)+Math.random();
 if(c<bc){bc=c;best=x}}
 if(best){asg[p.id]=best;used.add(best);if(p.t==='si'&&st[best].lb===s-1)RT++}};
 const snP=ps.find(p=>p.id==='סנח');if(snP){place(snP,true,x=>st[x].lp==='סיור');if(!asg[snP.id])place(snP,true)}
@@ -418,7 +419,8 @@ const score=6*rng(nv('si'))+2*rng(nv('sd'))+4*rng(nv('br'))+3*Math.abs(avg(cv)-a
 return{rows,st,score,uneaten,miss}}
 
 const PM={};POS.forEach(q=>PM[q.id]=q);
-let EXTRA=[];
+let EXTRA=[];const FAR=new Set(['23','27','29']);let FARON=true;try{FARON=localStorage.getItem('shiftFar')!=='0'}catch(e){}
+const farMv=(a,b)=>FARON&&a&&b&&((a==='סיור'&&FAR.has(b))||(b==='סיור'&&FAR.has(a)));
 function regExtra(x){const q={id:x.id,k:x.lab,t:x.t,lab:x.lab,ex:1};POS.push(q);PM[q.id]=q;DISP.push(q.id);DROP.push(q.id)}
 function clearExtra(){EXTRA.forEach(x=>{[POS,DISP,DROP].forEach(A=>{const i=A.findIndex(y=>(y.id||y)===x.id);if(i>=0)A.splice(i,1)});delete PM[x.id]});EXTRA=[]}
 function polish(best,g,f0,S,rm,W){
@@ -426,7 +428,7 @@ if(f0>=S)return;const rows=best.rows,win=W.win;
 const gp=(x,s)=>((W.gap||{})[x]||[]).some(([a,b])=>s>=a&&s<b),wl=x=>{let c=0;for(let s=win[x][0];s<Math.min(S,win[x][1]);s++)if(!gp(x,s))c++;return Math.max(1,c)},Wt=g.reduce((a,x)=>a+wl(x),0);
 const E=()=>{const c={};g.forEach(x=>c[x]={si:0,sd:0,pk:{}});let rep=0;
 rows.forEach((r,s)=>{for(const[id,x]of Object.entries(r.asg)){const q=PM[id];if(!c[x])continue;c[x][q.t]++;c[x].pk[q.k]=(c[x].pk[q.k]||0)+1;
-if(s>0){const o=rows[s-1].asg;for(const i2 in o)if(o[i2]===x&&PM[i2].k!==q.k)rep+=(PM[i2].t==='sd'&&q.t==='sd')?3:.3}}});
+if(s>0){const o=rows[s-1].asg;for(const i2 in o)if(o[i2]===x&&PM[i2].k!==q.k)rep+=((PM[i2].t==='sd'&&q.t==='sd')?3:.3)+(farMv(PM[i2].k,q.k)?5:0)}}});
 const vs=k=>{const m=g.reduce((a,x)=>a+c[x][k],0)/Wt;return g.reduce((a,x)=>a+(c[x][k]-m*wl(x))**2,0)};
 const ks={};g.forEach(x=>{for(const k in c[x].pk)ks[k]=(ks[k]||0)+c[x].pk[k]});
 let pv=0;for(const k in ks){const m=ks[k]/Wt;g.forEach(x=>{pv+=((c[x].pk[k]||0)-m*wl(x))**2})}
@@ -482,8 +484,10 @@ if(px)r.asg[px]=y;else r.br=r.br.map(z=>z===x?y:z);
 if(py)r.asg[py]=x;else r.br=r.br.map(z=>z===y?x:z);
 r.m=[...(r.m||[]),...[px,py].filter(Boolean)];recalc()}
 let edit=null;
+function saveLast(){try{const{g,S,a,e,L,isL,rm,best,W}=last;localStorage.setItem('shiftLast',JSON.stringify({k:today(),m:curMode,g,S,a,e,L,isL,rm,rows:best.rows,miss:best.miss,uneaten:best.uneaten,score:best.score,W:{win:W.win,gap:W.gap||{},noLast:[...W.noLast],gate:W.gate,first:[...(W.first||[])]},EX:EXTRA}))}catch(x){}}
+function restoreLast(){try{const d=JSON.parse(localStorage.getItem('shiftLast')||'null');if(!d||d.k!==today())return;pre(d.m,true);d.EX.forEach(x=>{EXTRA.push(x);regExtra(x)});last={g:d.g,S:d.S,a:d.a,e:d.e,L:d.L,isL:d.isL,rm:d.rm,best:{rows:d.rows,miss:d.miss,uneaten:d.uneaten,score:d.score},W:{win:d.W.win,gap:d.W.gap,noLast:new Set(d.W.noLast),gate:d.W.gate,first:new Set(d.W.first)}};recalc();render();show('result')}catch(x){last=null}}
 function render(){
-if(!last)return;const{g,S,a,e,L,isL,rm,best,all,W}=last;const C=g.filter(x=>cert.has(x)).length;
+if(!last)return;saveLast();const{g,S,a,e,L,isL,rm,best,all,W}=last;const C=g.filter(x=>cert.has(x)).length;
 let w='';const WN=t=>{w+=`<div class="warn">${t}</div>`};
 if(g.length<9)WN('יש פחות מ־9 מאבטחים - לא כל העמדות יאוישו');
 const gk=Object.keys(W.gate||{}).filter(k=>W.gate[k]);const NC=gk.length;
@@ -541,6 +545,7 @@ function addName(){const v=$('nm').value.trim();if(!v)return;addNames(v);$('nm')
 $('add').onclick=addName;$('nm').oninput=()=>{srch=$('nm').value.trim();chips()};$('nm').onkeydown=ev=>{if(ev.key==='Enter'){ev.preventDefault();addName()}};
 function show(p){if(p==='setup'){remUI();gatesUI()}$('pg1').hidden=p!=='setup';$('pg2').hidden=p!=='result';$('pg3').hidden=p!=='lasts';$('n1').classList.toggle('on',p==='setup');$('n2').classList.toggle('on',p==='result');$('n3').classList.toggle('on',p==='lasts');window.scrollTo(0,0)}
 $('n1').onclick=()=>show('setup');$('n2').onclick=()=>show('result');$('n3').onclick=()=>show('lasts');
+$('farc').checked=FARON;$('farc').onchange=()=>{FARON=$('farc').checked;try{localStorage.setItem('shiftFar',FARON?'1':'0')}catch(e){}};
 $('manc').onclick=()=>{MAN={};manUI()};
 $('go').onclick=()=>{clearExtra();if(!names().length){$('gomsg').textContent='סמן לפחות מאבטח אחד שנמצא במשמרת';return}$('gomsg').textContent='';pick=null;edit=null;$('go').textContent='⏳ מחשב סידור...';setTimeout(()=>{try{build();show('result')}catch(e){$('gomsg').textContent='משהו השתבש בחישוב. נסה שוב.'}chips()},40)};
 function gatesUI(){$('gates').innerHTML=['24','25','29'].map(k=>`<button class="gate${GATES[k]?' on':''}" data-k="${k}"><b>${k}</b><small>${GATES[k]?'צריך מוסמך':'לא צריך מוסמך'}</small></button>`).join('');
@@ -587,7 +592,7 @@ const t=T0+' · '+d.getDate()+'.'+(d.getMonth()+1)+'.'+d.getFullYear()+' · '+(c
 L.unshift({k,d:d.getDate()+'.'+(d.getMonth()+1),m:curMode==='m'?'בוקר':'צהריים',t});localStorage.setItem('shiftHist',JSON.stringify(L.slice(0,14)))}catch(e){}histUI()}
 function histUI(){const L=histGet();$('hist2').innerHTML=L.length?`<details class="card hh"><summary>🗂️ סידורים קודמים (${L.length})</summary>${L.map((z,i)=>`<details><summary>${esc(z.d)} · ${esc(z.m)}</summary><pre>${esc(z.t)}</pre><a class="wa" target="_blank" rel="noopener" href="${waUrl(z.t)}">שלח בווצאפ</a></details>`).join('')}</details>`:''}
 load();chips();gatesUI();setLogo();histUI();['r4','r5','r6'].forEach(id=>{$(id).oninput=gatesUI});
-const VER='15.10.2026 · גרסה 32';$('ver').textContent='גרסה: '+VER+' · אם זה נראה לך לא מעודכן, פתח את הקישור עצמו (לא עותק שמור) ורענן את הדף';let wipeArm=false;$('wipe').onclick=()=>{if(!wipeArm){wipeArm=true;$('wipe').textContent='בטוח? לחץ שוב למחיקה';setTimeout(()=>{wipeArm=false;$('wipe').textContent='🗑️ מחק את כל הנתונים במכשיר הזה'},4000);return}try{localStorage.removeItem('shiftRoster');localStorage.removeItem('shift');localStorage.removeItem('shiftPal');localStorage.removeItem('shiftHist')}catch(e){}location.reload()};pre(new Date().getHours()>=13?'a':'m',true);setInterval(tick,30000);
+const VER='19.10.2026 · גרסה 35';$('ver').textContent='גרסה: '+VER+' · אם זה נראה לך לא מעודכן, פתח את הקישור עצמו (לא עותק שמור) ורענן את הדף';let wipeArm=false;$('wipe').onclick=()=>{if(!wipeArm){wipeArm=true;$('wipe').textContent='בטוח? לחץ שוב למחיקה';setTimeout(()=>{wipeArm=false;$('wipe').textContent='🗑️ מחק את כל הנתונים במכשיר הזה'},4000);return}try{localStorage.removeItem('shiftRoster');localStorage.removeItem('shift');localStorage.removeItem('shiftPal');localStorage.removeItem('shiftHist')}catch(e){}location.reload()};pre(new Date().getHours()>=13?'a':'m',true);restoreLast();setInterval(tick,30000);
 
 
 (function(){const sp=document.getElementById('splash');if(!sp)return;let seen=false;try{seen=!!sessionStorage.getItem('splashSeen')}catch(e){}
