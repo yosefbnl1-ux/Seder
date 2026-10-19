@@ -24,6 +24,11 @@ nav.main button.on{background:var(--ink);color:var(--inkfg)}
 h2{font-size:1.05rem;margin:0 0 12px;display:flex;align-items:center;gap:10px;font-weight:800}
 .stepn{width:28px;height:28px;border-radius:50%;background:var(--ink);color:var(--inkfg);display:inline-flex;align-items:center;justify-content:center;font-size:.9rem}
 summary{cursor:pointer;font-weight:700}
+#mand{grid-column:1/-1}
+.mang{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.mang label{display:flex;flex-direction:column;gap:4px;font-size:.85rem;color:var(--mut);background:var(--bg);border-radius:12px;padding:8px 10px}
+.mang select{font:inherit;font-size:1rem;padding:8px;border:1px solid var(--line,#d5e3da);border-radius:10px;background:#fff;color:var(--ink)}
+.mang select.on{border-color:var(--ink);font-weight:700}
 .hg{display:grid;grid-template-columns:1fr;gap:10px;margin-top:12px}
 .hs{display:flex;gap:12px;align-items:flex-start;background:var(--bg);border-radius:14px;padding:12px 14px}
 .hs>b{flex:0 0 28px;height:28px;border-radius:50%;background:var(--ink);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.9rem}
@@ -240,6 +245,7 @@ body{max-width:none;padding:0 0 40px}
 <div class="bar"><span id="cnt"></span><span><button class="lnk" id="all1">בחר הכל</button><button class="lnk" id="none1">נקה</button><button class="lnk" id="edm">✎ עריכה</button></span></div>
 <div id="chips"></div>
 <div class="sug" style="margin-top:10px"><span>הצע אחרונות לפי הוגנות:</span><span class="stp"><button id="lminus">−</button><b id="lcount">3</b><button id="lplus">+</button></span><button class="lnk" id="lsug">הצע</button></div></section>
+<details class="card" id="mand"><summary>✋ שיבוץ ידני לאיקס הראשון <span id="mans" style="font-weight:400;color:var(--mut)"></span></summary><p class="hint" style="margin:10px 0">אופציונלי. בחר מי עומד בכל עמדה באיקס הראשון, והאפליקציה תסדר את כל האיקסים שאחריו. מי שלא שובץ יוצא להפסקה באיקס הראשון.</p><div class="mang" id="mang"></div><button class="btn2" id="manc" type="button" style="margin-top:10px">נקה שיבוץ ידני</button></details>
 <details class="card adv"><summary>⚙️ הגדרות מתקדמות</summary>
 <div class="advg">
 <section><h3>שעות המשמרת</h3><div class="row3">
@@ -290,7 +296,15 @@ function monthCheck(){if(MO!==mk()){Object.keys(hist).forEach(k=>delete hist[k])
 function sumUI(){const g=document.getElementById('sumg');if(!g)return;const nm=roster.filter(n=>!off.has(n)),c=nm.filter(n=>cert.has(n)).length,ls=nm.filter(n=>fin.has(n)),a=hm($('st').value||'0:0'),e=hm($('en').value||'0:0'),L=Math.min(120,Math.max(10,+$('len').value||40)),S=Math.max(0,Math.floor((e-a)/L));
 g.innerHTML=[[nm.length,'מאבטחים במשמרת'],[c,'מוסמכים ★'],[ls.length,'אחרונים'],[S,'איקסים של '+L+' דקות']].map(([v,t])=>`<div><b>${v}</b><span>${t}</span></div>`).join('');
 document.getElementById('sumn').textContent=($('st').value&&$('en').value?'משמרת '+$('st').value+'–'+$('en').value:'')+(ls.length?' · אחרונים: '+ls.join(', '):'')}
-function chips(){chips0();sumUI()}
+let MAN={};
+function man0(){const a=hm($('st').value||'0:0'),t=id=>$(id).value?hm($(id).value):1e9,o=['סנח'];if(a>=t('r1'))o.push('23 ב');if(a>=t('r3'))o.push('26');if(a>=t('r2'))o.push('27');const p=$('p26').value?hm($('p26').value):0;if(p&&a<p)o.push('26');return o}
+function manUI(){const box=$('mang');if(!box)return;const nm=names().sort(he),hide=man0();Object.keys(MAN).forEach(k=>{if(!nm.includes(MAN[k])||hide.includes(k))delete MAN[k]});
+const ps=DISP.filter(d=>!hide.includes(d)&&!PM[d].ex);
+box.innerHTML=ps.map(d=>{const cur=MAN[d]||'',used=new Set(Object.entries(MAN).filter(([k])=>k!==d).map(([,v])=>v));return `<label>${PM[d].lab}${PM[d].lab!==d?' ('+d.slice(-1)+')':''}${PM[d].cert?' ★':''}<select data-p="${d}" class="${cur?'on':''}"><option value="">—</option>${nm.filter(x=>!used.has(x)).map(x=>`<option value="${esc(x)}"${x===cur?' selected':''}>${esc(x)}${cert.has(x)?' ★':''}</option>`).join('')}</select></label>`}).join('');
+box.querySelectorAll('select').forEach(el=>el.onchange=()=>{if(el.value)MAN[el.dataset.p]=el.value;else delete MAN[el.dataset.p];manUI()});
+const k=Object.keys(MAN).length;$('mans').textContent=k?'· שובצו '+k:'';$('manc').style.display=k?'':'none'}
+function manRow(g,W){const asg={};for(const[id,x]of Object.entries(MAN)){const w=W.win[x];if(g.includes(x)&&w&&w[0]<=0&&!((W.gap||{})[x]||[]).some(([a,b])=>0>=a&&0<b))asg[id]=x}if(!Object.keys(asg).length)return null;const used=new Set(Object.values(asg));return{asg,br:g.filter(x=>!used.has(x)&&W.win[x][0]<=0&&!((W.gap||{})[x]||[]).some(([a,b])=>0>=a&&0<b))}}
+function chips(){chips0();sumUI();manUI()}
 function chips0(){
 monthCheck();
 const A=curMode==='a';
@@ -440,6 +454,7 @@ if(S<1){out.innerHTML='<p class="warn">שעת הסיום חייבת להיות �
 const isL=[...Array(S)].map((_,i)=>!!useL&&a+i*L>=ls&&(i===S-1?e:a+(i+1)*L)<=le);
 const r1=$('r1').value?hm($('r1').value):1e9,r2=$('r2').value?hm($('r2').value):1e9,r3=$('r3').value?hm($('r3').value):1e9,r4=$('r4').value?hm($('r4').value):1e9,r5=$('r5').value?hm($('r5').value):1e9,r6=$('r6').value?hm($('r6').value):1e9;const p26=$('p26').value?hm($('p26').value):0,sn0=$('snf').value?hm($('snf').value):null,snI=sn0!=null?Math.floor((sn0-a)/L):-1;const rm=[...Array(S)].map((_,i)=>{const t=a+i*L,o=[];if(t>=r1)o.push('23 ב');if(t>=r3)o.push('26');if(t>=r2)o.push('27');if(t>=r4)o.push('29c');if(t>=r5)o.push('24c');if(t>=r6)o.push('25c');const te=i===S-1?e:a+(i+1)*L;if(p26&&t<p26)o.push('26');if(i!==snI)o.push('סנח');EXTRA.forEach(x=>{if(i<x.from||i>=x.to)o.push(x.id)});return o});
 const W=Wov||mkW(g,S,a,L);g.forEach(x=>{if(!W.win[x])W.win[x]=[0,S]});if(!W.gate)W.gate={...GATES};EXTRA.forEach(x=>{W.gate[x.id]=x.cert?1:0});
+if(!(fx&&fx.length)){const mr=manRow(g,W);if(mr){mr.asg=Object.fromEntries(Object.entries(mr.asg).filter(([k])=>!rm[0].includes(k)));fx=[mr]}}
 let best=null;for(let i=0;i<120;i++){const r=gen(g,S,isL,rm,fx||[],W);if(!best||r.score<best.score)best=r}
 polish(best,g,(fx||[]).length,S,rm,W);last={g,S,a,e,L,isL,rm,best,W};recalc();openSet=null;autoRec();render();histSave()}
 
@@ -526,6 +541,7 @@ function addName(){const v=$('nm').value.trim();if(!v)return;addNames(v);$('nm')
 $('add').onclick=addName;$('nm').oninput=()=>{srch=$('nm').value.trim();chips()};$('nm').onkeydown=ev=>{if(ev.key==='Enter'){ev.preventDefault();addName()}};
 function show(p){if(p==='setup'){remUI();gatesUI()}$('pg1').hidden=p!=='setup';$('pg2').hidden=p!=='result';$('pg3').hidden=p!=='lasts';$('n1').classList.toggle('on',p==='setup');$('n2').classList.toggle('on',p==='result');$('n3').classList.toggle('on',p==='lasts');window.scrollTo(0,0)}
 $('n1').onclick=()=>show('setup');$('n2').onclick=()=>show('result');$('n3').onclick=()=>show('lasts');
+$('manc').onclick=()=>{MAN={};manUI()};
 $('go').onclick=()=>{clearExtra();if(!names().length){$('gomsg').textContent='סמן לפחות מאבטח אחד שנמצא במשמרת';return}$('gomsg').textContent='';pick=null;edit=null;$('go').textContent='⏳ מחשב סידור...';setTimeout(()=>{try{build();show('result')}catch(e){$('gomsg').textContent='משהו השתבש בחישוב. נסה שוב.'}chips()},40)};
 function gatesUI(){$('gates').innerHTML=['24','25','29'].map(k=>`<button class="gate${GATES[k]?' on':''}" data-k="${k}"><b>${k}</b><small>${GATES[k]?'צריך מוסמך':'לא צריך מוסמך'}</small></button>`).join('');
 $('gsum').textContent=[['24','r5'],['25','r6'],['29','r4']].map(([k,r])=>k+(GATES[k]?' מוסמך'+($(r).value?' עד '+$(r).value:''):' כולם')).join(' · ');document.querySelectorAll('#gates button').forEach(b=>b.onclick=()=>{GATES[b.dataset.k]=GATES[b.dataset.k]?0:1;gatesUI();save()})}
