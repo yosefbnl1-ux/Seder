@@ -228,7 +228,7 @@ body{max-width:none;padding:0 0 40px}
 <details class="card help"><summary>❓ איך משתמשים?</summary><div class="hg">
 <div class="hs"><b>1</b><div><h4>בוחרים משמרת</h4><p>בוקר או צהריים. השעות והאיקסים מתעדכנים לבד.</p></div></div>
 <div class="hs"><b>2</b><div><h4>מסמנים מי במשמרת</h4><p>הקש על שם כדי להוסיף אותו. מי שנבחר עולה למעלה. שם חדש? כתוב בשורת החיפוש ולחץ "הוסף".</p></div></div>
-<div class="hs"><b>3</b><div><h4>מגדירים מי מיוחד</h4><p>★ ליד השם = מוסמך, 🚗 = דאלס (הקש להחלפה, זה נשמר). הקש ⋯ ליד מאבטח שנבחר: שילדי יום, שילדי לילה (בצהריים) ו"אחרונה" (הקשה חוזרת מחליפה בין 🏠 ל־🌙).</p></div></div>
+<div class="hs"><b>3</b><div><h4>מגדירים מי מיוחד</h4><p>★ ליד השם = מוסמך, 🚗 = דאלס (הקש להחלפה, זה נשמר). הקש ⋯ ליד מאבטח שנבחר: שילדי יום, שילדי לילה (בצהריים) ו"אחרונה" (הקשה חוזרת מחליפה בין 🏠 ל־🌙). לשילדי לילה יש "ראשונה": הפסקה באיקס האחרון לפני שהוא ממשיך ללילה, והיא לא נספרת באחרונות.</p></div></div>
 <div class="hs"><b>4</b><div><h4>כניסות ועמדות</h4><p>בכרטיס "כניסות" הקש על 24/25/29 כדי לקבוע אם צריך מוסמך, ואפשר לקבוע שעה שממנה כבר לא צריך. בהגדרות מתקדמות אפשר להוריד עמדה או להגדיר סנ"ח.</p></div></div>
 <div class="hs"><b>5</b><div><h4>בונים סידור</h4><p>לחץ "בנה סידור" והסידור מופיע בלשונית "סידור".</p></div></div>
 <div class="hs"><b>6</b><div><h4>משהו השתנה באמצע?</h4><p>בלשונית "סידור" תחת "שינויים באמצע משמרת": מאבטח שיוצא וחוזר, מצטרף באמצע, או הוספת עמדה. הסידור נבנה מחדש.</p></div></div>
@@ -312,9 +312,9 @@ monthCheck();
 const A=curMode==='a';
 const vis=roster.filter(n=>!srch||n.includes(srch));
 const on=vis.filter(n=>!off.has(n)).sort(he),no=vis.filter(n=>off.has(n)).sort(he);
-const row=n=>{const s=!off.has(n),e=esc(n),open=s&&OPEN===n,lst=fin.has(n),blk=(!A&&LNG.has(n))||JOIN.has(n);
-const tags=s?`${LNG.has(n)?'<span class="tag">שילדי יום</span>':''}${JOIN.has(n)?'<span class="tag j">שילדי לילה</span>':''}${lst?`<span class="tag l">אחרונה ${NITE.has(n)?'🌙':'🏠'}</span>`:''}`:'';
-const pl=open?`<div class="pl"><button class="tg f${LNG.has(n)?' on':''}" data-n="${e}" data-k="l">שילדי יום</button>${A?`<button class="tg f${JOIN.has(n)?' on':''}" data-n="${e}" data-k="j">שילדי לילה</button>`:''}<button class="tg f${lst?' on':''}" data-n="${e}" data-k="t"${blk?' disabled':''}>${lst?(NITE.has(n)?'אחרונה 🌙':'אחרונה 🏠'):'אחרונה'}</button></div>`:'';
+const row=n=>{const s=!off.has(n),e=esc(n),open=s&&OPEN===n,lst=fin.has(n),blk=(!A&&LNG.has(n));
+const tags=s?`${LNG.has(n)?'<span class="tag">שילדי יום</span>':''}${JOIN.has(n)?'<span class="tag j">שילדי לילה</span>':''}${lst?(JOIN.has(n)?'<span class="tag l">ראשונה 🌙</span>':`<span class="tag l">אחרונה ${NITE.has(n)?'🌙':'🏠'}</span>`):''}`:'';
+const pl=open?`<div class="pl"><button class="tg f${LNG.has(n)?' on':''}" data-n="${e}" data-k="l">שילדי יום</button>${A?`<button class="tg f${JOIN.has(n)?' on':''}" data-n="${e}" data-k="j">שילדי לילה</button>`:''}<button class="tg f${lst?' on':''}" data-n="${e}" data-k="t"${blk?' disabled':''}>${JOIN.has(n)?(lst?'ראשונה 🌙':'ראשונה'):(lst?(NITE.has(n)?'אחרונה 🌙':'אחרונה 🏠'):'אחרונה')}</button></div>`:'';
 return `<div class="g${s?'':' off'}"><button class="nm" data-n="${e}" data-k="p"><span class="ck">${s?'✓':''}</span>${e}</button><button class="star${cert.has(n)?' on':''}" data-n="${e}" data-k="c" aria-label="מוסמך">${cert.has(n)?'★':'☆'}</button><button class="star dal${DAL.has(n)?' on':''}" data-n="${e}" data-k="d" aria-label="דאלס" title="דאלס (נהיגה ברכב)">🚗</button>${tags}<span class="sp"></span>${s?`<button class="mn" data-n="${e}" data-k="m" aria-label="אפשרויות">${open?'▴':'⋯'}</button>`:''}${edMode?`<button class="tg" data-n="${e}" data-k="x">✕</button>`:''}${pl}</div>`};
 $('chips').innerHTML=(on.map(row).join('')+(on.length&&no.length?'<p class="sec">לא במשמרת</p>':'')+no.map(row).join(''))||(srch?'<p class="hint">אין מאבטח כזה במאגר. הקש "הוסף" כדי להוסיף אותו.</p>':'<p class="hint">המאגר ריק. כתוב שם למעלה והקש "הוסף".</p>');
 const k=names().length;$('cnt').textContent='נבחרו '+k+' מתוך '+roster.length;$('go').textContent=k?'בנה סידור ('+k+' מאבטחים)':'בנה סידור';
@@ -325,6 +325,7 @@ else if(k==='p'){if(off.has(n))off.delete(n);else{off.add(n);if(OPEN===n)OPEN=nu
 else if(k==='l'){if(LNG.has(n))LNG.delete(n);else{LNG.add(n);JOIN.delete(n);if(curMode==='m'){fin.delete(n);NITE.delete(n)}}}
 else if(k==='m'){OPEN=OPEN===n?null:n}
 else if(k==='j'){if(JOIN.has(n))JOIN.delete(n);else{JOIN.add(n);LNG.delete(n);fin.delete(n);NITE.delete(n)}}
+else if(k==='t'&&JOIN.has(n)){if(fin.has(n)){fin.delete(n);NITE.delete(n)}else{fin.add(n);NITE.add(n)}}
 else if(k==='t'){if(!fin.has(n))fin.add(n);else if(!NITE.has(n))NITE.add(n);else{fin.delete(n);NITE.delete(n)}}
 else if(k==='d'){DAL.has(n)?DAL.delete(n):DAL.add(n)}
 else{cert.has(n)?cert.delete(n):cert.add(n)}
@@ -353,7 +354,7 @@ $('rok').onclick=()=>{if(!$('rtm').value)return;$($('rsel').value).value=$('rtm'
 
 $('lminus').onclick=()=>{nL=Math.max(1,nL-1);$('lcount').textContent=nL};
 $('lplus').onclick=()=>{nL=Math.min(10,nL+1);$('lcount').textContent=nL};
-$('lsug').onclick=()=>{const pool=names().filter(n=>curMode==='a'||!LNG.has(n)).sort(()=>Math.random()-.5).sort((a,b)=>(hist[a]||0)-(hist[b]||0));fin.clear();NITE.clear();pool.slice(0,nL).forEach(n=>fin.add(n));chips();save()};
+$('lsug').onclick=()=>{const pool=names().filter(n=>!JOIN.has(n)&&(curMode==='a'||!LNG.has(n))).sort(()=>Math.random()-.5).sort((a,b)=>(hist[a]||0)-(hist[b]||0));[...fin].forEach(x=>{if(!JOIN.has(x)){fin.delete(x);NITE.delete(x)}});pool.slice(0,nL).forEach(n=>fin.add(n));chips();save()};
 $('hreset').onclick=()=>{if(!rstArm){rstArm=true;$('hreset').textContent='בטוח? לחץ שוב לאיפוס';setTimeout(()=>{rstArm=false;$('hreset').textContent='איפוס ההיסטוריה'},4000);return}
 Object.keys(hist).forEach(k=>delete hist[k]);recd=null;rstArm=false;$('hreset').textContent='איפוס ההיסטוריה';chips();save()};
 
@@ -603,7 +604,7 @@ const t=T0+' · '+d.getDate()+'.'+(d.getMonth()+1)+'.'+d.getFullYear()+' · '+(c
 L.unshift({k,d:d.getDate()+'.'+(d.getMonth()+1),m:curMode==='m'?'בוקר':'צהריים',t});localStorage.setItem('shiftHist',JSON.stringify(L.slice(0,14)))}catch(e){}histUI()}
 function histUI(){const L=histGet();$('hist2').innerHTML=L.length?`<details class="card hh"><summary>🗂️ סידורים קודמים (${L.length})</summary>${L.map((z,i)=>`<details><summary>${esc(z.d)} · ${esc(z.m)}</summary><pre>${esc(z.t)}</pre><a class="wa" target="_blank" rel="noopener" href="${waUrl(z.t)}">שלח בווצאפ</a></details>`).join('')}</details>`:''}
 load();chips();gatesUI();setLogo();histUI();['r4','r5','r6'].forEach(id=>{$(id).oninput=gatesUI});
-const VER='19.10.2026 · גרסה 37';$('ver').textContent='גרסה: '+VER+' · אם זה נראה לך לא מעודכן, פתח את הקישור עצמו (לא עותק שמור) ורענן את הדף';let wipeArm=false;$('wipe').onclick=()=>{if(!wipeArm){wipeArm=true;$('wipe').textContent='בטוח? לחץ שוב למחיקה';setTimeout(()=>{wipeArm=false;$('wipe').textContent='🗑️ מחק את כל הנתונים במכשיר הזה'},4000);return}try{localStorage.removeItem('shiftRoster');localStorage.removeItem('shift');localStorage.removeItem('shiftPal');localStorage.removeItem('shiftHist')}catch(e){}location.reload()};pre(new Date().getHours()>=13?'a':'m',true);restoreLast();setInterval(tick,30000);
+const VER='19.10.2026 · גרסה 38';$('ver').textContent='גרסה: '+VER+' · אם זה נראה לך לא מעודכן, פתח את הקישור עצמו (לא עותק שמור) ורענן את הדף';let wipeArm=false;$('wipe').onclick=()=>{if(!wipeArm){wipeArm=true;$('wipe').textContent='בטוח? לחץ שוב למחיקה';setTimeout(()=>{wipeArm=false;$('wipe').textContent='🗑️ מחק את כל הנתונים במכשיר הזה'},4000);return}try{localStorage.removeItem('shiftRoster');localStorage.removeItem('shift');localStorage.removeItem('shiftPal');localStorage.removeItem('shiftHist')}catch(e){}location.reload()};pre(new Date().getHours()>=13?'a':'m',true);restoreLast();setInterval(tick,30000);
 
 
 (function(){const sp=document.getElementById('splash');if(!sp)return;let seen=false;try{seen=!!sessionStorage.getItem('splashSeen')}catch(e){}
