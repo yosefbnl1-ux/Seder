@@ -383,7 +383,7 @@ let need=0;
 if(isL[s]){const left=isL.slice(s).filter(Boolean).length;const U=G.filter(x=>st[x].ate<0).length;need=Math.ceil(U/left)}
 nb=Math.min(n,Math.max(nb,need));
 const lim=Math.max(0,C-act.filter(p=>p.cert).length);let cb=0;const dN=act.filter(p=>p.dal).length,limD=Math.max(0,Dc-dN);let db=0;const br=[];
-const srt=a=>a.slice().sort((a,b)=>st[a].br-st[b].br||st[a].lb-st[b].lb||Math.random()-.5);
+const srt=a=>a.slice().sort((a,b)=>(st[a].br-(st[a].run>=2?1:0))-(st[b].br-(st[b].run>=2?1:0))||st[a].br-st[b].br||st[a].lb-st[b].lb||Math.random()-.5);
 const nl=x=>fin.has(x)&&!nol.has(x)&&win[x][1]===s+2;
 const snAct=!!act.find(p=>p.id==='סנח'),keepP=x=>!(snAct&&st[x].lp==='סיור'&&G.filter(y=>st[y].lp==='סיור'&&!br.includes(y)).length<=1),ok=x=>(!cert.has(x)||cb<lim)&&(!DAL.has(x)||db<limD)&&st[x].lb!==s-1&&!nl(x)&&keepP(x),ok2=x=>(!cert.has(x)||cb<lim)&&(!DAL.has(x)||db<limD)&&!nl(x),ok3=x=>(!cert.has(x)||cb<lim)&&(!DAL.has(x)||db<limD);
 const take=x=>{br.push(x);if(cert.has(x))cb++;if(DAL.has(x))db++;if(st[x].lb===s-1)DB++};fz.forEach(take);const PB=(s===0&&W.first)?G.filter(x=>W.first.has(x)):[];for(const x of srt(PB)){if(br.length>=nb)break;if(!br.includes(x)&&(!cert.has(x)||cb<lim))take(x)}
@@ -401,7 +401,7 @@ const place=(p,res,only)=>{let best=null,bc=1e9;
 for(const x of av){if(used.has(x)||(p.cert&&!cert.has(x))||(p.dal&&!DAL.has(x))||(only&&!only(x)))continue;
 if(res&&!p.dal&&DAL.has(x)){const rd=ps.filter(q=>q.dal&&!asg[q.id]).length;if(rd&&av.filter(y=>DAL.has(y)&&!used.has(y)).length<=rd)continue}
 if(res&&!p.cert&&cert.has(x)&&av.filter(y=>cert.has(y)&&!used.has(y)).length<=needC)continue;
-const c=1.5*(st[x].pk[p.k]||0)+3*st[x][p.t]+(st[x].lp===p.k?(p.t==='sd'?-6:2):0)+(p.t==='si'&&st[x].lb===s-1?50:0)+(farMv(st[x].lp,p.k)?24:0)+(p.t==='sd'&&st[x].run>=2?30:0)+(p.t==='si'&&st[x].run>=2?-14:0)+(p.t==='si'?(st[x].lt==='sd'?-3:st[x].lt==='si'?3:0):0)+Math.random();
+const c=1.5*(st[x].pk[p.k]||0)+3*st[x][p.t]+(st[x].lp===p.k?(p.t==='sd'?-6:2):0)+(p.t==='si'&&st[x].lb===s-1?50:0)+(farMv(st[x].lp,p.k)?24:0)+(p.t==='sd'&&st[x].run>=2?400:0)+(p.t==='si'&&st[x].run>=2?-60:0)+(p.t==='si'?(st[x].lt==='sd'?-3:st[x].lt==='si'?3:0):0)+Math.random();
 if(c<bc){bc=c;best=x}}
 if(best){asg[p.id]=best;used.add(best);if(p.t==='si'&&st[best].lb===s-1)RT++}};
 const snP=ps.find(p=>p.id==='סנח');if(snP){place(snP,true,x=>st[x].lp==='סיור');if(!asg[snP.id])place(snP,true)}
@@ -435,7 +435,7 @@ const gp=(x,s)=>((W.gap||{})[x]||[]).some(([a,b])=>s>=a&&s<b),wl=x=>{let c=0;for
 const E=()=>{const c={};g.forEach(x=>c[x]={si:0,sd:0,pk:{}});let rep=0;const run={};
 rows.forEach((r,s)=>{for(const[id,x]of Object.entries(r.asg)){const q=PM[id];if(!c[x])continue;c[x][q.t]++;c[x].pk[q.k]=(c[x].pk[q.k]||0)+1;
 if(s>0){const o=rows[s-1].asg;for(const i2 in o)if(o[i2]===x&&PM[i2].k!==q.k)rep+=((PM[i2].t==='sd'&&q.t==='sd')?3:.3)+(farMv(PM[i2].k,q.k)?9:0)}}
-const sdN=new Set(Object.entries(r.asg).filter(([i])=>PM[i].t==='sd').map(([,x])=>x));g.forEach(x=>{run[x]=sdN.has(x)?(run[x]||0)+1:0;if(run[x]>=3)rep+=25})});
+const sdN=new Set(Object.entries(r.asg).filter(([i])=>PM[i].t==='sd').map(([,x])=>x));g.forEach(x=>{run[x]=sdN.has(x)?(run[x]||0)+1:0;if(run[x]>=3)rep+=80})});
 const vs=k=>{const m=g.reduce((a,x)=>a+c[x][k],0)/Wt;return g.reduce((a,x)=>a+(c[x][k]-m*wl(x))**2,0)};
 const ks={};g.forEach(x=>{for(const k in c[x].pk)ks[k]=(ks[k]||0)+c[x].pk[k]});
 let pv=0;for(const k in ks){const m=ks[k]/Wt;g.forEach(x=>{pv+=((c[x].pk[k]||0)-m*wl(x))**2})}
@@ -603,7 +603,7 @@ const t=T0+' · '+d.getDate()+'.'+(d.getMonth()+1)+'.'+d.getFullYear()+' · '+(c
 L.unshift({k,d:d.getDate()+'.'+(d.getMonth()+1),m:curMode==='m'?'בוקר':'צהריים',t});localStorage.setItem('shiftHist',JSON.stringify(L.slice(0,14)))}catch(e){}histUI()}
 function histUI(){const L=histGet();$('hist2').innerHTML=L.length?`<details class="card hh"><summary>🗂️ סידורים קודמים (${L.length})</summary>${L.map((z,i)=>`<details><summary>${esc(z.d)} · ${esc(z.m)}</summary><pre>${esc(z.t)}</pre><a class="wa" target="_blank" rel="noopener" href="${waUrl(z.t)}">שלח בווצאפ</a></details>`).join('')}</details>`:''}
 load();chips();gatesUI();setLogo();histUI();['r4','r5','r6'].forEach(id=>{$(id).oninput=gatesUI});
-const VER='19.10.2026 · גרסה 36';$('ver').textContent='גרסה: '+VER+' · אם זה נראה לך לא מעודכן, פתח את הקישור עצמו (לא עותק שמור) ורענן את הדף';let wipeArm=false;$('wipe').onclick=()=>{if(!wipeArm){wipeArm=true;$('wipe').textContent='בטוח? לחץ שוב למחיקה';setTimeout(()=>{wipeArm=false;$('wipe').textContent='🗑️ מחק את כל הנתונים במכשיר הזה'},4000);return}try{localStorage.removeItem('shiftRoster');localStorage.removeItem('shift');localStorage.removeItem('shiftPal');localStorage.removeItem('shiftHist')}catch(e){}location.reload()};pre(new Date().getHours()>=13?'a':'m',true);restoreLast();setInterval(tick,30000);
+const VER='19.10.2026 · גרסה 37';$('ver').textContent='גרסה: '+VER+' · אם זה נראה לך לא מעודכן, פתח את הקישור עצמו (לא עותק שמור) ורענן את הדף';let wipeArm=false;$('wipe').onclick=()=>{if(!wipeArm){wipeArm=true;$('wipe').textContent='בטוח? לחץ שוב למחיקה';setTimeout(()=>{wipeArm=false;$('wipe').textContent='🗑️ מחק את כל הנתונים במכשיר הזה'},4000);return}try{localStorage.removeItem('shiftRoster');localStorage.removeItem('shift');localStorage.removeItem('shiftPal');localStorage.removeItem('shiftHist')}catch(e){}location.reload()};pre(new Date().getHours()>=13?'a':'m',true);restoreLast();setInterval(tick,30000);
 
 
 (function(){const sp=document.getElementById('splash');if(!sp)return;let seen=false;try{seen=!!sessionStorage.getItem('splashSeen')}catch(e){}
