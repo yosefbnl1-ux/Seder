@@ -228,7 +228,7 @@ body{max-width:none;padding:0 0 40px}
 <details class="card help"><summary>❓ איך משתמשים?</summary><div class="hg">
 <div class="hs"><b>1</b><div><h4>בוחרים משמרת</h4><p>בוקר או צהריים. השעות והאיקסים מתעדכנים לבד.</p></div></div>
 <div class="hs"><b>2</b><div><h4>מסמנים מי במשמרת</h4><p>הקש על שם כדי להוסיף אותו. מי שנבחר עולה למעלה. שם חדש? כתוב בשורת החיפוש ולחץ "הוסף".</p></div></div>
-<div class="hs"><b>3</b><div><h4>מגדירים מי מיוחד</h4><p>★ ליד השם = מוסמך, 🚗 = דאלס (הקש להחלפה, זה נשמר). הקש ⋯ ליד מאבטח שנבחר: שילדי יום, שילדי לילה (בצהריים) ו"אחרונה" (הקשה חוזרת מחליפה בין 🏠 ל־🌙). לשילדי לילה יש "ראשונה": הפסקה באיקס האחרון לפני שהוא ממשיך ללילה, והיא לא נספרת באחרונות.</p></div></div>
+<div class="hs"><b>3</b><div><h4>מגדירים מי מיוחד</h4><p>★ ליד השם = מוסמך, 🚗 = דאלס (הקש להחלפה, זה נשמר). הקש ⋯ ליד מאבטח שנבחר: שילדי יום, שילדי לילה (בצהריים) ו"אחרונה". לשילדי לילה יש "ראשונה": הפסקה באיקס האחרון לפני שהוא ממשיך ללילה, והיא לא נספרת באחרונות.</p></div></div>
 <div class="hs"><b>4</b><div><h4>כניסות ועמדות</h4><p>בכרטיס "כניסות" הקש על 24/25/29 כדי לקבוע אם צריך מוסמך, ואפשר לקבוע שעה שממנה כבר לא צריך. בהגדרות מתקדמות אפשר להוריד עמדה או להגדיר סנ"ח.</p></div></div>
 <div class="hs"><b>5</b><div><h4>בונים סידור</h4><p>לחץ "בנה סידור" והסידור מופיע בלשונית "סידור".</p></div></div>
 <div class="hs"><b>6</b><div><h4>משהו השתנה באמצע?</h4><p>בלשונית "סידור" תחת "שינויים באמצע משמרת": מאבטח שיוצא וחוזר, מצטרף באמצע, או הוספת עמדה. הסידור נבנה מחדש.</p></div></div>
@@ -313,8 +313,8 @@ const A=curMode==='a';
 const vis=roster.filter(n=>!srch||n.includes(srch));
 const on=vis.filter(n=>!off.has(n)).sort(he),no=vis.filter(n=>off.has(n)).sort(he);
 const row=n=>{const s=!off.has(n),e=esc(n),open=s&&OPEN===n,lst=fin.has(n),blk=(!A&&LNG.has(n));
-const tags=s?`${LNG.has(n)?'<span class="tag">שילדי יום</span>':''}${JOIN.has(n)?'<span class="tag j">שילדי לילה</span>':''}${lst?(JOIN.has(n)?'<span class="tag l">ראשונה 🌙</span>':`<span class="tag l">אחרונה ${NITE.has(n)?'🌙':'🏠'}</span>`):''}`:'';
-const pl=open?`<div class="pl"><button class="tg f${LNG.has(n)?' on':''}" data-n="${e}" data-k="l">שילדי יום</button>${A?`<button class="tg f${JOIN.has(n)?' on':''}" data-n="${e}" data-k="j">שילדי לילה</button>`:''}<button class="tg f${lst?' on':''}" data-n="${e}" data-k="t"${blk?' disabled':''}>${JOIN.has(n)?(lst?'ראשונה 🌙':'ראשונה'):(lst?(NITE.has(n)?'אחרונה 🌙':'אחרונה 🏠'):'אחרונה')}</button></div>`:'';
+const tags=s?`${LNG.has(n)?'<span class="tag">שילדי יום</span>':''}${JOIN.has(n)?'<span class="tag j">שילדי לילה</span>':''}${lst?(JOIN.has(n)?'<span class="tag l">ראשונה 🌙</span>':'<span class="tag l">אחרונה 🏠</span>'):''}`:'';
+const pl=open?`<div class="pl"><button class="tg f${LNG.has(n)?' on':''}" data-n="${e}" data-k="l">שילדי יום</button>${A?`<button class="tg f${JOIN.has(n)?' on':''}" data-n="${e}" data-k="j">שילדי לילה</button>`:''}<button class="tg f${lst?' on':''}" data-n="${e}" data-k="t"${blk?' disabled':''}>${JOIN.has(n)?(lst?'ראשונה 🌙':'ראשונה'):(lst?'אחרונה 🏠':'אחרונה')}</button></div>`:'';
 return `<div class="g${s?'':' off'}"><button class="nm" data-n="${e}" data-k="p"><span class="ck">${s?'✓':''}</span>${e}</button><button class="star${cert.has(n)?' on':''}" data-n="${e}" data-k="c" aria-label="מוסמך">${cert.has(n)?'★':'☆'}</button><button class="star dal${DAL.has(n)?' on':''}" data-n="${e}" data-k="d" aria-label="דאלס" title="דאלס (נהיגה ברכב)">🚗</button>${tags}<span class="sp"></span>${s?`<button class="mn" data-n="${e}" data-k="m" aria-label="אפשרויות">${open?'▴':'⋯'}</button>`:''}${edMode?`<button class="tg" data-n="${e}" data-k="x">✕</button>`:''}${pl}</div>`};
 $('chips').innerHTML=(on.map(row).join('')+(on.length&&no.length?'<p class="sec">לא במשמרת</p>':'')+no.map(row).join(''))||(srch?'<p class="hint">אין מאבטח כזה במאגר. הקש "הוסף" כדי להוסיף אותו.</p>':'<p class="hint">המאגר ריק. כתוב שם למעלה והקש "הוסף".</p>');
 const k=names().length;$('cnt').textContent='נבחרו '+k+' מתוך '+roster.length;$('go').textContent=k?'בנה סידור ('+k+' מאבטחים)':'בנה סידור';
@@ -326,13 +326,13 @@ else if(k==='l'){if(LNG.has(n))LNG.delete(n);else{LNG.add(n);JOIN.delete(n);if(c
 else if(k==='m'){OPEN=OPEN===n?null:n}
 else if(k==='j'){if(JOIN.has(n))JOIN.delete(n);else{JOIN.add(n);LNG.delete(n);fin.delete(n);NITE.delete(n)}}
 else if(k==='t'&&JOIN.has(n)){if(fin.has(n)){fin.delete(n);NITE.delete(n)}else{fin.add(n);NITE.add(n)}}
-else if(k==='t'){if(!fin.has(n))fin.add(n);else if(!NITE.has(n))NITE.add(n);else{fin.delete(n);NITE.delete(n)}}
+else if(k==='t'){if(fin.has(n)){fin.delete(n);NITE.delete(n)}else fin.add(n)}
 else if(k==='d'){DAL.has(n)?DAL.delete(n):DAL.add(n)}
 else{cert.has(n)?cert.delete(n):cert.add(n)}
 chips();save()})}
 function save(){try{localStorage.setItem('shiftRoster',JSON.stringify({r:roster,c:[...cert],dl:[...DAL],f:[...fin],fd:today(),o:[...off],h:hist,rc:recd,lg:[...LNG],jn:[...JOIN],nt:[...NITE],gt:GATES,mo:MO}))}catch(e){}}
 function load(){try{const d=JSON.parse(localStorage.getItem('shiftRoster')||'null');
-if(d){roster=d.r||[];(d.c||[]).forEach(x=>cert.add(x));(d.dl||[]).forEach(x=>DAL.add(x));if(d.fd===today()){(d.f||[]).forEach(x=>fin.add(x));(d.lg||[]).forEach(x=>LNG.add(x));(d.jn||[]).forEach(x=>JOIN.add(x));(d.nt||[]).forEach(x=>NITE.add(x))}(d.o||[]).forEach(x=>off.add(x));Object.assign(hist,d.h||{});if(d.gt)Object.assign(GATES,d.gt);recd=d.rc||null;MO=d.mo||mk();roster.sort(he);monthCheck()}
+if(d){roster=d.r||[];(d.c||[]).forEach(x=>cert.add(x));(d.dl||[]).forEach(x=>DAL.add(x));if(d.fd===today()){(d.f||[]).forEach(x=>fin.add(x));(d.lg||[]).forEach(x=>LNG.add(x));(d.jn||[]).forEach(x=>JOIN.add(x));(d.nt||[]).forEach(x=>NITE.add(x));[...NITE].forEach(x=>{if(!JOIN.has(x))NITE.delete(x)})}(d.o||[]).forEach(x=>off.add(x));Object.assign(hist,d.h||{});if(d.gt)Object.assign(GATES,d.gt);recd=d.rc||null;MO=d.mo||mk();roster.sort(he);monthCheck()}
 else{const o=JSON.parse(localStorage.getItem('shift')||'null');if(o){roster=[...new Set((o.n||'').split('\n').map(z=>z.trim()).filter(Boolean))];(o.c||[]).forEach(x=>cert.add(x))}}}catch(e){}}
 function addNames(t){t.split('\n').map(z=>z.trim()).filter(Boolean).forEach(l=>{const m=l.match(/^(.*?)\s*([*!]*)$/),n=m[1].trim();if(!n)return;if(!roster.includes(n))roster.push(n);if(m[2].includes('*'))cert.add(n);if(m[2].includes('!'))fin.add(n)});roster.sort(he)}
 $('addl').onclick=()=>{addNames($('names').value);$('names').value='';chips();save()};
@@ -604,7 +604,7 @@ const t=T0+' · '+d.getDate()+'.'+(d.getMonth()+1)+'.'+d.getFullYear()+' · '+(c
 L.unshift({k,d:d.getDate()+'.'+(d.getMonth()+1),m:curMode==='m'?'בוקר':'צהריים',t});localStorage.setItem('shiftHist',JSON.stringify(L.slice(0,14)))}catch(e){}histUI()}
 function histUI(){const L=histGet();$('hist2').innerHTML=L.length?`<details class="card hh"><summary>🗂️ סידורים קודמים (${L.length})</summary>${L.map((z,i)=>`<details><summary>${esc(z.d)} · ${esc(z.m)}</summary><pre>${esc(z.t)}</pre><a class="wa" target="_blank" rel="noopener" href="${waUrl(z.t)}">שלח בווצאפ</a></details>`).join('')}</details>`:''}
 load();chips();gatesUI();setLogo();histUI();['r4','r5','r6'].forEach(id=>{$(id).oninput=gatesUI});
-const VER='19.10.2026 · גרסה 38';$('ver').textContent='גרסה: '+VER+' · אם זה נראה לך לא מעודכן, פתח את הקישור עצמו (לא עותק שמור) ורענן את הדף';let wipeArm=false;$('wipe').onclick=()=>{if(!wipeArm){wipeArm=true;$('wipe').textContent='בטוח? לחץ שוב למחיקה';setTimeout(()=>{wipeArm=false;$('wipe').textContent='🗑️ מחק את כל הנתונים במכשיר הזה'},4000);return}try{localStorage.removeItem('shiftRoster');localStorage.removeItem('shift');localStorage.removeItem('shiftPal');localStorage.removeItem('shiftHist')}catch(e){}location.reload()};pre(new Date().getHours()>=13?'a':'m',true);restoreLast();setInterval(tick,30000);
+const VER='19.10.2026 · גרסה 39';$('ver').textContent='גרסה: '+VER+' · אם זה נראה לך לא מעודכן, פתח את הקישור עצמו (לא עותק שמור) ורענן את הדף';let wipeArm=false;$('wipe').onclick=()=>{if(!wipeArm){wipeArm=true;$('wipe').textContent='בטוח? לחץ שוב למחיקה';setTimeout(()=>{wipeArm=false;$('wipe').textContent='🗑️ מחק את כל הנתונים במכשיר הזה'},4000);return}try{localStorage.removeItem('shiftRoster');localStorage.removeItem('shift');localStorage.removeItem('shiftPal');localStorage.removeItem('shiftHist')}catch(e){}location.reload()};pre(new Date().getHours()>=13?'a':'m',true);restoreLast();setInterval(tick,30000);
 
 
 (function(){const sp=document.getElementById('splash');if(!sp)return;let seen=false;try{seen=!!sessionStorage.getItem('splashSeen')}catch(e){}
