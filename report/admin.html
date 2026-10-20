@@ -35,6 +35,10 @@ label.f{display:block;font-weight:700;font-size:.85rem;margin:10px 0 4px;color:#
 .stat b{display:block;font-size:1.7rem;line-height:1.1;color:var(--ink);font-variant-numeric:tabular-nums}
 .stat span{color:var(--mut);font-size:.85rem;font-weight:600}
 .stat.bad b{color:var(--bad)}
+button.stat{font:inherit;text-align:right;cursor:pointer;position:relative}
+button.stat::after{content:"‹";position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:1.6rem;color:#a9b6c6}
+button.stat:hover{border-color:var(--acc);background:#f6f9fd}
+button.stat.on{border-color:var(--ink);box-shadow:0 0 0 2px var(--ink) inset}
 .filters{display:grid;grid-template-columns:2fr 1fr 1fr 1fr auto;gap:10px;align-items:end;margin-bottom:12px}
 .folders{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px}
 .folder{display:flex;align-items:center;gap:12px;text-align:right;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 16px;min-height:76px}
@@ -106,8 +110,8 @@ dialog::backdrop{background:rgba(10,20,35,.55)}
  <div id="app" hidden>
   <div class="stats">
    <div class="stat"><b id="sAll">0</b><span>דוחות בתצוגה</span></div>
-   <div class="stat"><b id="sToday">0</b><span>דוחות היום</span></div>
-   <div class="stat bad"><b id="sBad">0</b><span>דוחות עם ליקויים</span></div>
+   <button class="stat" id="qToday" type="button"><b id="sToday">0</b><span>דוחות היום</span></button>
+   <button class="stat bad" id="qBad" type="button"><b id="sBad">0</b><span>דוחות עם ליקויים</span></button>
    <div class="stat bad"><b id="sUnrep">0</b><span>ליקויים שטרם דווחו</span></div>
   </div>
   <div class="filters">
@@ -158,13 +162,14 @@ dialog::backdrop{background:rgba(10,20,35,.55)}
 <script>
 const st=document.createElement('style');st.textContent=REPORT_CSS;document.head.appendChild(st);
 SHIFTS.forEach(s=>$('fShift').add(new Option(s,s)));$('fShift').add(new Option(OTHER,OTHER));
-let ALL=[],VIEW=[],sel=new Set(),cur=null,curMonth=null;
+let ALL=[],VIEW=[],sel=new Set(),cur=null,curMonth=null,quickBad=false;
 // תיקייה לכל חודש לפי תאריך הדוח
 const monthOf=r=>(r.date||'').slice(0,7);
 const monthName=m=>{const[y,mo]=m.split('-');return new Date(+y,mo-1,1).toLocaleDateString('he-IL',{month:'long',year:'numeric'})};
 const fileTag=()=>curMonth||[$('from').value,$('to').value].filter(Boolean).join('_to_')||todayISO();
 
 const defects=r=>r.defects??badList(r).length;
+const hasIssue=r=>defects(r)>0||r.status==='reported'||r.status==='unreported';
 function statusTag(r){
   const n=defects(r);
   if(r.status==='unreported')return'<span class="tag bad">טרם דווח</span>';
@@ -172,12 +177,14 @@ function statusTag(r){
   return n?'<span class="tag warn">ליקויים</span>':'<span class="tag ok">תקין</span>'}
 function render(){
   const q=$('q').value.trim().toLowerCase(),f=$('from').value,t=$('to').value,sh=$('fShift').value,ob=$('onlyBad').checked;
-  const base=ALL.filter(r=>(!f||r.date>=f)&&(!t||r.date<=t)&&(!sh||(sh===OTHER?!SHIFTS.includes(r.shift):r.shift===sh))&&(!ob||defects(r)||r.status!=='ok')
+  const base=ALL.filter(r=>(!f||r.date>=f)&&(!t||r.date<=t)&&(!sh||(sh===OTHER?!SHIFTS.includes(r.shift):r.shift===sh))&&(!ob||hasIssue(r))
     &&(!q||[r.vehicle,r.giver,r.receiver,r.vNotes,r.details,r.reportedTo].join(' ').toLowerCase().includes(q)));
   // בלי חודש נבחר ובלי חיפוש/תאריכים - מציגים תיקיות; חיפוש ותאריכים מחפשים בכל החודשים
-  const folderMode=!curMonth&&!q&&!f&&!t;
+  const today=f&&f===todayISO()&&t===f,allBad=ob&&quickBad;
+  const folderMode=!curMonth&&!q&&!f&&!t&&!allBad;
+  $('qToday').classList.toggle('on',!!today&&!curMonth);$('qBad').classList.toggle('on',allBad&&!curMonth);
   $('folders').hidden=!folderMode;$('listWrap').hidden=folderMode;$('crumbs').hidden=folderMode;
-  $('crumbName').textContent=curMonth?monthName(curMonth):(f||t)?`דוחות ${f?'מ-'+fmtDate(f):''} ${t?'עד '+fmtDate(t):''}`.trim():'תוצאות חיפוש בכל החודשים';
+  $('crumbName').textContent=curMonth?monthName(curMonth):today?'דוחות היום':allBad&&!f&&!t?'כל הדוחות עם ליקויים':(f||t)?`דוחות ${f?'מ-'+fmtDate(f):''} ${t?'עד '+fmtDate(t):''}`.trim():'תוצאות חיפוש בכל החודשים';
   const groups={};base.forEach(r=>{(groups[monthOf(r)]??=[]).push(r)});
   $('folders').innerHTML=Object.keys(groups).sort().reverse().map(m=>{const L=groups[m],nb=L.filter(r=>defects(r)).length;
     return`<button class="folder" data-month="${esc(m)}"><span class="ic">📁</span><div><b>${esc(monthName(m))}</b><span>${L.length} דוחות</span>${nb?` · <span class="bd">${nb} עם ליקויים</span>`:''}</div></button>`}).join('');
@@ -186,7 +193,7 @@ function render(){
     .sort((a,b)=>(b.date+b.time).localeCompare(a.date+a.time)||b.createdAt-a.createdAt);
   const ids=new Set(VIEW.map(r=>r.id));sel.forEach(id=>{if(!ids.has(id))sel.delete(id)});
   $('sAll').textContent=VIEW.length;$('sToday').textContent=ALL.filter(r=>r.date===todayISO()).length;
-  $('sBad').textContent=VIEW.filter(r=>defects(r)).length;$('sUnrep').textContent=VIEW.filter(r=>r.status==='unreported').length;
+  $('sBad').textContent=VIEW.filter(hasIssue).length;$('sUnrep').textContent=VIEW.filter(r=>r.status==='unreported').length;
   $('rows').innerHTML=VIEW.map(r=>`<tr data-id="${esc(r.id)}">
    <td class="cb"><input type="checkbox" data-sel="${esc(r.id)}" ${sel.has(r.id)?'checked':''} aria-label="בחירה"></td>
    <td class="num"><b>${fmtDate(r.date)}</b> ${esc(r.time)}</td><td data-l="משמרת">${esc(r.shift)}</td>
@@ -199,7 +206,11 @@ function render(){
   $('all').checked=VIEW.length>0&&sel.size===VIEW.length}
 ['q','from','to','fShift','onlyBad'].forEach(id=>$(id).addEventListener('input',render));
 $('folders').addEventListener('click',e=>{const f=e.target.closest('[data-month]');if(!f)return;curMonth=f.dataset.month;sel.clear();render();scrollTo(0,0)});
-$('back').onclick=()=>{curMonth=null;$('q').value=$('from').value=$('to').value='';sel.clear();render()};
+$('back').onclick=()=>{curMonth=null;quickBad=false;$('onlyBad').checked=false;$('q').value=$('from').value=$('to').value='';sel.clear();render()};
+// לחיצה על הכרטיסים למעלה: דוחות היום / כל הדוחות עם ליקויים (מכל החודשים)
+$('qToday').onclick=()=>{curMonth=null;quickBad=false;$('onlyBad').checked=false;$('q').value='';$('from').value=$('to').value=todayISO();sel.clear();render();scrollTo(0,0)};
+$('qBad').onclick=()=>{curMonth=null;quickBad=true;$('onlyBad').checked=true;$('q').value=$('from').value=$('to').value='';sel.clear();render();scrollTo(0,0)};
+$('onlyBad').addEventListener('change',()=>{if(!$('onlyBad').checked)quickBad=false});
 $('all').onchange=()=>{sel=new Set($('all').checked?VIEW.map(r=>r.id):[]);render()};
 $('rows').addEventListener('click',e=>{
   const c=e.target.closest('[data-sel]');
