@@ -412,7 +412,7 @@ const place=(p,res,only)=>{let best=null,bc=1e9;
 for(const x of av){if(used.has(x)||(p.cert&&!cert.has(x))||(p.dal&&!DAL.has(x))||(only&&!only(x)))continue;
 if(res&&!p.dal&&DAL.has(x)){const rd=ps.filter(q=>q.dal&&!asg[q.id]).length;if(rd&&av.filter(y=>DAL.has(y)&&!used.has(y)).length<=rd)continue}
 if(res&&!p.cert&&cert.has(x)&&av.filter(y=>cert.has(y)&&!used.has(y)).length<=needC)continue;
-const c=1.5*(st[x].pk[p.k]||0)+3*st[x][p.t]+(st[x].lp===p.k?(p.t==='sd'?-6:2):0)+(p.t==='si'&&st[x].lb===s-1?50:0)+(farMv(st[x].lp,p.k)?24:0)+(p.t==='sd'&&st[x].run>=2?400:0)+(p.t==='si'&&st[x].run>=2?-60:0)+(p.t==='si'?(st[x].lt==='sd'?-3:st[x].lt==='si'?3:0):0)+Math.random();
+const c=1.5*(st[x].pk[p.k]||0)+3*st[x][p.t]+(st[x].lp===p.k?(p.t==='sd'?-6:2):0)+(p.t==='si'&&st[x].lb===s-1?50:0)+(farMv(st[x].lp,p.k)?24:0)+(p.t==='sd'&&st[x].run>=2?400:0)+(p.t==='si'&&st[x].run>=2?-60:0)+(p.t==='si'?(st[x].lt==='sd'?-3:st[x].lt==='si'?SITSIT:0):0)+Math.random();
 if(c<bc){bc=c;best=x}}
 if(best){asg[p.id]=best;used.add(best);if(p.t==='si'&&st[best].lb===s-1)RT++}};
 const snP=ps.find(p=>p.id==='סנח');if(snP){place(snP,true,x=>st[x].lp==='סיור');if(!asg[snP.id])place(snP,true)}
@@ -436,17 +436,17 @@ const score=6*rng(nv('si'))+2*rng(nv('sd'))+4*rng(nv('br'))+3*Math.abs(avg(cv)-a
 return{rows,st,score,uneaten,miss}}
 
 const PM={};POS.forEach(q=>PM[q.id]=q);
-let EXTRA=[];const FAR=new Set(['23','27','29']);let FARON=true;try{FARON=localStorage.getItem('shiftFar')!=='0'}catch(e){}
+let EXTRA=[];let SITSIT=40,SITPOL=30;const FAR=new Set(['23','27','29']);let FARON=true;try{FARON=localStorage.getItem('shiftFar')!=='0'}catch(e){}
 const farMv=(a,b)=>FARON&&a&&b&&((a==='סיור'&&FAR.has(b))||(b==='סיור'&&FAR.has(a)));
 function regExtra(x){const q={id:x.id,k:x.lab,t:x.t,lab:x.lab,ex:1};POS.push(q);PM[q.id]=q;DISP.push(q.id);DROP.push(q.id)}
 function clearExtra(){SPLIT=[];EXTRA.forEach(x=>{[POS,DISP,DROP].forEach(A=>{const i=A.findIndex(y=>(y.id||y)===x.id);if(i>=0)A.splice(i,1)});delete PM[x.id]});EXTRA=[]}
 function polish(best,g,f0,S,rm,W){
 if(f0>=S)return;const rows=best.rows,win=W.win;
 const gp=(x,s)=>((W.gap||{})[x]||[]).some(([a,b])=>s>=a&&s<b),wl=x=>{let c=0;for(let s=win[x][0];s<Math.min(S,win[x][1]);s++)if(!gp(x,s))c++;return Math.max(1,c)},Wt=g.reduce((a,x)=>a+wl(x),0);
-const E=()=>{const c={};g.forEach(x=>c[x]={si:0,sd:0,pk:{}});let rep=0;const run={};
+const E=()=>{const c={};g.forEach(x=>c[x]={si:0,sd:0,pk:{}});let rep=0;const run={},sr={};
 rows.forEach((r,s)=>{for(const[id,x]of Object.entries(r.asg)){const q=PM[id];if(!c[x])continue;c[x][q.t]++;c[x].pk[q.k]=(c[x].pk[q.k]||0)+1;
 if(s>0){const o=rows[s-1].asg;for(const i2 in o)if(o[i2]===x&&PM[i2].k!==q.k)rep+=((PM[i2].t==='sd'&&q.t==='sd')?3:.3)+(farMv(PM[i2].k,q.k)?9:0)}}
-const sdN=new Set(Object.entries(r.asg).filter(([i])=>PM[i].t==='sd').map(([,x])=>x));g.forEach(x=>{run[x]=sdN.has(x)?(run[x]||0)+1:0;if(run[x]>=3)rep+=80})});
+const sdN=new Set(Object.entries(r.asg).filter(([i])=>PM[i].t==='sd').map(([,x])=>x));const siN=new Set(Object.entries(r.asg).filter(([i])=>PM[i].t==='si').map(([,x])=>x));g.forEach(x=>{run[x]=sdN.has(x)?(run[x]||0)+1:0;if(run[x]>=3)rep+=80;sr[x]=siN.has(x)?(sr[x]||0)+1:0;if(sr[x]>=2)rep+=SITPOL})});
 const vs=k=>{const m=g.reduce((a,x)=>a+c[x][k],0)/Wt;return g.reduce((a,x)=>a+(c[x][k]-m*wl(x))**2,0)};
 const ks={};g.forEach(x=>{for(const k in c[x].pk)ks[k]=(ks[k]||0)+c[x].pk[k]});
 let pv=0;for(const k in ks){const m=ks[k]/Wt;g.forEach(x=>{pv+=((c[x].pk[k]||0)-m*wl(x))**2})}
@@ -622,7 +622,7 @@ const t=T0+' · '+d.getDate()+'.'+(d.getMonth()+1)+'.'+d.getFullYear()+' · '+(c
 L.unshift({k,d:d.getDate()+'.'+(d.getMonth()+1),m:curMode==='m'?'בוקר':'צהריים',t});localStorage.setItem('shiftHist',JSON.stringify(L.slice(0,14)))}catch(e){}histUI()}
 function histUI(){const L=histGet();$('hist2').innerHTML=L.length?`<details class="card hh"><summary>🗂️ סידורים קודמים (${L.length})</summary>${L.map((z,i)=>`<details><summary>${esc(z.d)} · ${esc(z.m)}</summary><pre>${esc(z.t)}</pre><a class="wa" target="_blank" rel="noopener" href="${waUrl(z.t)}">שלח בווצאפ</a></details>`).join('')}</details>`:''}
 load();chips();gatesUI();setLogo();histUI();['r4','r5','r6'].forEach(id=>{$(id).oninput=gatesUI});
-const VER='20.10.2026 · גרסה 44';$('ver').textContent='גרסה: '+VER+' · אם זה נראה לך לא מעודכן, פתח את הקישור עצמו (לא עותק שמור) ורענן את הדף';let wipeArm=false;$('wipe').onclick=()=>{if(!wipeArm){wipeArm=true;$('wipe').textContent='בטוח? לחץ שוב למחיקה';setTimeout(()=>{wipeArm=false;$('wipe').textContent='🗑️ מחק את כל הנתונים במכשיר הזה'},4000);return}try{localStorage.removeItem('shiftRoster');localStorage.removeItem('shift');localStorage.removeItem('shiftPal');localStorage.removeItem('shiftHist')}catch(e){}location.reload()};pre(new Date().getHours()>=13?'a':'m',true);restoreLast();setInterval(tick,30000);
+const VER='20.10.2026 · גרסה 45';$('ver').textContent='גרסה: '+VER+' · אם זה נראה לך לא מעודכן, פתח את הקישור עצמו (לא עותק שמור) ורענן את הדף';let wipeArm=false;$('wipe').onclick=()=>{if(!wipeArm){wipeArm=true;$('wipe').textContent='בטוח? לחץ שוב למחיקה';setTimeout(()=>{wipeArm=false;$('wipe').textContent='🗑️ מחק את כל הנתונים במכשיר הזה'},4000);return}try{localStorage.removeItem('shiftRoster');localStorage.removeItem('shift');localStorage.removeItem('shiftPal');localStorage.removeItem('shiftHist')}catch(e){}location.reload()};pre(new Date().getHours()>=13?'a':'m',true);restoreLast();setInterval(tick,30000);
 
 
 (function(){const sp=document.getElementById('splash');if(!sp)return;let seen=false;try{seen=!!sessionStorage.getItem('splashSeen')}catch(e){}
