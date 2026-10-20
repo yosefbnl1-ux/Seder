@@ -249,7 +249,7 @@ body{max-width:none;padding:0 0 40px}
 <details class="card" id="mand"><summary>✋ שיבוץ ידני לאיקס הראשון <span id="mans" style="font-weight:400;color:var(--mut)"></span></summary><p class="hint" style="margin:10px 0">אופציונלי. בחר מי עומד בכל עמדה באיקס הראשון, והאפליקציה תסדר את כל האיקסים שאחריו. מי שלא שובץ יוצא להפסקה באיקס הראשון.</p><div class="mang" id="mang"></div><button class="btn2" id="manc" type="button" style="margin-top:10px">נקה שיבוץ ידני</button></details>
 <details class="card adv"><summary>⚙️ הגדרות מתקדמות</summary>
 <div class="advg">
-<div><h3>🚨 הקפצת כונן שילדי</h3><p class="hint" id="kinfo" style="margin:4px 0 8px"></p><div class="row" id="krow"><select id="ksel"></select><button class="btn2" id="kgo" type="button">הקפץ</button></div></div>
+<div><h3>🚨 הקפצת כונן שילדי</h3><p class="hint" id="kinfo" style="margin:4px 0 8px"></p><div class="row" id="krow"><select id="ksel"></select><button class="btn2" id="kgo" type="button">הקפץ</button></div><div id="kask"></div></div>
 <div><h3>🚧 עבודות תשתית בכנסת</h3><label style="display:flex;gap:10px;align-items:flex-start;color:var(--mut);font-size:.92rem"><input type="checkbox" id="farc" checked style="margin-top:4px"><span>המעבר מסיור ל־23, 27 ו־29 ארוך עכשיו. העדף העברה מסיור ל־24, 25 ו־26 (ולהפך).</span></label></div>
 <section><h3>שעות המשמרת</h3><div class="row3">
 <div><label>תחילה</label><input type="time" id="st" value="06:50"></div>
@@ -395,8 +395,8 @@ if(isL[s]){const left=isL.slice(s).filter(Boolean).length;const U=G.filter(x=>st
 nb=Math.min(n,Math.max(nb,need));
 const lim=Math.max(0,C-act.filter(p=>p.cert).length);let cb=0;const dN=act.filter(p=>p.dal).length,limD=Math.max(0,Dc-dN);let db=0;const br=[];
 const srt=a=>a.slice().sort((a,b)=>(st[a].br-(st[a].run>=2?1:0))-(st[b].br-(st[b].run>=2?1:0))||st[a].br-st[b].br||st[a].lb-st[b].lb||Math.random()-.5);
-const nl=x=>fin.has(x)&&!nol.has(x)&&win[x][1]===s+2;
-const snAct=!!act.find(p=>p.id==='סנח'),keepP=x=>!(snAct&&st[x].lp==='סיור'&&G.filter(y=>st[y].lp==='סיור'&&!br.includes(y)).length<=1),ok=x=>(!cert.has(x)||cb<lim)&&(!DAL.has(x)||db<limD)&&st[x].lb!==s-1&&!nl(x)&&keepP(x),ok2=x=>(!cert.has(x)||cb<lim)&&(!DAL.has(x)||db<limD)&&!nl(x),ok3=x=>(!cert.has(x)||cb<lim)&&(!DAL.has(x)||db<limD);
+const nl=x=>fin.has(x)&&!nol.has(x)&&win[x][1]===s+2;const nf=x=>nol.has(x)&&win[x][1]===s+1;
+const snAct=!!act.find(p=>p.id==='סנח'),keepP=x=>!(snAct&&st[x].lp==='סיור'&&G.filter(y=>st[y].lp==='סיור'&&!br.includes(y)).length<=1),ok=x=>(!cert.has(x)||cb<lim)&&(!DAL.has(x)||db<limD)&&st[x].lb!==s-1&&!nl(x)&&!nf(x)&&keepP(x),ok2=x=>(!cert.has(x)||cb<lim)&&(!DAL.has(x)||db<limD)&&!nl(x)&&!nf(x),ok3=x=>(!cert.has(x)||cb<lim)&&(!DAL.has(x)||db<limD)&&!nf(x);
 const take=x=>{br.push(x);if(cert.has(x))cb++;if(DAL.has(x))db++;if(st[x].lb===s-1)DB++};fz.forEach(take);const PB=(s===0&&W.first)?G.filter(x=>W.first.has(x)):[];for(const x of srt(PB)){if(br.length>=nb)break;if(!br.includes(x)&&(!cert.has(x)||cb<lim))take(x)}
 for(const f of [ok,ok2,ok3,x=>true])for(const x of srt(G.filter(x=>st[x].ate<0&&!br.includes(x)))){if(br.length>=need)break;if(f(x))take(x)}
 const AR=s>0?G.filter(x=>win[x][0]===s||((W.gap||{})[x]||[]).some(([,b2])=>b2===s)):[],nA=x=>!AR.includes(x);for(const f of [x=>ok(x)&&nA(x),ok,x=>ok2(x)&&nA(x),ok2,x=>ok3(x)&&nA(x),ok3])for(const x of srt(G.filter(x=>!br.includes(x)))){if(br.length>=nb)break;if(f(x))take(x)}
@@ -570,7 +570,12 @@ $('add').onclick=addName;$('nm').oninput=()=>{srch=$('nm').value.trim();chips()}
 function show(p){if(p==='setup'){remUI();gatesUI()}$('pg1').hidden=p!=='setup';$('pg2').hidden=p!=='result';$('pg3').hidden=p!=='lasts';$('n1').classList.toggle('on',p==='setup');$('n2').classList.toggle('on',p==='result');$('n3').classList.toggle('on',p==='lasts');window.scrollTo(0,0)}
 $('n1').onclick=()=>show('setup');$('n2').onclick=()=>show('result');$('n3').onclick=()=>show('lasts');
 $('farc').checked=FARON;$('farc').onchange=()=>{FARON=$('farc').checked;try{localStorage.setItem('shiftFar',FARON?'1':'0')}catch(e){}};
-$('kgo').onclick=()=>{const n=$('ksel').value;if(!n)return;const rb=summon(n);chips();if(rb)show('result')};
+$('kgo').onclick=()=>{const n=$('ksel').value;if(!n)return;const go=()=>{const rb=summon(n);chips();if(rb)show('result')};
+const S0=last&&last.mode===curMode&&curMode==='m'?last.S:0,wl=S0&&(fin.has(n)||last.best.rows[S0-1].br.includes(n));
+if(!wl){go();return}
+const c0=last.g.filter(x=>x!==n&&!LNG.has(x)&&!JOIN.has(x)&&!fin.has(x)&&!off.has(x)&&last.W.win[x]&&last.W.win[x][1]===S0),mn=Math.min(...c0.map(x=>hist[x]||0)),c=c0.filter(x=>(hist[x]||0)===mn).sort(he),box=$('kask');
+box.innerHTML=`<div style="color:var(--warn);margin:8px 0">${esc(n)} הוקפץ לשילדי, ולכן הוא לא יכול להיות אחרונה. בחר אחרונה אחרת במקומו. מוצגים רק מי שקיבלו הכי מעט אחרונות החודש (${mn}) ואינם שילדי:</div><div class="row"><select id="kpick">${c.map(x=>`<option>${esc(x)}</option>`).join('')}</select><button class="btn2" id="kok" type="button">אשר והקפץ</button></div>`;
+$('kok').onclick=()=>{const p=$('kpick').value;if(!p)return;fin.add(p);box.innerHTML='';go()}};
 $('manc').onclick=()=>{MAN={};manUI()};
 $('go').onclick=()=>{clearExtra();if(!names().length){$('gomsg').textContent='סמן לפחות מאבטח אחד שנמצא במשמרת';return}$('gomsg').textContent='';pick=null;edit=null;$('go').textContent='⏳ מחשב סידור...';setTimeout(()=>{try{build();show('result')}catch(e){$('gomsg').textContent='משהו השתבש בחישוב. נסה שוב.'}chips()},40)};
 function gatesUI(){$('gates').innerHTML=['24','25','29'].map(k=>`<button class="gate${GATES[k]?' on':''}" data-k="${k}"><b>${k}</b><small>${GATES[k]?'צריך מוסמך':'לא צריך מוסמך'}</small></button>`).join('');
@@ -617,7 +622,7 @@ const t=T0+' · '+d.getDate()+'.'+(d.getMonth()+1)+'.'+d.getFullYear()+' · '+(c
 L.unshift({k,d:d.getDate()+'.'+(d.getMonth()+1),m:curMode==='m'?'בוקר':'צהריים',t});localStorage.setItem('shiftHist',JSON.stringify(L.slice(0,14)))}catch(e){}histUI()}
 function histUI(){const L=histGet();$('hist2').innerHTML=L.length?`<details class="card hh"><summary>🗂️ סידורים קודמים (${L.length})</summary>${L.map((z,i)=>`<details><summary>${esc(z.d)} · ${esc(z.m)}</summary><pre>${esc(z.t)}</pre><a class="wa" target="_blank" rel="noopener" href="${waUrl(z.t)}">שלח בווצאפ</a></details>`).join('')}</details>`:''}
 load();chips();gatesUI();setLogo();histUI();['r4','r5','r6'].forEach(id=>{$(id).oninput=gatesUI});
-const VER='20.10.2026 · גרסה 42';$('ver').textContent='גרסה: '+VER+' · אם זה נראה לך לא מעודכן, פתח את הקישור עצמו (לא עותק שמור) ורענן את הדף';let wipeArm=false;$('wipe').onclick=()=>{if(!wipeArm){wipeArm=true;$('wipe').textContent='בטוח? לחץ שוב למחיקה';setTimeout(()=>{wipeArm=false;$('wipe').textContent='🗑️ מחק את כל הנתונים במכשיר הזה'},4000);return}try{localStorage.removeItem('shiftRoster');localStorage.removeItem('shift');localStorage.removeItem('shiftPal');localStorage.removeItem('shiftHist')}catch(e){}location.reload()};pre(new Date().getHours()>=13?'a':'m',true);restoreLast();setInterval(tick,30000);
+const VER='20.10.2026 · גרסה 43';$('ver').textContent='גרסה: '+VER+' · אם זה נראה לך לא מעודכן, פתח את הקישור עצמו (לא עותק שמור) ורענן את הדף';let wipeArm=false;$('wipe').onclick=()=>{if(!wipeArm){wipeArm=true;$('wipe').textContent='בטוח? לחץ שוב למחיקה';setTimeout(()=>{wipeArm=false;$('wipe').textContent='🗑️ מחק את כל הנתונים במכשיר הזה'},4000);return}try{localStorage.removeItem('shiftRoster');localStorage.removeItem('shift');localStorage.removeItem('shiftPal');localStorage.removeItem('shiftHist')}catch(e){}location.reload()};pre(new Date().getHours()>=13?'a':'m',true);restoreLast();setInterval(tick,30000);
 
 
 (function(){const sp=document.getElementById('splash');if(!sp)return;let seen=false;try{seen=!!sessionStorage.getItem('splashSeen')}catch(e){}
