@@ -310,7 +310,7 @@ function manRow(g,W){const asg={};for(const[id,x]of Object.entries(MAN)){const w
 function konUI(){const el=document.getElementById('ksel');if(!el)return;const all=roster.filter(n=>!off.has(n)&&!LNG.has(n)).sort(he),kk=all.filter(n=>KON.has(n)),ks=curMode==='m'?kk.concat(all.filter(n=>!KON.has(n))):kk;el.innerHTML=ks.map(n=>`<option value="${esc(n)}">${esc(n)}${KON.has(n)?' · כונן':''}</option>`).join('');$('kgo').disabled=!ks.length;el.disabled=!ks.length;$('kinfo').textContent=ks.length?(curMode==='m'?'המוקפץ נשאר כשילדי יום אחרי המשמרת. אפשר להקפיץ גם מאבטח רגיל, לא רק כונן. השיבוץ מתעדכן מהאיקס הנוכחי והעבר לא משתנה.':'הכונן מגיע ב-18:50 כשילדי לילה. הסידור נבנה מחדש מהאיקס הנוכחי.'):'אין כוננים מסומנים. מסמנים בתפריט ⋯ של מאבטח: "כונן".'}
 function summon(n){KON.delete(n);fin.delete(n);NITE.delete(n);const m=curMode;if(m==='m'){LNG.add(n);JOIN.delete(n)}else{JOIN.add(n);LNG.delete(n)}save();
 if(!last||last.mode!==m)return false;
-const W0=last.W,w2={win:{...W0.win},noLast:new Set(W0.noLast),gate:W0.gate,gap:{...(W0.gap||{})},first:W0.first},now=new Date(),nm=now.getHours()*60+now.getMinutes();let i=0;for(let k=0;k<last.S;k++)if(last.a+k*last.L>=nm){i=k;break}
+const W0=last.W,w2={win:{...W0.win},noLast:new Set(W0.noLast),gate:W0.gate,gap:{...(W0.gap||{})},first:W0.first},now=new Date(),nm=now.getHours()*60+now.getMinutes();let i=nm>last.a?last.S-1:0;for(let k=0;k<last.S;k++)if(last.a+k*last.L>=nm){i=k;break}
 let g=last.g;
 if(m==='m'){if(!g.includes(n))return false;w2.noLast.add(n)}
 else{const sw=$('sw').value?hm($('sw').value):1e9,swI=Math.max(0,Math.min(last.S,Math.ceil((sw-last.a)/last.L)));w2.win[n]=[Math.max(i,swI),last.S];if(!g.includes(n))g=[...g,n]}
@@ -573,8 +573,8 @@ $('farc').checked=FARON;$('farc').onchange=()=>{FARON=$('farc').checked;try{loca
 $('kgo').onclick=()=>{const n=$('ksel').value;if(!n)return;const go=()=>{const rb=summon(n);chips();if(rb)show('result')};
 const S0=last&&last.mode===curMode&&curMode==='m'?last.S:0,wl=S0&&(fin.has(n)||last.best.rows[S0-1].br.includes(n));
 if(!wl){go();return}
-const c0=last.g.filter(x=>x!==n&&!LNG.has(x)&&!JOIN.has(x)&&!fin.has(x)&&!off.has(x)&&last.W.win[x]&&last.W.win[x][1]===S0),mn=Math.min(...c0.map(x=>hist[x]||0)),c=c0.filter(x=>(hist[x]||0)===mn).sort(he),box=$('kask');
-box.innerHTML=`<div style="color:var(--warn);margin:8px 0">${esc(n)} הוקפץ לשילדי, ולכן הוא לא יכול להיות אחרונה. בחר אחרונה אחרת במקומו. מוצגים רק מי שקיבלו הכי מעט אחרונות החודש (${mn}) ואינם שילדי:</div><div class="row"><select id="kpick">${c.map(x=>`<option>${esc(x)}</option>`).join('')}</select><button class="btn2" id="kok" type="button">אשר והקפץ</button></div>`;
+const c0=last.g.filter(x=>x!==n&&!LNG.has(x)&&!JOIN.has(x)&&!off.has(x)&&last.W.win[x]&&last.W.win[x][1]===S0),c=c0.sort(he),box=$('kask');
+box.innerHTML=`<div style="color:var(--warn);margin:8px 0">${esc(n)} הוקפץ לשילדי, ולכן הוא לא יכול להיות אחרונה. בחר אחרונה אחרת במקומו:</div><div class="row"><select id="kpick">${c.map(x=>`<option value="${esc(x)}">${esc(x)} · אחרונות החודש: ${hist[x]||0}${fin.has(x)?' · כבר אחרונה':''}</option>`).join('')}</select><button class="btn2" id="kok" type="button">אשר והקפץ</button></div>`;
 $('kok').onclick=()=>{const p=$('kpick').value;if(!p)return;fin.add(p);box.innerHTML='';go()}};
 $('manc').onclick=()=>{MAN={};manUI()};
 $('go').onclick=()=>{clearExtra();if(!names().length){$('gomsg').textContent='סמן לפחות מאבטח אחד שנמצא במשמרת';return}$('gomsg').textContent='';pick=null;edit=null;$('go').textContent='⏳ מחשב סידור...';setTimeout(()=>{try{build();show('result')}catch(e){$('gomsg').textContent='משהו השתבש בחישוב. נסה שוב.'}chips()},40)};
@@ -622,7 +622,7 @@ const t=T0+' · '+d.getDate()+'.'+(d.getMonth()+1)+'.'+d.getFullYear()+' · '+(c
 L.unshift({k,d:d.getDate()+'.'+(d.getMonth()+1),m:curMode==='m'?'בוקר':'צהריים',t});localStorage.setItem('shiftHist',JSON.stringify(L.slice(0,14)))}catch(e){}histUI()}
 function histUI(){const L=histGet();$('hist2').innerHTML=L.length?`<details class="card hh"><summary>🗂️ סידורים קודמים (${L.length})</summary>${L.map((z,i)=>`<details><summary>${esc(z.d)} · ${esc(z.m)}</summary><pre>${esc(z.t)}</pre><a class="wa" target="_blank" rel="noopener" href="${waUrl(z.t)}">שלח בווצאפ</a></details>`).join('')}</details>`:''}
 load();chips();gatesUI();setLogo();histUI();['r4','r5','r6'].forEach(id=>{$(id).oninput=gatesUI});
-const VER='20.10.2026 · גרסה 43';$('ver').textContent='גרסה: '+VER+' · אם זה נראה לך לא מעודכן, פתח את הקישור עצמו (לא עותק שמור) ורענן את הדף';let wipeArm=false;$('wipe').onclick=()=>{if(!wipeArm){wipeArm=true;$('wipe').textContent='בטוח? לחץ שוב למחיקה';setTimeout(()=>{wipeArm=false;$('wipe').textContent='🗑️ מחק את כל הנתונים במכשיר הזה'},4000);return}try{localStorage.removeItem('shiftRoster');localStorage.removeItem('shift');localStorage.removeItem('shiftPal');localStorage.removeItem('shiftHist')}catch(e){}location.reload()};pre(new Date().getHours()>=13?'a':'m',true);restoreLast();setInterval(tick,30000);
+const VER='20.10.2026 · גרסה 44';$('ver').textContent='גרסה: '+VER+' · אם זה נראה לך לא מעודכן, פתח את הקישור עצמו (לא עותק שמור) ורענן את הדף';let wipeArm=false;$('wipe').onclick=()=>{if(!wipeArm){wipeArm=true;$('wipe').textContent='בטוח? לחץ שוב למחיקה';setTimeout(()=>{wipeArm=false;$('wipe').textContent='🗑️ מחק את כל הנתונים במכשיר הזה'},4000);return}try{localStorage.removeItem('shiftRoster');localStorage.removeItem('shift');localStorage.removeItem('shiftPal');localStorage.removeItem('shiftHist')}catch(e){}location.reload()};pre(new Date().getHours()>=13?'a':'m',true);restoreLast();setInterval(tick,30000);
 
 
 (function(){const sp=document.getElementById('splash');if(!sp)return;let seen=false;try{seen=!!sessionStorage.getItem('splashSeen')}catch(e){}
