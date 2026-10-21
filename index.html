@@ -376,10 +376,10 @@ function gen(g,S,isL,rm,fx,W){
 const win=W.win,nol=W.noLast,gate=W.gate||{'24':1,'29':1},st={};
 const gp=(x,s)=>((W.gap||{})[x]||[]).some(([a,b])=>s>=a&&s<b),pr=(x,s)=>s>=win[x][0]&&s<win[x][1]&&!gp(x,s),wl=x=>{let c=0;for(let s=win[x][0];s<Math.min(S,win[x][1]);s++)if(!gp(x,s))c++;return Math.max(1,c)};
 const isLast=(x,s)=>fin.has(x)&&!nol.has(x)&&win[x][1]===s+1;
-g.forEach(x=>st[x]={br:(fin.has(x)&&!nol.has(x))?1:0,si:0,sd:0,pk:{},ate:-1,lb:-9,lp:null,run:0});
+g.forEach(x=>st[x]={br:(fin.has(x)&&!nol.has(x))?1:0,si:0,sd:0,pk:{},ate:-1,lb:-9,lp:null,run:0,wk:0});
 const rows=fx.map(r=>({asg:{...r.asg},br:[...r.br]}));let miss=0,DB=0,RT=0;const started=new Set();
-fx.forEach((r,s)=>{for(const[id,x]of Object.entries(r.asg)){if(!st[x])continue;started.add(x);const p=POS.find(q=>q.id===id);st[x].pk[p.k]=(st[x].pk[p.k]||0)+1;st[x][p.t]++;st[x].lp=p.k;st[x].lt=p.t;st[x].run=p.t==='sd'?st[x].run+1:0}
-r.br.forEach(x=>{if(!st[x])return;started.add(x);if(!isLast(x,s))st[x].br++;st[x].lb=s;st[x].lp=null;st[x].lt=null;st[x].run=0;if(isL[s]&&st[x].ate<0)st[x].ate=s})});
+fx.forEach((r,s)=>{for(const[id,x]of Object.entries(r.asg)){if(!st[x])continue;started.add(x);const p=POS.find(q=>q.id===id);st[x].pk[p.k]=(st[x].pk[p.k]||0)+1;st[x][p.t]++;st[x].lp=p.k;st[x].lt=p.t;st[x].run=p.t==='sd'?st[x].run+1:0;st[x].wk++}
+r.br.forEach(x=>{if(!st[x])return;st[x].wk=0;started.add(x);if(!isLast(x,s))st[x].br++;st[x].lb=s;st[x].lp=null;st[x].lt=null;st[x].run=0;if(isL[s]&&st[x].ate<0)st[x].ate=s})});
 let forceBr=fx.length?(fx[fx.length-1].asg['סנח']||null):null;
 for(let s=fx.length;s<S;s++){
 const G=g.filter(x=>pr(x,s)),n=G.length,C=G.filter(x=>cert.has(x)).length;
@@ -394,7 +394,7 @@ let need=0;
 if(isL[s]){const left=isL.slice(s).filter(Boolean).length;const U=G.filter(x=>st[x].ate<0).length;need=Math.ceil(U/left)}
 nb=Math.min(n,Math.max(nb,need));
 const lim=Math.max(0,C-act.filter(p=>p.cert).length);let cb=0;const dN=act.filter(p=>p.dal).length,limD=Math.max(0,Dc-dN);let db=0;const br=[];
-const srt=a=>a.slice().sort((a,b)=>(st[a].br-(st[a].run>=2?1:0))-(st[b].br-(st[b].run>=2?1:0))||st[a].br-st[b].br||st[a].lb-st[b].lb||Math.random()-.5);
+const srt=a=>a.slice().sort((a,b)=>(((st[b].wk>=WKMAX)*2+(st[b].run>=2))-((st[a].wk>=WKMAX)*2+(st[a].run>=2)))||(st[a].br-(st[a].run>=2?1:0))-(st[b].br-(st[b].run>=2?1:0))||st[a].br-st[b].br||st[a].lb-st[b].lb||Math.random()-.5);
 const nl=x=>fin.has(x)&&!nol.has(x)&&win[x][1]===s+2;const nf=x=>nol.has(x)&&win[x][1]===s+1;
 const snAct=!!act.find(p=>p.id==='סנח'),keepP=x=>!(snAct&&st[x].lp==='סיור'&&G.filter(y=>st[y].lp==='סיור'&&!br.includes(y)).length<=1),ok=x=>(!cert.has(x)||cb<lim)&&(!DAL.has(x)||db<limD)&&st[x].lb!==s-1&&!nl(x)&&!nf(x)&&keepP(x),ok2=x=>(!cert.has(x)||cb<lim)&&(!DAL.has(x)||db<limD)&&!nl(x)&&!nf(x),ok3=x=>(!cert.has(x)||cb<lim)&&(!DAL.has(x)||db<limD)&&!nf(x);
 const take=x=>{br.push(x);if(cert.has(x))cb++;if(DAL.has(x))db++;if(st[x].lb===s-1)DB++};fz.forEach(take);const PB=(s===0&&W.first)?G.filter(x=>W.first.has(x)):[];for(const x of srt(PB)){if(br.length>=nb)break;if(!br.includes(x)&&(!cert.has(x)||cb<lim))take(x)}
@@ -408,11 +408,12 @@ for(const d of DROP){if(ps.length<=av.length)break;ps=ps.filter(p=>p.id!==d)}
 ps.sort((a,b)=>((b.cert?2:0)+(b.t==='si'?1:0))-((a.cert?2:0)+(a.t==='si'?1:0)));
 const asg={},used=new Set();
 const needC=ps.filter(p=>p.cert).length;
+const prevA=rows.length?rows[rows.length-1].asg:{},prevP={};for(const k in prevA)prevP[prevA[k]]=k;
 const place=(p,res,only)=>{let best=null,bc=1e9;
 for(const x of av){if(used.has(x)||(p.cert&&!cert.has(x))||(p.dal&&!DAL.has(x))||(only&&!only(x)))continue;
 if(res&&!p.dal&&DAL.has(x)){const rd=ps.filter(q=>q.dal&&!asg[q.id]).length;if(rd&&av.filter(y=>DAL.has(y)&&!used.has(y)).length<=rd)continue}
 if(res&&!p.cert&&cert.has(x)&&av.filter(y=>cert.has(y)&&!used.has(y)).length<=needC)continue;
-const c=1.5*(st[x].pk[p.k]||0)+3*st[x][p.t]+(st[x].lp===p.k?(p.t==='sd'?-6:2):0)+(p.t==='si'&&st[x].lb===s-1?50:0)+(farMv(st[x].lp,p.k)?24:0)+(p.t==='sd'&&st[x].run>=2?400:0)+(p.t==='si'&&st[x].run>=2?-60:0)+(p.t==='si'?(st[x].lt==='sd'?-3:st[x].lt==='si'?SITSIT:0):0)+Math.random();
+const c=1.5*(st[x].pk[p.k]||0)+3*st[x][p.t]+(st[x].lp===p.k?(p.t==='sd'?-6:2):0)+(p.t==='si'&&st[x].lb===s-1?50:0)+(farMv(st[x].lp,p.k)?24:0)+(p.t==='sd'&&st[x].run>=2?400:0)+(p.t==='si'&&st[x].run>=2?-60:0)+(p.t==='si'?(st[x].lt==='sd'?-3:st[x].lt==='si'?SITSIT:0):0)+((()=>{const y=prevA[p.id],q=prevP[x];return y&&q&&y!==x&&asg[q]===y})()?SWP:0)+Math.random();
 if(c<bc){bc=c;best=x}}
 if(best){asg[p.id]=best;used.add(best);if(p.t==='si'&&st[best].lb===s-1)RT++}};
 const snP=ps.find(p=>p.id==='סנח');if(snP){place(snP,true,x=>st[x].lp==='סיור');if(!asg[snP.id])place(snP,true)}
@@ -424,8 +425,8 @@ rest.forEach(p=>{const x=av.find(y=>!used.has(y)&&st[y].lp===p.k);if(x){asg[p.id
 rest.forEach(p=>{if(!asg[p.id])place(p,false)});
 av.forEach(x=>{if(!used.has(x))br.push(x)});
 for(const p of act)if(!asg[p.id])miss++;
-for(const [id,x] of Object.entries(asg)){const p=POS.find(q=>q.id===id);st[x].pk[p.k]=(st[x].pk[p.k]||0)+1;st[x][p.t]++;st[x].lp=p.k;st[x].lt=p.t;st[x].run=p.t==='sd'?st[x].run+1:0}
-br.forEach(x=>{if(!lastsF.includes(x))st[x].br++;st[x].lb=s;st[x].lp=null;st[x].lt=null;st[x].run=0;if(isL[s]&&st[x].ate<0)st[x].ate=s});
+for(const [id,x] of Object.entries(asg)){const p=POS.find(q=>q.id===id);st[x].pk[p.k]=(st[x].pk[p.k]||0)+1;st[x][p.t]++;st[x].lp=p.k;st[x].lt=p.t;st[x].run=p.t==='sd'?st[x].run+1:0;st[x].wk++}
+br.forEach(x=>{st[x].wk=0;if(!lastsF.includes(x))st[x].br++;st[x].lb=s;st[x].lp=null;st[x].lt=null;st[x].run=0;if(isL[s]&&st[x].ate<0)st[x].ate=s});
 rows.push({asg,br});forceBr=asg['סנח']||null;}
 const Wm=g.reduce((a,x)=>a+wl(x),0)/g.length;
 const nv=k=>g.map(x=>st[x][k]*Wm/wl(x));
@@ -436,17 +437,18 @@ const score=6*rng(nv('si'))+2*rng(nv('sd'))+4*rng(nv('br'))+3*Math.abs(avg(cv)-a
 return{rows,st,score,uneaten,miss}}
 
 const PM={};POS.forEach(q=>PM[q.id]=q);
-let EXTRA=[];let SITSIT=40,SITPOL=30;const FAR=new Set(['23','27','29']);let FARON=true;try{FARON=localStorage.getItem('shiftFar')!=='0'}catch(e){}
+let EXTRA=[];let SITSIT=40,SITPOL=30,SWP=45,SWPOL=25,WKMAX=3,WKPOL=70;const FAR=new Set(['23','27','29']);let FARON=true;try{FARON=localStorage.getItem('shiftFar')!=='0'}catch(e){}
 const farMv=(a,b)=>FARON&&a&&b&&((a==='סיור'&&FAR.has(b))||(b==='סיור'&&FAR.has(a)));
 function regExtra(x){const q={id:x.id,k:x.lab,t:x.t,lab:x.lab,ex:1};POS.push(q);PM[q.id]=q;DISP.push(q.id);DROP.push(q.id)}
 function clearExtra(){SPLIT=[];EXTRA.forEach(x=>{[POS,DISP,DROP].forEach(A=>{const i=A.findIndex(y=>(y.id||y)===x.id);if(i>=0)A.splice(i,1)});delete PM[x.id]});EXTRA=[]}
 function polish(best,g,f0,S,rm,W){
 if(f0>=S)return;const rows=best.rows,win=W.win;
 const gp=(x,s)=>((W.gap||{})[x]||[]).some(([a,b])=>s>=a&&s<b),wl=x=>{let c=0;for(let s=win[x][0];s<Math.min(S,win[x][1]);s++)if(!gp(x,s))c++;return Math.max(1,c)},Wt=g.reduce((a,x)=>a+wl(x),0);
-const E=()=>{const c={};g.forEach(x=>c[x]={si:0,sd:0,pk:{}});let rep=0;const run={},sr={};
+const E=()=>{const c={};g.forEach(x=>c[x]={si:0,sd:0,pk:{}});let rep=0;const run={},sr={},wkr={};
 rows.forEach((r,s)=>{for(const[id,x]of Object.entries(r.asg)){const q=PM[id];if(!c[x])continue;c[x][q.t]++;c[x].pk[q.k]=(c[x].pk[q.k]||0)+1;
 if(s>0){const o=rows[s-1].asg;for(const i2 in o)if(o[i2]===x&&PM[i2].k!==q.k)rep+=((PM[i2].t==='sd'&&q.t==='sd')?3:.3)+(farMv(PM[i2].k,q.k)?9:0)}}
-const sdN=new Set(Object.entries(r.asg).filter(([i])=>PM[i].t==='sd').map(([,x])=>x));const siN=new Set(Object.entries(r.asg).filter(([i])=>PM[i].t==='si').map(([,x])=>x));g.forEach(x=>{run[x]=sdN.has(x)?(run[x]||0)+1:0;if(run[x]>=3)rep+=80;sr[x]=siN.has(x)?(sr[x]||0)+1:0;if(sr[x]>=2)rep+=SITPOL})});
+if(s>0){const o=rows[s-1].asg;for(const i2 in r.asg)for(const j2 in r.asg)if(i2<j2&&o[i2]===r.asg[j2]&&o[j2]===r.asg[i2]&&o[i2]!==o[j2])rep+=SWPOL}
+const sdN=new Set(Object.entries(r.asg).filter(([i])=>PM[i].t==='sd').map(([,x])=>x));const siN=new Set(Object.entries(r.asg).filter(([i])=>PM[i].t==='si').map(([,x])=>x));g.forEach(x=>{run[x]=sdN.has(x)?(run[x]||0)+1:0;if(run[x]>=3)rep+=80;sr[x]=siN.has(x)?(sr[x]||0)+1:0;if(sr[x]>=2)rep+=SITPOL;wkr[x]=(sdN.has(x)||siN.has(x))?(wkr[x]||0)+1:0;if(wkr[x]>WKMAX)rep+=WKPOL})});
 const vs=k=>{const m=g.reduce((a,x)=>a+c[x][k],0)/Wt;return g.reduce((a,x)=>a+(c[x][k]-m*wl(x))**2,0)};
 const ks={};g.forEach(x=>{for(const k in c[x].pk)ks[k]=(ks[k]||0)+c[x].pk[k]});
 let pv=0;for(const k in ks){const m=ks[k]/Wt;g.forEach(x=>{pv+=((c[x].pk[k]||0)-m*wl(x))**2})}
@@ -623,7 +625,7 @@ const t=T0+' · '+d.getDate()+'.'+(d.getMonth()+1)+'.'+d.getFullYear()+' · '+(c
 L.unshift({k,d:d.getDate()+'.'+(d.getMonth()+1),m:curMode==='m'?'בוקר':'צהריים',t});localStorage.setItem('shiftHist',JSON.stringify(L.slice(0,14)))}catch(e){}histUI()}
 function histUI(){const L=histGet();$('hist2').innerHTML=L.length?`<details class="card hh"><summary>🗂️ סידורים קודמים (${L.length})</summary>${L.map((z,i)=>`<details><summary>${esc(z.d)} · ${esc(z.m)}</summary><pre>${esc(z.t)}</pre><a class="wa" target="_blank" rel="noopener" href="${waUrl(z.t)}">שלח בווצאפ</a></details>`).join('')}</details>`:''}
 load();chips();gatesUI();setLogo();histUI();['r4','r5','r6'].forEach(id=>{$(id).oninput=gatesUI});
-const VER='20.10.2026 · גרסה 46';$('ver').textContent='גרסה: '+VER+' · אם זה נראה לך לא מעודכן, פתח את הקישור עצמו (לא עותק שמור) ורענן את הדף';let wipeArm=false;$('wipe').onclick=()=>{if(!wipeArm){wipeArm=true;$('wipe').textContent='בטוח? לחץ שוב למחיקה';setTimeout(()=>{wipeArm=false;$('wipe').textContent='🗑️ מחק את כל הנתונים במכשיר הזה'},4000);return}try{localStorage.removeItem('shiftRoster');localStorage.removeItem('shift');localStorage.removeItem('shiftPal');localStorage.removeItem('shiftHist')}catch(e){}location.reload()};pre(new Date().getHours()>=13?'a':'m',true);restoreLast();setInterval(tick,30000);
+const VER='20.10.2026 · גרסה 47';$('ver').textContent='גרסה: '+VER+' · אם זה נראה לך לא מעודכן, פתח את הקישור עצמו (לא עותק שמור) ורענן את הדף';let wipeArm=false;$('wipe').onclick=()=>{if(!wipeArm){wipeArm=true;$('wipe').textContent='בטוח? לחץ שוב למחיקה';setTimeout(()=>{wipeArm=false;$('wipe').textContent='🗑️ מחק את כל הנתונים במכשיר הזה'},4000);return}try{localStorage.removeItem('shiftRoster');localStorage.removeItem('shift');localStorage.removeItem('shiftPal');localStorage.removeItem('shiftHist')}catch(e){}location.reload()};pre(new Date().getHours()>=13?'a':'m',true);restoreLast();setInterval(tick,30000);
 
 
 (function(){const sp=document.getElementById('splash');if(!sp)return;let seen=false;try{seen=!!sessionStorage.getItem('splashSeen')}catch(e){}
