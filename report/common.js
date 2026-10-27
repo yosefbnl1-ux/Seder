@@ -110,7 +110,7 @@ function reportHTML(r) {
    <tr><th>אופן הדיווח</th><td colspan="3">${esc(r.reportMethod) || '—'}</td></tr></table>
   <div class="rsec">05 · סטטוס כשירות</div><div class="rnote">${esc(statusText(r.status)) || '—'}</div>
   <div class="rsec">06 · אישור העברת משמרת</div>
-  <div class="rsigs">${sig(r.sigGiver, r.giverOk, 'המאבטח המוסר')}${sig(r.sigReceiver, r.receiverOk, 'המאבטח המקבל')}</div>
+  <div class="rsigs"><div class="rsig"><div class="rsl">המאבטח המוסר: ${esc(r.giver)}</div><div class="rgv">${r.giverOk ? '☑' : '☐'} מאשר שהציג את כלל הליקויים הידועים לו</div></div>${sig(r.sigReceiver, r.receiverOk, 'המאבטח המקבל')}</div>
   <div class="rfoot">נשלח: ${r.createdAt ? new Date(r.createdAt).toLocaleString('he-IL') : ''} · מזהה: ${esc(r.id || '')}</div>
  </div>`;
 }
@@ -131,7 +131,7 @@ const REPORT_CSS = `
 .rsigs{display:flex;gap:14px}.rsig{flex:1;border:1px solid #d5dde8;border-radius:8px;padding:8px}
 .rsl{font-weight:700;font-size:12px;color:#4a5a70}.rsig img{display:block;width:100%;height:95px;object-fit:contain}
 .rnone{height:95px;display:flex;align-items:center;justify-content:center;color:#b3261e;font-weight:700}
-.rsc{font-size:11.5px;color:#4a5a70}.rfoot{margin-top:14px;color:#8a97a8;font-size:11px;text-align:center}`;
+.rsc{font-size:11.5px;color:#4a5a70}.rgv{font-size:12.5px;margin-top:10px}.rfoot{margin-top:14px;color:#8a97a8;font-size:11px;text-align:center}`;
 
 // ---------- PDF ----------
 async function reportsToPDF(list, filename) {

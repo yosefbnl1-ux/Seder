@@ -109,9 +109,6 @@ textarea{min-height:110px;resize:vertical}
 <section class="card">
  <h2><span>06</span>אישור העברת משמרת</h2>
  <label class="chk"><input type="checkbox" id="giverOk"><span class="box"></span><span>המאבטח המוסר מאשר שהציג את כלל הליקויים הידועים לו</span></label>
- <div class="sighead"><label class="f">חתימת המאבטח המוסר</label><span class="signed" id="sgGiver" hidden>נחתם</span></div>
- <canvas class="pad" id="padGiver"></canvas>
- <button type="button" class="clear" data-pad="padGiver">ניקוי חתימה</button>
  <label class="chk"><input type="checkbox" id="receiverOk"><span class="box"></span><span>המאבטח המקבל מאשר שביצע את הבדיקות וקיבל את המידע הנדרש</span></label>
  <div class="sighead"><label class="f">חתימת המאבטח המקבל</label><span class="signed" id="sgReceiver" hidden>נחתם</span></div>
  <canvas class="pad" id="padReceiver"></canvas>
@@ -182,7 +179,7 @@ function makePad(id,flag){
 // מקטין את החתימה לגודל סביר (PNG שקוף) כדי שהדוח יישמר מהר
 function trimmed(cv){const o=document.createElement('canvas'),s=Math.min(1,600/cv.width);o.width=cv.width*s;o.height=cv.height*s;
   o.getContext('2d').drawImage(cv,0,0,o.width,o.height);return o.toDataURL('image/png')}
-makePad('padGiver','sgGiver');makePad('padReceiver','sgReceiver');
+makePad('padReceiver','sgReceiver');
 document.querySelectorAll('.clear').forEach(b=>b.onclick=()=>pads[b.dataset.pad].clear());
 
 // ----- טיוטה (רק במכשיר הזה, בלי חתימות) -----
@@ -211,7 +208,6 @@ function validate(){
   if(bad.length&&!$('vNotes').value.trim()&&!$('details').value.trim()){$('details').classList.add('invalid');miss.push('פירוט הליקויים שסומנו "לא תקין"')}
   if(!$('giverOk').checked)miss.push('אישור המאבטח המוסר');
   if(!$('receiverOk').checked)miss.push('אישור המאבטח המקבל');
-  if(pads.padGiver.empty){$('padGiver').classList.add('invalid');miss.push('חתימת המאבטח המוסר')}
   if(pads.padReceiver.empty){$('padReceiver').classList.add('invalid');miss.push('חתימת המאבטח המקבל')}
   return{miss,status}}
 // אחרי דיווח, אפשר לשלוח דיווח נוסף מאותו מכשיר רק אחרי שעה
@@ -230,7 +226,7 @@ $('form').addEventListener('submit',async e=>{
     const first=document.querySelector('.invalid');(first||$('err')).scrollIntoView({behavior:'smooth',block:'center'});return}
   const r={date:$('date').value,time:$('time').value,shift:$('shift').value===OTHER?$('shiftOther').value.trim():$('shift').value,vehicle:$('vehicle').value.trim(),giver:$('giver').value.trim(),receiver:$('receiver').value.trim(),
     checks:{...ans},fuel,vNotes:$('vNotes').value.trim(),details:$('details').value.trim(),reportedTo:$('reportedTo').value.trim(),reportTime:$('reportTime').value,reportMethod:$('reportMethod').value.trim(),
-    status,giverOk:true,receiverOk:true,sigGiver:pads.padGiver.data,sigReceiver:pads.padReceiver.data,createdAt:Date.now()};
+    status,giverOk:true,receiverOk:true,sigReceiver:pads.padReceiver.data,createdAt:Date.now()};
   r.defects=CHECKS.filter(c=>r.checks[c.k]==='bad').length;
   $('send').disabled=true;$('send').textContent='שולח...';
   try{await ready;const res=await Store.add(r);lastReport=r;
