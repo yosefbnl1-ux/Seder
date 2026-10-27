@@ -108,7 +108,6 @@ textarea{min-height:110px;resize:vertical}
 
 <section class="card">
  <h2><span>06</span>אישור העברת משמרת</h2>
- <label class="chk"><input type="checkbox" id="giverOk"><span class="box"></span><span>המאבטח המוסר מאשר שהציג את כלל הליקויים הידועים לו</span></label>
  <label class="chk"><input type="checkbox" id="receiverOk"><span class="box"></span><span>המאבטח המקבל מאשר שביצע את הבדיקות וקיבל את המידע הנדרש</span></label>
  <div class="sighead"><label class="f">חתימת המאבטח המקבל</label><span class="signed" id="sgReceiver" hidden>נחתם</span></div>
  <canvas class="pad" id="padReceiver"></canvas>
@@ -206,7 +205,6 @@ function validate(){
   const bad=CHECKS.filter(c=>ans[c.k]==='bad');
   if(bad.length&&status==='ok')miss.push('סומן "לא תקין" אבל הסטטוס הוא "ללא ליקויים חדשים" – יש לתקן');
   if(bad.length&&!$('vNotes').value.trim()&&!$('details').value.trim()){$('details').classList.add('invalid');miss.push('פירוט הליקויים שסומנו "לא תקין"')}
-  if(!$('giverOk').checked)miss.push('אישור המאבטח המוסר');
   if(!$('receiverOk').checked)miss.push('אישור המאבטח המקבל');
   if(pads.padReceiver.empty){$('padReceiver').classList.add('invalid');miss.push('חתימת המאבטח המקבל')}
   return{miss,status}}
@@ -226,7 +224,7 @@ $('form').addEventListener('submit',async e=>{
     const first=document.querySelector('.invalid');(first||$('err')).scrollIntoView({behavior:'smooth',block:'center'});return}
   const r={date:$('date').value,time:$('time').value,shift:$('shift').value===OTHER?$('shiftOther').value.trim():$('shift').value,vehicle:$('vehicle').value.trim(),giver:$('giver').value.trim(),receiver:$('receiver').value.trim(),
     checks:{...ans},fuel,vNotes:$('vNotes').value.trim(),details:$('details').value.trim(),reportedTo:$('reportedTo').value.trim(),reportTime:$('reportTime').value,reportMethod:$('reportMethod').value.trim(),
-    status,giverOk:true,receiverOk:true,sigReceiver:pads.padReceiver.data,createdAt:Date.now()};
+    status,receiverOk:true,sigReceiver:pads.padReceiver.data,createdAt:Date.now()};
   r.defects=CHECKS.filter(c=>r.checks[c.k]==='bad').length;
   $('send').disabled=true;$('send').textContent='שולח...';
   try{await ready;const res=await Store.add(r);lastReport=r;

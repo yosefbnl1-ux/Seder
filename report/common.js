@@ -92,7 +92,7 @@ function loadScript(src) {
 function reportHTML(r) {
   const mark = v => v === 'ok' ? '<b class="rk ok">✓ תקין</b>' : v === 'bad' ? '<b class="rk bad">✗ לא תקין</b>' : '<b class="rk">—</b>';
   const rows = list => list.map(c => `<tr><td>${esc(c.t)}</td><td>${c.type === 'fuel' ? `<b class="rk">${esc(r.fuel || '—')}</b>` : mark(r.checks?.[c.k])}</td></tr>`).join('');
-  const sig = (img, ok, who) => `<div class="rsig"><div class="rsl">חתימת ${who}</div>${img ? `<img src="${img}" alt="">` : '<div class="rnone">לא נחתם</div>'}<div class="rsc">${ok ? '☑' : '☐'} ${who === 'המאבטח המוסר' ? 'מאשר שהציג את כלל הליקויים הידועים לו' : 'מאשר שביצע את הבדיקות וקיבל את המידע הנדרש'}</div></div>`;
+  const sig = (img, ok, who) => `<div class="rsig"><div class="rsl">חתימת ${who}</div>${img ? `<img src="${img}" alt="">` : '<div class="rnone">לא נחתם</div>'}<div class="rsc">${ok ? '☑' : '☐'} מאשר שביצע את הבדיקות וקיבל את המידע הנדרש</div></div>`;
   const bad = badList(r).length;
   return `<div class="rep">
   <div class="rh"><img src="logo.jpg" alt=""><div><div class="ro">${ORG}</div><div class="rt">${TITLE}</div><div class="rst">${SUBTITLE}</div></div>
@@ -110,7 +110,7 @@ function reportHTML(r) {
    <tr><th>אופן הדיווח</th><td colspan="3">${esc(r.reportMethod) || '—'}</td></tr></table>
   <div class="rsec">05 · סטטוס כשירות</div><div class="rnote">${esc(statusText(r.status)) || '—'}</div>
   <div class="rsec">06 · אישור העברת משמרת</div>
-  <div class="rsigs"><div class="rsig"><div class="rsl">המאבטח המוסר: ${esc(r.giver)}</div><div class="rgv">${r.giverOk ? '☑' : '☐'} מאשר שהציג את כלל הליקויים הידועים לו</div></div>${sig(r.sigReceiver, r.receiverOk, 'המאבטח המקבל')}</div>
+  <div class="rsigs">${sig(r.sigReceiver, r.receiverOk, 'המאבטח המקבל')}</div>
   <div class="rfoot">נשלח: ${r.createdAt ? new Date(r.createdAt).toLocaleString('he-IL') : ''} · מזהה: ${esc(r.id || '')}</div>
  </div>`;
 }
@@ -128,10 +128,10 @@ const REPORT_CSS = `
 .rchk td{border-bottom:1px solid #e3e8ef;padding:4px 8px;font-size:13px}.rchk td:last-child{width:110px;text-align:left}
 .rk{font-weight:800}.rk.ok{color:#17683f}.rk.bad{color:#b3261e}
 .rnote{border:1px solid #d5dde8;border-radius:6px;padding:7px 10px;font-size:13px;white-space:pre-wrap;margin-bottom:6px}
-.rsigs{display:flex;gap:14px}.rsig{flex:1;border:1px solid #d5dde8;border-radius:8px;padding:8px}
+.rsigs{display:flex;gap:14px}.rsig{flex:0 1 50%;border:1px solid #d5dde8;border-radius:8px;padding:8px}
 .rsl{font-weight:700;font-size:12px;color:#4a5a70}.rsig img{display:block;width:100%;height:95px;object-fit:contain}
 .rnone{height:95px;display:flex;align-items:center;justify-content:center;color:#b3261e;font-weight:700}
-.rsc{font-size:11.5px;color:#4a5a70}.rgv{font-size:12.5px;margin-top:10px}.rfoot{margin-top:14px;color:#8a97a8;font-size:11px;text-align:center}`;
+.rsc{font-size:11.5px;color:#4a5a70}.rfoot{margin-top:14px;color:#8a97a8;font-size:11px;text-align:center}`;
 
 // ---------- PDF ----------
 async function reportsToPDF(list, filename) {
