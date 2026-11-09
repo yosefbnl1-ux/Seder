@@ -60,7 +60,8 @@ const Store = {
     if (withAuth) await loadScript(base + 'firebase-auth-compat.js');
     firebase.initializeApp(window.FIREBASE_CONFIG);
     this.db = firebase.firestore();
-    try { await this.db.enablePersistence({ synchronizeTabs: true }) } catch (e) { }
+    // הטופס שומר דוחות במכשיר כדי לשלוח גם בלי קליטה; באתר המנהל לא שומרים עותק של הדוחות בדפדפן
+    if (!withAuth) try { await this.db.enablePersistence({ synchronizeTabs: true }) } catch (e) { }
     if (withAuth) this.auth = firebase.auth();
   },
   // מחזיר true אם אושר בשרת, 'queued' אם נשמר וישלח כשיחזור חיבור
