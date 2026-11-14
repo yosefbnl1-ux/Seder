@@ -21,6 +21,31 @@ service cloud.firestore {
       allow read, delete: if isAdmin();
       allow update: if false;
     }
+    // רשימת הרכבים לטופס: כולם קוראים, רק מנהל משנה
+    match /settings/{doc} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    // הליקויים הפתוחים של כל רכב - רק שם הסעיף ותאריך. הטופס יכול רק להוסיף; רק מנהל מוחק
+    match /openByVehicle/{key} {
+      allow read: if true;
+      allow create: if request.resource.data.keys().hasOnly(['items']);
+      allow update: if isAdmin() || (request.resource.data.keys().hasOnly(['items'])
+                    && request.resource.data.items.keys().hasAll(resource.data.items.keys()));
+      allow delete: if isAdmin();
+    }
+    // ליקוי: נפתח מהטופס, ורק מנהל רואה ומסמן "תוקן"
+    match /issues/{id} {
+      allow create: if request.resource.data.status == 'open'
+                    && request.resource.data.keys().hasOnly(['vehicleKey', 'vehicle', 'item', 'itemText', 'status', 'openedAt', 'reportId', 'giver', 'receiver']);
+      allow read, update, delete: if isAdmin();
+    }
+    // תמונות ליקויים: הטופס שולח, רק מנהל רואה
+    match /photos/{id} {
+      allow create: if request.resource.data.keys().hasOnly(['reportId', 'item', 'data', 'createdAt'])
+                    && request.resource.data.data is string && request.resource.data.data.size() < 900000;
+      allow read, delete: if isAdmin();
+    }
     match /admins/{email} {
       allow read: if isAdmin();
       allow create: if isAdmin() && email == email.lower() && request.resource.data.keys().hasOnly(['addedBy', 'addedAt']);

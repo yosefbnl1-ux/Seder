@@ -60,6 +60,22 @@ textarea{min-height:110px;resize:vertical}
 .done .wait{color:var(--ink);font-weight:700;background:#e6eef8;border-radius:14px;padding:12px}
 .btn2{display:block;width:100%;min-height:52px;border:1.5px solid var(--ink);border-radius:16px;background:#fff;color:var(--ink);font-weight:800;margin-top:12px}
 .mode{margin-top:16px;font-size:.8rem;color:var(--mut);text-align:center}
+.ktag{display:inline-block;margin-inline-start:8px;padding:1px 8px;border-radius:10px;background:#fff1d1;color:#8a5a00;font-size:.75rem;font-weight:800;vertical-align:middle}
+.ph{margin:-4px 0 12px;padding:10px 12px;background:#fdf5f4;border:1.5px dashed #e6b3ad;border-radius:14px}
+.phl{font-weight:700;font-size:.85rem;color:var(--bad);margin-bottom:8px}
+.thumbs{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.th{position:relative}.th img{width:72px;height:72px;object-fit:cover;border-radius:10px;display:block}
+.th button{position:absolute;top:-7px;left:-7px;width:26px;height:26px;border-radius:50%;border:0;background:var(--bad);color:#fff;font-size:.8rem;padding:0}
+.shot{display:inline-flex;align-items:center;gap:6px;min-height:46px;padding:0 14px;border:1.5px solid var(--bad);border-radius:14px;background:#fff;color:var(--bad);font-weight:800;cursor:pointer;position:relative}
+.vh{position:absolute!important;opacity:0;width:1px!important;height:1px!important;min-height:0!important;padding:0!important;border:0!important;overflow:hidden}
+.np{display:flex;align-items:center;gap:8px;margin-top:10px;font-size:.9rem;font-weight:700;color:#4a5a70;cursor:pointer}
+.np input{width:22px;height:22px;min-height:0;padding:0;-webkit-appearance:checkbox;appearance:auto}
+.npr{margin-top:8px;min-height:44px}
+.known{background:#fff8e6;border:1px solid #f0d58a;border-radius:16px;padding:12px 14px;margin:12px 0 4px}
+.kh{font-weight:800;color:#8a5a00}.kp{margin:4px 0 6px;font-size:.85rem;color:#6b5a30}
+.kr{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:10px 0;border-top:1px solid #f0e2b8}
+.kr .q{flex:1 1 140px;font-size:.95rem}.kr small{display:block;color:var(--mut);font-size:.8rem}
+.kr.invalid{box-shadow:none;outline:2px solid var(--bad);outline-offset:2px;border-radius:10px}
 .mode a{color:var(--acc)}
 </style>
 </head>
@@ -77,7 +93,8 @@ textarea{min-height:110px;resize:vertical}
  <label class="f" for="time">שעה</label><input type="time" id="time" name="time">
  <label class="f" for="shift">סוג משמרת</label><select id="shift" name="shift"><option value="">בחירה</option></select>
  <input id="shiftOther" name="shiftOther" placeholder="כתבו את סוג המשמרת" style="margin-top:10px" hidden>
- <label class="f" for="vehicle">מספר רכב</label><input id="vehicle" name="vehicle" inputmode="numeric" maxlength="30">
+ <label class="f" for="vehicleSel">מספר רכב</label><select id="vehicleSel" name="vehicleSel" hidden></select>
+ <input id="vehicle" name="vehicle" inputmode="numeric" maxlength="30" aria-label="מספר רכב">
  <label class="f" for="giver">מאבטח מוסר</label><input id="giver" name="giver" autocomplete="name">
  <label class="f" for="receiver">מאבטח מקבל</label><input id="receiver" name="receiver">
 </section>
@@ -95,6 +112,7 @@ textarea{min-height:110px;resize:vertical}
 
 <section class="card">
  <h2><span>04</span>תיעוד ליקויים והעברת מידע</h2>
+ <div class="known" id="known" hidden></div>
  <label class="f" for="details">פירוט התקלה / הליקוי, מועד גילוי ופעולות שננקטו</label><textarea id="details" name="details"></textarea>
  <label class="f" for="reportedTo">גורם שאליו דווח</label><input id="reportedTo" name="reportedTo">
  <label class="f" for="reportTime">שעת הדיווח</label><input type="time" id="reportTime" name="reportTime">
@@ -143,17 +161,65 @@ const ans={};let fuel='';
 function rowHTML(c){
   const btns=c.type==='fuel'?FUEL.map(f=>`<button type="button" class="n" data-fuel="${f}">${f}</button>`).join('')
     :`<button type="button" class="ok" data-k="${c.k}" data-v="ok">תקין</button><button type="button" class="bad" data-k="${c.k}" data-v="bad">לא תקין</button>`;
-  return `<div class="row" id="row_${c.k}"><div class="q">${esc(c.t)}</div><div class="opts">${btns}</div></div>`}
+  return `<div class="row" id="row_${c.k}"><div class="q">${esc(c.t)}${c.type==='fuel'?'':`<span class="ktag" id="kt_${c.k}" hidden>ליקוי ידוע</span>`}</div><div class="opts">${btns}</div></div>`
+    +(c.type==='fuel'?'':`<div class="ph" id="ph_${c.k}" hidden></div>`)}
 $('vehicleRows').innerHTML=VEHICLE.map(rowHTML).join('');
 $('equipRows').innerHTML=EQUIP.map(rowHTML).join('');
 $('statusRows').innerHTML=STATUS.map(s=>`<label class="chk"><input type="radio" name="status" value="${s.k}"><span class="box"></span><span>${esc(s.t)}</span></label>`).join('');
 function paintRows(){
   document.querySelectorAll('[data-k]').forEach(b=>b.classList.toggle('on',ans[b.dataset.k]===b.dataset.v));
-  document.querySelectorAll('[data-fuel]').forEach(b=>b.classList.toggle('on',fuel===b.dataset.fuel))}
+  document.querySelectorAll('[data-fuel]').forEach(b=>b.classList.toggle('on',fuel===b.dataset.fuel));
+  CHECKS.forEach(c=>{$('kt_'+c.k).hidden=!known[c.k];const show=ans[c.k]==='bad'&&!known[c.k];$('ph_'+c.k).hidden=!show;if(show)renderPh(c)})}
+
+// ----- צילום ליקויים: ליקוי חדש בסעיף שרואים בעין חייב תמונה, או סיבה למה אי אפשר -----
+const photos={},np={},npOn={};
+function renderPh(c){const k=c.k,L=photos[k]||[];
+  $('ph_'+k).innerHTML=`<div class="phl">${c.photo?'צילום הליקוי (חובה)':'צילום הליקוי (לא חובה)'}</div>
+   <div class="thumbs">${L.map((d,i)=>`<span class="th"><img src="${d}" alt=""><button type="button" data-rmph="${k}" data-i="${i}" aria-label="מחיקת תמונה">✕</button></span>`).join('')}
+   ${L.length<3?`<label class="shot">📷 צילום ליקוי<input class="vh" type="file" accept="image/*" capture="environment" data-ph="${k}"></label>`:''}</div>
+   ${c.photo&&!L.length?`<label class="np"><input type="checkbox" data-np="${k}" ${npOn[k]?'checked':''}>לא ניתן לצלם</label>${npOn[k]?`<input class="npr" data-npr="${k}" placeholder="למה? (למשל: חושך)" value="${esc(np[k]||'')}">`:''}`:''}`}
+// מקטין את התמונה בטלפון לפני השמירה (צלע ארוכה עד 1280, בערך 150-250KB)
+async function shrink(file){const url=URL.createObjectURL(file);try{
+  const im=await new Promise((ok,bad)=>{const i=new Image();i.onload=()=>ok(i);i.onerror=()=>bad(new Error('img'));i.src=url});
+  const sc=Math.min(1,1280/Math.max(im.naturalWidth,im.naturalHeight)),cv=document.createElement('canvas');
+  cv.width=Math.round(im.naturalWidth*sc);cv.height=Math.round(im.naturalHeight*sc);cv.getContext('2d').drawImage(im,0,0,cv.width,cv.height);
+  let q=.7,d=cv.toDataURL('image/jpeg',q);while(d.length>500000&&q>.3){q-=.15;d=cv.toDataURL('image/jpeg',q)}return d}finally{URL.revokeObjectURL(url)}}
+
+// ----- ליקויים ידועים: ליקויים פתוחים של הרכב שנבחר (רק שם הסעיף ותאריך) -----
+let known={},kAns={};
+function renderKnown(){const ks=Object.keys(known).filter(k=>CHECKS.some(c=>c.k===k));$('known').hidden=!ks.length;if(!ks.length)return;
+  $('known').innerHTML=`<div class="kh">ליקויים ידועים ברכב הזה</div><p class="kp">דווחו בעבר ועוד לא תוקנו. סמנו לכל אחד אם הוא עדיין קיים.</p>`
+   +ks.map(k=>`<div class="kr" id="kr_${k}"><div class="q">${esc(itemText(k))}<small>מדווח מ-${fmtTs(known[k].since)}</small></div><div class="opts">
+     <button type="button" class="bad${kAns[k]==='still'?' on':''}" data-kn="${k}" data-v="still">עדיין קיים</button><button type="button" class="ok${kAns[k]==='gone'?' on':''}" data-kn="${k}" data-v="gone">כבר לא קיים</button></div></div>`).join('')}
+let lkSeq=0;
+async function loadKnown(){const key=vKey(curVehicle()),seq=++lkSeq;let o={};
+  if(key){await ready.catch(()=>{});o=await Store.openIssues(key)}
+  if(seq!==lkSeq)return;known=o||{};for(const k in kAns)if(!known[k])delete kAns[k];renderKnown();paintRows()}
+
+// ----- רכב: הרכב הקבוע בחור מראש, "רכב אחר" פותח שדה טקסט -----
+const OTHERV='__other';let draftVeh=null;
+function curVehicle(){const sel=$('vehicleSel');return !sel.hidden&&sel.value!==OTHERV?sel.value:$('vehicle').value.trim()}
+function paintVehicle(focus){const sel=$('vehicleSel'),useSel=!sel.hidden,other=!useSel||sel.value===OTHERV;
+  $('vehicle').hidden=!other;$('vehicle').placeholder=useSel?'כתבו את מספר הרכב':'';$('vehicle').style.marginTop=useSel?'10px':'';
+  if(other&&useSel&&focus)$('vehicle').focus()}
+function pickVehicle(VEH){const sel=$('vehicleSel'),L=VEH.list||[];if(!L.length){sel.hidden=true;return}
+  const order=[...L].sort((a,b)=>(b===VEH.main)-(a===VEH.main));
+  sel.innerHTML=order.map(v=>`<option value="${esc(v)}">${esc(v)}${v===VEH.main?' (הרכב הקבוע)':''}</option>`).join('')+`<option value="${OTHERV}">רכב אחר</option>`;
+  sel.hidden=false;sel.value=draftVeh===OTHERV||L.includes(draftVeh)?draftVeh:order[0]}
+let VEH={list:[],main:''};
+async function loadVehicles(){await ready.catch(()=>{});VEH=await Store.vehicles();pickVehicle(VEH);paintVehicle();loadKnown()}
+$('vehicleSel').addEventListener('change',()=>{draftVeh=$('vehicleSel').value;$('vehicleSel').classList.remove('invalid');paintVehicle(true);loadKnown()});
+let vT=0;$('vehicle').addEventListener('input',()=>{clearTimeout(vT);vT=setTimeout(loadKnown,600)});
 document.addEventListener('click',e=>{
+  const kb=e.target.closest('[data-kn]');
+  if(kb){const k=kb.dataset.kn;kAns[k]=kb.dataset.v;ans[k]=kb.dataset.v==='still'?'bad':'ok';$('row_'+k).classList.remove('invalid');
+    renderKnown();paintRows();saveDraft();return}
+  const rm=e.target.closest('[data-rmph]');
+  if(rm){photos[rm.dataset.rmph].splice(+rm.dataset.i,1);paintRows();saveDraft();return}
   const b=e.target.closest('[data-k],[data-fuel]');if(!b)return;
   if(b.dataset.fuel){fuel=fuel===b.dataset.fuel?'':b.dataset.fuel;$('row_fuel').classList.remove('invalid')}
-  else{ans[b.dataset.k]=ans[b.dataset.k]===b.dataset.v?undefined:b.dataset.v;$('row_'+b.dataset.k).classList.remove('invalid')}
+  else{const k=b.dataset.k;ans[k]=ans[k]===b.dataset.v?undefined:b.dataset.v;$('row_'+k).classList.remove('invalid');
+    if(known[k]){kAns[k]=ans[k]==='bad'?'still':ans[k]==='ok'?'gone':undefined;if(!kAns[k])delete kAns[k];renderKnown()}}
   paintRows();saveDraft()});
 
 // ----- חתימות -----
@@ -183,31 +249,47 @@ document.querySelectorAll('.clear').forEach(b=>b.onclick=()=>pads[b.dataset.pad]
 
 // ----- טיוטה (רק במכשיר הזה, בלי חתימות) -----
 const TXT=['shift','shiftOther','vehicle','giver','receiver','vNotes','details','reportedTo','reportTime','reportMethod'];
-function saveDraft(){try{const d={ans,fuel,status:(document.querySelector('[name=status]:checked')||{}).value};TXT.forEach(k=>d[k]=$(k).value);localStorage.setItem('handoverDraft',JSON.stringify(d))}catch(e){}}
+function saveDraft(){try{const d={ans,fuel,kAns,np,npOn,vehicleSel:$('vehicleSel').hidden?draftVeh:$('vehicleSel').value,status:(document.querySelector('[name=status]:checked')||{}).value};TXT.forEach(k=>d[k]=$(k).value);
+  // תמונות נשמרות בטיוטה אם יש מקום בזיכרון הדפדפן
+  try{localStorage.setItem('handoverDraft',JSON.stringify({...d,photos}))}catch(e){localStorage.setItem('handoverDraft',JSON.stringify(d))}}catch(e){}}
 function loadDraft(){try{const d=JSON.parse(localStorage.getItem('handoverDraft')||'null');if(!d)return;
   TXT.forEach(k=>{if(d[k])$(k).value=d[k]});Object.assign(ans,d.ans||{});fuel=d.fuel||'';
+  Object.assign(kAns,d.kAns||{});Object.assign(photos,d.photos||{});Object.assign(np,d.np||{});Object.assign(npOn,d.npOn||{});draftVeh=d.vehicleSel??null;
   if(d.status){const r=document.querySelector(`[name=status][value="${d.status}"]`);if(r)r.checked=true}}catch(e){}}
-function resetForm(){$('form').reset();for(const k in ans)delete ans[k];fuel='';Object.values(pads).forEach(p=>p.clear());
+function resetForm(){$('form').reset();for(const o of [ans,kAns,photos,np,npOn])for(const k in o)delete o[k];fuel='';draftVeh=null;Object.values(pads).forEach(p=>p.clear());
+  pickVehicle(VEH);paintVehicle();loadKnown();
   $('date').value=todayISO();$('time').value=nowHM();try{localStorage.removeItem('handoverDraft')}catch(e){}paintRows();paintShift()}
-$('form').addEventListener('input',e=>{e.target.classList.remove('invalid');saveDraft()});
+$('form').addEventListener('change',async e=>{const t=e.target;
+  if(t.dataset.np){npOn[t.dataset.np]=t.checked;$('ph_'+t.dataset.np).classList.remove('invalid');renderPh(CHECKS.find(c=>c.k===t.dataset.np));if(t.checked)document.querySelector(`[data-npr="${t.dataset.np}"]`).focus();saveDraft()}
+  if(t.dataset.ph&&t.files?.length){const k=t.dataset.ph,box=$('ph_'+k);box.classList.remove('invalid');
+    for(const f of [...t.files]){if((photos[k]||=[]).length>=3)break;try{photos[k].push(await shrink(f))}catch(err){alert('לא הצלחנו לקרוא את התמונה. נסו לצלם שוב.')}}
+    paintRows();saveDraft()}});
+$('form').addEventListener('input',e=>{const t=e.target;if(t.dataset.npr){np[t.dataset.npr]=t.value;$('ph_'+t.dataset.npr).classList.remove('invalid')}
+  t.classList.remove('invalid');saveDraft()});
 $('form').addEventListener('change',saveDraft);
 $('date').value=todayISO();$('time').value=nowHM();loadDraft();paintRows();paintShift();
 
 // ----- בדיקה ושליחה -----
 function validate(){
   const miss=[];const need=(id,name)=>{if(!$(id).value.trim()){$(id).classList.add('invalid');miss.push(name)}};
-  need('date','תאריך');need('time','שעה');need('shift','סוג משמרת');if($('shift').value===OTHER)need('shiftOther','סוג המשמרת (אחר)');need('vehicle','מספר רכב');need('giver','מאבטח מוסר');need('receiver','מאבטח מקבל');
+  need('date','תאריך');need('time','שעה');need('shift','סוג משמרת');if($('shift').value===OTHER)need('shiftOther','סוג המשמרת (אחר)');if(!curVehicle()){($('vehicleSel').hidden||$('vehicleSel').value===OTHERV?$('vehicle'):$('vehicleSel')).classList.add('invalid');miss.push('מספר רכב')}need('giver','מאבטח מוסר');need('receiver','מאבטח מקבל');
   const open=CHECKS.filter(c=>!ans[c.k]);open.forEach(c=>$('row_'+c.k).classList.add('invalid'));
   if(open.length)miss.push(`סימון תקין/לא תקין ב-${open.length} סעיפים`);
   if(!fuel){$('row_fuel').classList.add('invalid');miss.push('מצב מיכל הדלק')}
   const status=(document.querySelector('[name=status]:checked')||{}).value;
   if(!status)miss.push('סטטוס כשירות (סעיף 05)');
-  const bad=CHECKS.filter(c=>ans[c.k]==='bad');
-  if(bad.length&&status==='ok')miss.push('סומן "לא תקין" אבל הסטטוס הוא "ללא ליקויים חדשים" – יש לתקן');
+  const ku=Object.keys(known).filter(k=>!kAns[k]);ku.forEach(k=>$('kr_'+k)?.classList.add('invalid'));
+  if(ku.length)miss.push('לסמן "עדיין קיים" או "כבר לא קיים" בליקויים הידועים (סעיף 04)');
+  // ליקוי ידוע שעדיין קיים הוא לא ליקוי חדש: לא דורש פירוט, צילום, ולא סותר "ללא ליקויים חדשים"
+  const bad=CHECKS.filter(c=>ans[c.k]==='bad'&&!known[c.k]);
+  if(bad.length&&status==='ok')miss.push('סומן ליקוי חדש ("לא תקין") אבל הסטטוס הוא "ללא ליקויים חדשים" – יש לתקן');
   if(bad.length&&!$('vNotes').value.trim()&&!$('details').value.trim()){$('details').classList.add('invalid');miss.push('פירוט הליקויים שסומנו "לא תקין"')}
+  const noPic=bad.filter(c=>c.photo&&!(photos[c.k]||[]).length&&!(npOn[c.k]&&(np[c.k]||'').trim()));
+  noPic.forEach(c=>$('ph_'+c.k).classList.add('invalid'));
+  if(noPic.length)miss.push('צילום הליקוי (או "לא ניתן לצלם" עם סיבה): '+noPic.map(c=>shortText(c.k)).join(', '));
   if(!$('receiverOk').checked)miss.push('אישור המאבטח המקבל');
   if(pads.padReceiver.empty){$('padReceiver').classList.add('invalid');miss.push('חתימת המאבטח המקבל')}
-  return{miss,status}}
+  return{miss,status,bad}}
 // אחרי דיווח, אפשר לשלוח דיווח נוסף מאותו מכשיר רק אחרי שעה
 const COOLDOWN=60*60*1000;
 let lastReport=null;try{lastReport=JSON.parse(localStorage.getItem('handoverLast')||'null')}catch(e){}
@@ -219,15 +301,18 @@ function paintLock(){const left=lockLeft();$('again').hidden=left>0;$('wait').hi
 setInterval(()=>{if(!$('done').hidden)paintLock()},20000);
 $('form').addEventListener('submit',async e=>{
   e.preventDefault();$('err').hidden=true;
-  const{miss,status}=validate();
+  const{miss,status,bad}=validate();
   if(miss.length){$('err').innerHTML='יש להשלים לפני השליחה:<ul>'+miss.map(m=>`<li>${esc(m)}</li>`).join('')+'</ul>';$('err').hidden=false;
     const first=document.querySelector('.invalid');(first||$('err')).scrollIntoView({behavior:'smooth',block:'center'});return}
-  const r={date:$('date').value,time:$('time').value,shift:$('shift').value===OTHER?$('shiftOther').value.trim():$('shift').value,vehicle:$('vehicle').value.trim(),giver:$('giver').value.trim(),receiver:$('receiver').value.trim(),
+  const r={date:$('date').value,time:$('time').value,shift:$('shift').value===OTHER?$('shiftOther').value.trim():$('shift').value,vehicle:curVehicle(),vehicleKey:vKey(curVehicle()),giver:$('giver').value.trim(),receiver:$('receiver').value.trim(),
     checks:{...ans},fuel,vNotes:$('vNotes').value.trim(),details:$('details').value.trim(),reportedTo:$('reportedTo').value.trim(),reportTime:$('reportTime').value,reportMethod:$('reportMethod').value.trim(),
     status,receiverOk:true,sigReceiver:pads.padReceiver.data,createdAt:Date.now()};
-  r.defects=CHECKS.filter(c=>r.checks[c.k]==='bad').length;
+  r.defects=CHECKS.filter(c=>r.checks[c.k]==='bad').length;r.newDefects=bad.length;
+  r.known={};Object.keys(known).forEach(k=>{if(kAns[k])r.known[k]=kAns[k]});
+  const pics=bad.flatMap(c=>(photos[c.k]||[]).map(d=>({item:c.k,data:d})));r.photoCount=pics.length;
+  r.noPhoto={};bad.forEach(c=>{if(c.photo&&!(photos[c.k]||[]).length&&npOn[c.k])r.noPhoto[c.k]=np[c.k].trim()});
   $('send').disabled=true;$('send').textContent='שולח...';
-  try{await ready;const res=await Store.add(r);lastReport=r;
+  try{await ready;const res=await Store.submit(r,pics,bad.map(c=>c.k));lastReport=r;
     try{localStorage.setItem('handoverLast',JSON.stringify({createdAt:r.createdAt}))}catch(e){}
     resetForm();
     showDone(res==='queued'?'אין כרגע חיבור לרשת – הדיווח נשמר בטלפון ויישלח אוטומטית כשהחיבור יחזור. אל תמחקו את נתוני הדפדפן עד אז.':'הדיווח התקבל ונשמר במערכת.')}
@@ -237,6 +322,7 @@ $('again').onclick=()=>{if(lockLeft()>0)return paintLock();$('done').hidden=true
 
 if(lockLeft()>0)showDone('כבר נשלח דיווח מהמכשיר הזה בשעה האחרונה.');
 const ready=Store.init(false).catch(e=>{$('err').textContent='אין חיבור למערכת הדיווחים: '+e.message;$('err').hidden=false;throw e});ready.catch(()=>{});
+loadVehicles();
 $('mode').innerHTML=Store.cloud?'':'⚠️ מצב ניסיון: הדוחות נשמרים רק בטלפון הזה (לא הוגדר Firebase ב-config.js)';
 </script>
 </body>

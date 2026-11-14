@@ -7,16 +7,17 @@ const OTHER = 'אחר'; // בבחירת "אחר" המאבטח כותב את סו
 const FUEL = ['מלא', 'חצי', 'רבע'];
 
 // type: 'ok' = תקין/לא תקין, 'fuel' = מלא/חצי/רבע
+// photo: true = ליקוי חדש בסעיף הזה חייב צילום (או סיבה למה אי אפשר לצלם)
 const VEHICLE = [
-  { k: 'v1', t: 'בדיקה חזותית של הרכב ואיתור נזקים' },
-  { k: 'v2', t: 'צמיגים ולחץ אוויר – בדיקה חזותית' },
-  { k: 'v3', t: 'תאורה חיצונית – פנסי תאורה, וינקרים' },
-  { k: 'v4', t: 'מראות, שמשות' },
+  { k: 'v1', t: 'בדיקה חזותית של הרכב ואיתור נזקים', photo: true },
+  { k: 'v2', t: 'צמיגים ולחץ אוויר – בדיקה חזותית', photo: true },
+  { k: 'v3', t: 'תאורה חיצונית – פנסי תאורה, וינקרים', photo: true },
+  { k: 'v4', t: 'מראות, שמשות', photo: true },
   { k: 'v5', t: 'צופר ומערכת התרעה בנסיעה לאחור' },
   { k: 'fuel', t: 'מצב מיכל הדלק', type: 'fuel' },
-  { k: 'v6', t: 'נוריות אזהרה בלוח המחוונים' },
-  { k: 'v7', t: 'ניקיון הרכב והיעדר חפצים חריגים' },
-  { k: 'v8', t: 'שלמות הריפודים ומושבים' },
+  { k: 'v6', t: 'נוריות אזהרה בלוח המחוונים', photo: true },
+  { k: 'v7', t: 'ניקיון הרכב והיעדר חפצים חריגים', photo: true },
+  { k: 'v8', t: 'שלמות הריפודים ומושבים', photo: true },
 ];
 const EQUIP = [
   { k: 'e1', t: 'מכשיר קשר – תקינות וקליטה' },
@@ -46,6 +47,11 @@ const todayISO = () => { const d = new Date(); return d.getFullYear() + '-' + pa
 const nowHM = () => { const d = new Date(); return pad(d.getHours()) + ':' + pad(d.getMinutes()) };
 const badList = r => CHECKS.filter(c => r.checks && r.checks[c.k] === 'bad');
 const statusText = k => (STATUS.find(s => s.k === k) || {}).t || '';
+const itemText = k => (CHECKS.find(c => c.k === k) || {}).t || k;
+const shortText = k => itemText(k).split(' – ')[0];
+// מפתח רכב: רק הספרות, כדי ש-12-345-67 ו-1234567 ייחשבו אותו רכב
+const vKey = v => (String(v || '').match(/\d/g) || []).join('') || String(v || '').trim().toLowerCase().replace(/[^\w\u0590-\u05FF-]/g, '_');
+const fmtTs = t => { const d = new Date(t); return pad(d.getDate()) + '.' + pad(d.getMonth() + 1) + '.' + d.getFullYear() };
 
 // ---------- שמירה: Firebase אם הוגדר, אחרת במכשיר בלבד ----------
 const LOCAL_KEY = 'handoverReports';
@@ -64,36 +70,104 @@ const Store = {
     if (!withAuth) try { await this.db.enablePersistence({ synchronizeTabs: true }) } catch (e) { }
     if (withAuth) this.auth = firebase.auth();
   },
+  // שולח דוח + תמונות + ליקויים חדשים בפעולה אחת (הכול או כלום).
   // מחזיר true אם אושר בשרת, 'queued' אם נשמר וישלח כשיחזור חיבור
-  async add(r) {
+  async submit(r, photos, newItems) {
+    const now = r.createdAt, key = r.vehicleKey;
+    const issue = k => ({ vehicleKey: key, vehicle: r.vehicle, item: k, itemText: itemText(k), status: 'open', openedAt: now,
+      reportId: r.id, giver: r.giver, receiver: r.receiver });
     if (!this.cloud) {
-      const L = localGet(); r.id = 'L' + Date.now().toString(36); L.unshift(r);
-      localStorage.setItem(LOCAL_KEY, JSON.stringify(L)); return true;
+      r.id = 'L' + Date.now().toString(36);
+      const L = localGet(); L.unshift(r); lsSet(LOCAL_KEY, L);
+      lsSet('handoverPhotos', [...lsGet('handoverPhotos', []), ...photos.map((p, i) => ({ id: r.id + 'p' + i, reportId: r.id, item: p.item, data: p.data, createdAt: now }))]);
+      const I = lsGet('handoverIssues', []), O = lsGet('handoverOpen', {}), items = (O[key] ||= { items: {} }).items;
+      newItems.forEach((k, i) => { const id = r.id + 'i' + i; I.unshift({ ...issue(k), id }); items[k] = { since: now, issueId: id } });
+      lsSet('handoverIssues', I); lsSet('handoverOpen', O); return true;
     }
-    const ref = this.db.collection('reports').doc();
+    const db = this.db, b = db.batch(), ref = db.collection('reports').doc();
     r.id = ref.id;
-    const p = ref.set({ ...r, serverAt: firebase.firestore.FieldValue.serverTimestamp() });
+    b.set(ref, { ...r, serverAt: firebase.firestore.FieldValue.serverTimestamp() });
+    photos.forEach(p => b.set(db.collection('photos').doc(), { reportId: r.id, item: p.item, data: p.data, createdAt: now }));
+    if (newItems.length) {
+      const items = {};
+      newItems.forEach(k => { const iref = db.collection('issues').doc(); b.set(iref, issue(k)); items[k] = { since: now, issueId: iref.id } });
+      b.set(db.collection('openByVehicle').doc(key), { items }, { merge: true });
+    }
+    const p = b.commit();
     return Promise.race([p.then(() => true), new Promise(res => setTimeout(() => res('queued'), 10000))]);
+  },
+  // הליקויים הפתוחים של רכב אחד: { v3: {since, issueId}, ... } - רק שם הסעיף ותאריך
+  async openIssues(key) {
+    if (!key) return {};
+    if (!this.cloud) return (lsGet('handoverOpen', {})[key] || {}).items || {};
+    try { const d = await this.db.collection('openByVehicle').doc(key).get(); return (d.exists && d.data().items) || {} } catch (e) { return {} }
+  },
+  async vehicles() {
+    const def = { list: [], main: '' };
+    if (!this.cloud) return lsGet('handoverVehicles', def);
+    try { const d = await this.db.collection('settings').doc('vehicles').get(); return d.exists ? { ...def, ...d.data() } : def } catch (e) { return def }
+  },
+  async saveVehicles(v) {
+    if (!this.cloud) { lsSet('handoverVehicles', v); return }
+    await this.db.collection('settings').doc('vehicles').set(v);
   },
   subscribe(cb, onErr) {
     if (!this.cloud) { cb(localGet()); window.addEventListener('storage', () => cb(localGet())); return }
     return this.db.collection('reports').orderBy('createdAt', 'desc').limit(2000)
       .onSnapshot(s => cb(s.docs.map(d => ({ ...d.data(), id: d.id }))), onErr);
   },
+  subscribeIssues(cb, onErr) {
+    if (!this.cloud) { cb(lsGet('handoverIssues', [])); window.addEventListener('storage', () => cb(lsGet('handoverIssues', []))); return }
+    return this.db.collection('issues').orderBy('openedAt', 'desc').limit(1000)
+      .onSnapshot(s => cb(s.docs.map(d => ({ ...d.data(), id: d.id }))), onErr);
+  },
+  // המנהל מסמן ליקוי כתוקן: הוא עובר להיסטוריה ונעלם מהטופס
+  async fixIssue(is, note, by) {
+    const upd = { status: 'fixed', fixedAt: Date.now(), fixedBy: by || '', fixNote: note || '' };
+    if (!this.cloud) {
+      lsSet('handoverIssues', lsGet('handoverIssues', []).map(x => x.id === is.id ? { ...x, ...upd } : x));
+      const O = lsGet('handoverOpen', {}), it = O[is.vehicleKey]?.items;
+      if (it && it[is.item]?.issueId === is.id) { delete it[is.item]; lsSet('handoverOpen', O) }
+      return;
+    }
+    const db = this.db, b = db.batch(), oref = db.collection('openByVehicle').doc(is.vehicleKey);
+    b.update(db.collection('issues').doc(is.id), upd);
+    const o = await oref.get();
+    if (o.exists && o.data().items?.[is.item]?.issueId === is.id) b.update(oref, { ['items.' + is.item]: firebase.firestore.FieldValue.delete() });
+    await b.commit();
+  },
+  async photosFor(reportId) {
+    if (!this.cloud) return lsGet('handoverPhotos', []).filter(p => p.reportId === reportId);
+    const s = await this.db.collection('photos').where('reportId', '==', reportId).get();
+    return s.docs.map(d => ({ ...d.data(), id: d.id }));
+  },
   async remove(id) {
-    if (!this.cloud) { localStorage.setItem(LOCAL_KEY, JSON.stringify(localGet().filter(r => r.id !== id))); return }
-    await this.db.collection('reports').doc(id).delete();
+    if (!this.cloud) {
+      lsSet(LOCAL_KEY, localGet().filter(r => r.id !== id));
+      lsSet('handoverPhotos', lsGet('handoverPhotos', []).filter(p => p.reportId !== id)); return;
+    }
+    const b = this.db.batch();
+    (await this.db.collection('photos').where('reportId', '==', id).get()).docs.forEach(d => b.delete(d.ref));
+    b.delete(this.db.collection('reports').doc(id));
+    await b.commit();
   },
 };
-function localGet() { try { return JSON.parse(localStorage.getItem(LOCAL_KEY) || '[]') } catch (e) { return [] } }
+function lsGet(k, def) { try { return JSON.parse(localStorage.getItem(k) || 'null') ?? def } catch (e) { return def } }
+function lsSet(k, v) { localStorage.setItem(k, JSON.stringify(v)) }
+function localGet() { return lsGet(LOCAL_KEY, []) }
 function loadScript(src) {
   return new Promise((ok, bad) => { const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = () => bad(new Error('טעינה נכשלה: ' + src)); document.head.appendChild(s) });
 }
 
 // ---------- תצוגת דוח מלא (משמשת לצפייה ול-PDF) ----------
-function reportHTML(r) {
-  const mark = v => v === 'ok' ? '<b class="rk ok">✓ תקין</b>' : v === 'bad' ? '<b class="rk bad">✗ לא תקין</b>' : '<b class="rk">—</b>';
-  const rows = list => list.map(c => `<tr><td>${esc(c.t)}</td><td>${c.type === 'fuel' ? `<b class="rk">${esc(r.fuel || '—')}</b>` : mark(r.checks?.[c.k])}</td></tr>`).join('');
+// photos: התמונות של הדוח (נטענות בנפרד, רק באתר המנהל)
+function reportHTML(r, photos) {
+  const known = r.known || {}, noPh = r.noPhoto || {};
+  const mark = (v, k) => v === 'ok' ? '<b class="rk ok">✓ תקין</b>' : v === 'bad' ? `<b class="rk bad">✗ לא תקין${known[k] === 'still' ? ' (ידוע)' : ''}</b>` : '<b class="rk">—</b>';
+  const rows = list => list.map(c => `<tr><td>${esc(c.t)}</td><td>${c.type === 'fuel' ? `<b class="rk">${esc(r.fuel || '—')}</b>` : mark(r.checks?.[c.k], c.k)}</td></tr>`).join('');
+  const kn = Object.keys(known).map(k => `${esc(shortText(k))} – ${known[k] === 'still' ? 'עדיין קיים' : 'לפי המאבטח: כבר לא קיים'}`).join(' · ');
+  const ph = (photos || []).map(p => `<figure><img src="${esc(p.data)}" alt=""><figcaption>${esc(shortText(p.item))}</figcaption></figure>`).join('')
+    + Object.keys(noPh).map(k => `<figure class="rnoph"><div>לא ניתן לצלם:<br>${esc(noPh[k])}</div><figcaption>${esc(shortText(k))}</figcaption></figure>`).join('');
   const sig = (img, ok, who) => `<div class="rsig"><div class="rsl">חתימת ${who}</div>${img ? `<img src="${esc(img)}" alt="">` : '<div class="rnone">לא נחתם</div>'}<div class="rsc">${ok ? '☑' : '☐'} מאשר שביצע את הבדיקות וקיבל את המידע הנדרש</div></div>`;
   const bad = badList(r).length;
   return `<div class="rep">
@@ -107,12 +181,14 @@ function reportHTML(r) {
   ${r.vNotes ? `<div class="rnote"><b>הערות / נזקים קיימים ברכב:</b> ${esc(r.vNotes)}</div>` : ''}
   <div class="rsec">03 · בדיקת ציוד ואמצעים</div><table class="rchk">${rows(EQUIP)}</table>
   <div class="rsec">04 · תיעוד ליקויים והעברת מידע</div>
+  ${kn ? `<div class="rnote"><b>ליקויים ידועים מדוחות קודמים:</b> ${kn}</div>` : ''}
   <div class="rnote"><b>פירוט התקלה / הליקוי, מועד גילוי ופעולות שננקטו:</b> ${esc(r.details) || '—'}</div>
   <table class="rgrid"><tr><th>גורם שאליו דווח</th><td>${esc(r.reportedTo) || '—'}</td><th>שעת הדיווח</th><td>${esc(r.reportTime) || '—'}</td></tr>
    <tr><th>אופן הדיווח</th><td colspan="3">${esc(r.reportMethod) || '—'}</td></tr></table>
   <div class="rsec">05 · סטטוס כשירות</div><div class="rnote">${esc(statusText(r.status)) || '—'}</div>
   <div class="rsec">06 · אישור העברת משמרת</div>
   <div class="rsigs">${sig(r.sigReceiver, r.receiverOk, 'המאבטח המקבל')}</div>
+  ${ph ? `<div class="rsec">תמונות ליקויים</div><div class="rph">${ph}</div>` : ''}
   <div class="rfoot">נשלח: ${r.createdAt ? new Date(r.createdAt).toLocaleString('he-IL') : ''} · מזהה: ${esc(r.id || '')}</div>
  </div>`;
 }
@@ -133,7 +209,11 @@ const REPORT_CSS = `
 .rsigs{display:flex;gap:14px}.rsig{flex:0 1 50%;border:1px solid #d5dde8;border-radius:8px;padding:8px}
 .rsl{font-weight:700;font-size:12px;color:#4a5a70}.rsig img{display:block;width:100%;height:95px;object-fit:contain}
 .rnone{height:95px;display:flex;align-items:center;justify-content:center;color:#b3261e;font-weight:700}
-.rsc{font-size:11.5px;color:#4a5a70}.rfoot{margin-top:14px;color:#8a97a8;font-size:11px;text-align:center}`;
+.rsc{font-size:11.5px;color:#4a5a70}
+.rph{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.rph figure{margin:0;border:1px solid #d5dde8;border-radius:6px;padding:4px;break-inside:avoid}
+.rph img,.rnoph div{display:block;width:100%;height:160px;object-fit:cover;border-radius:4px}
+.rnoph div{display:flex;align-items:center;justify-content:center;text-align:center;background:#f6f8fb;color:#4a5a70;font-size:12px;padding:6px}
+.rph figcaption{font-size:11px;font-weight:700;color:#4a5a70;padding-top:3px}.rfoot{margin-top:14px;color:#8a97a8;font-size:11px;text-align:center}`;
 
 // ---------- PDF ----------
 async function reportsToPDF(list, filename) {
@@ -145,7 +225,9 @@ async function reportsToPDF(list, filename) {
   document.body.appendChild(host);
   try {
     for (let i = 0; i < list.length; i++) {
-      host.innerHTML = reportHTML(list[i]);
+      let photos = list[i]._photos;
+      if (!photos) try { photos = await Store.photosFor(list[i].id) } catch (e) { photos = [] }
+      host.innerHTML = reportHTML(list[i], photos);
       await Promise.all([...host.querySelectorAll('img')].map(im => im.complete ? 0 : new Promise(r => { im.onload = im.onerror = r })));
       const cv = await html2canvas(host.firstElementChild, { scale: 2, backgroundColor: '#fff', useCORS: true });
       const pageH = Math.floor(cv.width * H / W); // גובה עמוד בפיקסלים של הקנבס
