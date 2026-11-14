@@ -26,7 +26,7 @@ main{max-width:1100px;margin:0 auto;padding:16px 16px 60px}
 .loading{text-align:center;color:var(--mut);font-weight:700}
 .remember{display:flex;align-items:center;gap:8px;margin-top:12px;font-weight:700;font-size:.9rem;cursor:pointer}
 .remember input{width:20px;height:20px;min-height:0}
-.info{margin-top:10px;color:var(--warn);font-weight:700;font-size:.9rem}
+
 input,select{width:100%;font:inherit;color:inherit;background:var(--field);border:1.5px solid var(--line);border-radius:12px;padding:10px 12px;min-height:44px;outline:0}
 input:focus,select:focus{border-color:var(--acc);background:#fff}
 label.f{display:block;font-weight:700;font-size:.85rem;margin:10px 0 4px;color:#2c3e57}
@@ -115,7 +115,6 @@ dialog::backdrop{background:rgba(10,20,35,.55)}
   <label class="f" for="pass">סיסמה</label><input id="pass" type="password" autocomplete="current-password" dir="ltr" required>
   <label class="remember"><input type="checkbox" id="remember">זכור אותי (ימלא את האימייל והסיסמה בכניסה הבאה)</label>
   <button class="btn" style="width:100%;margin-top:14px">כניסה</button>
-  <div class="info" id="loginInfo"></div>
   <div class="msg" id="loginMsg"></div>
   <button type="button" class="lnk" id="forgot" style="margin-top:8px">שכחתי סיסמה / קביעת סיסמה ראשונה</button>
  </form>
@@ -270,11 +269,11 @@ function start(){clearTimeout(slowT);$('loading').hidden=true;$('login').hidden=
     if(unsub){unsub();unsub=null}
     $('logout').hidden=$('accBtn').hidden=!u;$('who').textContent=u?u.email:'';
     if(!u&&accUnsub){accUnsub();accUnsub=null;ADMINS=[]}
-    if(u&&idleExpired()){$('loginInfo').textContent=`נותקת אוטומטית אחרי ${IDLE_MIN} דקות ללא פעילות. יש להתחבר מחדש.`;Store.auth.signOut();return}
+    if(u&&idleExpired()){Store.auth.signOut();return}
     if(u)start();else showLogin()});
   $('login').onsubmit=async e=>{e.preventDefault();$('loginMsg').textContent='';
     const em=$('email').value.trim(),pw=$('pass').value;
-    try{touch(true);await Store.auth.signInWithEmailAndPassword(em,pw);saveRemembered(em,pw);$('pass').value='';$('loginInfo').textContent=''}
+    try{touch(true);await Store.auth.signInWithEmailAndPassword(em,pw);saveRemembered(em,pw);$('pass').value=''}
     catch(err){$('loginMsg').textContent=/invalid|wrong|not-found|credential/.test(err.code||'')?'אימייל או סיסמה שגויים':'הכניסה נכשלה: '+err.message}};
   $('logout').onclick=()=>{try{localStorage.removeItem(ACT_KEY)}catch(e){}Store.auth.signOut()};
   Store.auth.languageCode='he';
@@ -289,8 +288,7 @@ const IDLE_MIN=30,ACT_KEY='adminLastActive';
 let lastTouch=0;
 function touch(force){const n=Date.now();if(!force&&n-lastTouch<30000)return;lastTouch=n;try{localStorage.setItem(ACT_KEY,n)}catch(e){}}
 function idleExpired(){let t=0;try{t=+localStorage.getItem(ACT_KEY)||0}catch(e){}return Date.now()-t>IDLE_MIN*60000}
-function checkIdle(){if(Store.auth?.currentUser&&idleExpired()){Store.auth.signOut();
-  $('loginInfo').textContent=`נותקת אוטומטית אחרי ${IDLE_MIN} דקות ללא פעילות. יש להתחבר מחדש.`}}
+function checkIdle(){if(Store.auth?.currentUser&&idleExpired())Store.auth.signOut()}
 ['pointerdown','keydown','scroll','touchstart'].forEach(ev=>addEventListener(ev,()=>{if(!idleExpired())touch()},{passive:true}));
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)checkIdle()});
 setInterval(checkIdle,60000);
