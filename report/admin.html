@@ -269,11 +269,11 @@ $('pdfSel').onclick=()=>{
   if(list.length>60&&!confirm(`להכין PDF של ${list.length} דוחות? זה עשוי לקחת זמן.`))return;
   busy(`מכין PDF של ${list.length} דוחות...`,()=>reportsToPDF(list,list.length===1?pdfName(list[0]):`shift-handover-reports_${fileTag()}.pdf`))};
 $('csv').onclick=()=>{
-  const head=['תאריך','שעה','משמרת','רכב','מאבטח מוסר','מאבטח מקבל',...VEHICLE.map(c=>c.t),...EQUIP.map(c=>c.t),'הערות רכב','פירוט ליקוי','דווח ל','שעת דיווח','אופן דיווח','סטטוס','ליקויים ידועים – עדיין קיימים','ליקויים ידועים – כבר לא קיימים','מספר תמונות','נשלח'];
-  const kn=(r,v)=>Object.keys(r.known||{}).filter(k=>r.known[k]===v).map(shortText).join(', ');
+  const head=['תאריך','שעה','משמרת','רכב','מאבטח מוסר','מאבטח מקבל',...VEHICLE.map(c=>c.t),...EQUIP.map(c=>c.t),'הערות רכב','פירוט ליקוי','דווח ל','שעת דיווח','אופן דיווח','סטטוס','ליקויים פתוחים מדוחות קודמים','מספר תמונות','נשלח'];
+  const kn=r=>Object.keys(r.known||{}).map(shortText).join(', ');
   const v=x=>x==='ok'?'תקין':x==='bad'?'לא תקין':'';
   const lines=VIEW.map(r=>[fmtDate(r.date),r.time,r.shift,r.vehicle,r.giver,r.receiver,...VEHICLE.map(c=>c.type==='fuel'?r.fuel:v(r.checks?.[c.k])),...EQUIP.map(c=>v(r.checks?.[c.k])),
-    r.vNotes,r.details,r.reportedTo,r.reportTime,r.reportMethod,statusText(r.status),kn(r,'still'),kn(r,'gone'),r.photoCount||0,r.createdAt?new Date(r.createdAt).toLocaleString('he-IL'):'']);
+    r.vNotes,r.details,r.reportedTo,r.reportTime,r.reportMethod,statusText(r.status),kn(r),r.photoCount||0,r.createdAt?new Date(r.createdAt).toLocaleString('he-IL'):'']);
   const csv='﻿'+[head,...lines].map(l=>l.map(x=>'"'+String(x??'').replace(/"/g,'""')+'"').join(',')).join('\r\n');
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.download=`shift-handover-reports_${fileTag()}.csv`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),2000)};
 
@@ -329,23 +329,16 @@ function start(){clearTimeout(slowT);$('loading').hidden=true;$('login').hidden=
 })();
 
 // ----- ליקויים פתוחים / שתוקנו -----
-// "נראה לאחרונה" ו"כבר לא קיים" מחושבים מהדוחות של אותו רכב אחרי פתיחת הליקוי
-function issueStats(is){
-  const R=ALL.filter(r=>(r.vehicleKey||vKey(r.vehicle))===is.vehicleKey&&r.createdAt>is.openedAt&&r.id!==is.reportId);
-  const still=R.filter(r=>r.known?.[is.item]==='still'||r.checks?.[is.item]==='bad');
-  const last=Math.max(is.openedAt,...still.map(r=>r.createdAt));
-  const gone=R.filter(r=>r.known?.[is.item]==='gone'&&r.createdAt>last).sort((a,b)=>b.createdAt-a.createdAt)[0];
-  return{n:still.length,last,gone}}
+const daysSince=t=>Math.floor((Date.now()-t)/864e5);
 function renderIssues(){
   const open=ISSUES.filter(i=>i.status==='open'),fixed=ISSUES.filter(i=>i.status==='fixed');
   $('iOpenBtn').textContent=`פתוחים (${open.length})`;$('iFixedBtn').textContent=`תוקנו (${fixed.length})`;
   $('iOpenBtn').classList.toggle('on',issMode==='open');$('iFixedBtn').classList.toggle('on',issMode==='fixed');
   const L=(issMode==='open'?open:fixed).sort((a,b)=>issMode==='open'?a.openedAt-b.openedAt:b.fixedAt-a.fixedAt);
-  $('issList').innerHTML=L.length?L.map(is=>{const st=issueStats(is);return`<div class="iss${is.status==='fixed'?' fixed':''}">
+  $('issList').innerHTML=L.length?L.map(is=>{return`<div class="iss${is.status==='fixed'?' fixed':''}">
     <div class="ih"><b>${esc(is.itemText||itemText(is.item))}</b><span class="tag warn">רכב ${esc(is.vehicle)}</span></div>
     <div class="im">נפתח ${fmtTs(is.openedAt)} · דיווחו: ${esc(is.giver)} ← ${esc(is.receiver)}</div>
-    <div class="im">נראה לאחרונה ${fmtTs(st.last)}${st.n?` · אושר "עדיין קיים" ${st.n} פעמים`:''}</div>
-    ${is.status==='open'&&st.gone?`<div class="iw">⚠ מאבטח דיווח ב-${fmtTs(st.gone.createdAt)} שהליקוי כבר לא קיים – כדאי לבדוק ולסמן "תוקן"</div>`:''}
+    ${is.status==='open'?`<div class="im">פתוח ${daysSince(is.openedAt)} ימים</div>`:''}
     ${is.status==='fixed'?`<div class="iok">✓ תוקן ${fmtTs(is.fixedAt)}${is.fixedBy?' · '+esc(is.fixedBy):''}${is.fixNote?' · '+esc(is.fixNote):''}</div>`:''}
     <div class="ia"><button class="btn sec" data-iph="${esc(is.id)}">תמונות</button><button class="btn sec" data-irep="${esc(is.reportId)}">הדוח המקורי</button>
      ${is.status==='open'?`<button class="btn" data-fix="${esc(is.id)}">✓ תוקן</button>`:''}</div>

@@ -163,9 +163,9 @@ function loadScript(src) {
 // photos: התמונות של הדוח (נטענות בנפרד, רק באתר המנהל)
 function reportHTML(r, photos) {
   const known = r.known || {}, noPh = r.noPhoto || {};
-  const mark = (v, k) => v === 'ok' ? '<b class="rk ok">✓ תקין</b>' : v === 'bad' ? `<b class="rk bad">✗ לא תקין${known[k] === 'still' ? ' (ידוע)' : ''}</b>` : '<b class="rk">—</b>';
+  const mark = (v, k) => v === 'ok' ? '<b class="rk ok">✓ תקין</b>' : v === 'bad' ? `<b class="rk bad">✗ לא תקין${known[k] ? ' (ידוע)' : ''}</b>` : '<b class="rk">—</b>';
   const rows = list => list.map(c => `<tr><td>${esc(c.t)}</td><td>${c.type === 'fuel' ? `<b class="rk">${esc(r.fuel || '—')}</b>` : mark(r.checks?.[c.k], c.k)}</td></tr>`).join('');
-  const kn = Object.keys(known).map(k => `${esc(shortText(k))} – ${known[k] === 'still' ? 'עדיין קיים' : 'לפי המאבטח: כבר לא קיים'}`).join(' · ');
+  const kn = Object.keys(known).map(k => esc(shortText(k))).join(' · ');
   const ph = (photos || []).map(p => `<figure><img src="${esc(p.data)}" alt=""><figcaption>${esc(shortText(p.item))}</figcaption></figure>`).join('')
     + Object.keys(noPh).map(k => `<figure class="rnoph"><div>לא ניתן לצלם:<br>${esc(noPh[k])}</div><figcaption>${esc(shortText(k))}</figcaption></figure>`).join('');
   const sig = (img, ok, who) => `<div class="rsig"><div class="rsl">חתימת ${who}</div>${img ? `<img src="${esc(img)}" alt="">` : '<div class="rnone">לא נחתם</div>'}<div class="rsc">${ok ? '☑' : '☐'} מאשר שביצע את הבדיקות וקיבל את המידע הנדרש</div></div>`;
@@ -181,7 +181,7 @@ function reportHTML(r, photos) {
   ${r.vNotes ? `<div class="rnote"><b>הערות / נזקים קיימים ברכב:</b> ${esc(r.vNotes)}</div>` : ''}
   <div class="rsec">03 · בדיקת ציוד ואמצעים</div><table class="rchk">${rows(EQUIP)}</table>
   <div class="rsec">04 · תיעוד ליקויים והעברת מידע</div>
-  ${kn ? `<div class="rnote"><b>ליקויים ידועים מדוחות קודמים:</b> ${kn}</div>` : ''}
+  ${kn ? `<div class="rnote"><b>ליקויים פתוחים מדוחות קודמים (ממתינים לתיקון):</b> ${kn}</div>` : ''}
   <div class="rnote"><b>פירוט התקלה / הליקוי, מועד גילוי ופעולות שננקטו:</b> ${esc(r.details) || '—'}</div>
   <table class="rgrid"><tr><th>גורם שאליו דווח</th><td>${esc(r.reportedTo) || '—'}</td><th>שעת הדיווח</th><td>${esc(r.reportTime) || '—'}</td></tr>
    <tr><th>אופן הדיווח</th><td colspan="3">${esc(r.reportMethod) || '—'}</td></tr></table>

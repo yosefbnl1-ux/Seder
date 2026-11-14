@@ -75,7 +75,7 @@ textarea{min-height:110px;resize:vertical}
 .kh{font-weight:800;color:#8a5a00}.kp{margin:4px 0 6px;font-size:.85rem;color:#6b5a30}
 .kr{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:10px 0;border-top:1px solid #f0e2b8}
 .kr .q{flex:1 1 140px;font-size:.95rem}.kr small{display:block;color:var(--mut);font-size:.8rem}
-.kr.invalid{box-shadow:none;outline:2px solid var(--bad);outline-offset:2px;border-radius:10px}
+.opts button:disabled{opacity:.85;cursor:default}
 .mode a{color:var(--acc)}
 </style>
 </head>
@@ -161,7 +161,7 @@ const ans={};let fuel='';
 function rowHTML(c){
   const btns=c.type==='fuel'?FUEL.map(f=>`<button type="button" class="n" data-fuel="${f}">${f}</button>`).join('')
     :`<button type="button" class="ok" data-k="${c.k}" data-v="ok">תקין</button><button type="button" class="bad" data-k="${c.k}" data-v="bad">לא תקין</button>`;
-  return `<div class="row" id="row_${c.k}"><div class="q">${esc(c.t)}${c.type==='fuel'?'':`<span class="ktag" id="kt_${c.k}" hidden>ליקוי ידוע</span>`}</div><div class="opts">${btns}</div></div>`
+  return `<div class="row" id="row_${c.k}"><div class="q">${esc(c.t)}${c.type==='fuel'?'':`<span class="ktag" id="kt_${c.k}" hidden>ליקוי ידוע – כבר דווח</span>`}</div><div class="opts">${btns}</div></div>`
     +(c.type==='fuel'?'':`<div class="ph" id="ph_${c.k}" hidden></div>`)}
 $('vehicleRows').innerHTML=VEHICLE.map(rowHTML).join('');
 $('equipRows').innerHTML=EQUIP.map(rowHTML).join('');
@@ -169,7 +169,7 @@ $('statusRows').innerHTML=STATUS.map(s=>`<label class="chk"><input type="radio" 
 function paintRows(){
   document.querySelectorAll('[data-k]').forEach(b=>b.classList.toggle('on',ans[b.dataset.k]===b.dataset.v));
   document.querySelectorAll('[data-fuel]').forEach(b=>b.classList.toggle('on',fuel===b.dataset.fuel));
-  CHECKS.forEach(c=>{$('kt_'+c.k).hidden=!known[c.k];const show=ans[c.k]==='bad'&&!known[c.k];$('ph_'+c.k).hidden=!show;if(show)renderPh(c)})}
+  CHECKS.forEach(c=>{$('kt_'+c.k).hidden=!known[c.k];$('row_'+c.k).querySelectorAll('[data-k]').forEach(b=>b.disabled=!!known[c.k]);const show=ans[c.k]==='bad'&&!known[c.k];$('ph_'+c.k).hidden=!show;if(show)renderPh(c)})}
 
 // ----- צילום ליקויים: ליקוי חדש בסעיף שרואים בעין חייב תמונה, או סיבה למה אי אפשר -----
 const photos={},np={},npOn={};
@@ -186,15 +186,18 @@ async function shrink(file){const url=URL.createObjectURL(file);try{
   let q=.7,d=cv.toDataURL('image/jpeg',q);while(d.length>500000&&q>.3){q-=.15;d=cv.toDataURL('image/jpeg',q)}return d}finally{URL.revokeObjectURL(url)}}
 
 // ----- ליקויים ידועים: ליקויים פתוחים של הרכב שנבחר (רק שם הסעיף ותאריך) -----
-let known={},kAns={};
+// המאבטח רק רואה אותם: הסעיף נעול על "לא תקין", ורק המנהל מסמן "תוקן" באתר המנהל
+let known={};
 function renderKnown(){const ks=Object.keys(known).filter(k=>CHECKS.some(c=>c.k===k));$('known').hidden=!ks.length;if(!ks.length)return;
-  $('known').innerHTML=`<div class="kh">ליקויים ידועים ברכב הזה</div><p class="kp">דווחו בעבר ועוד לא תוקנו. סמנו לכל אחד אם הוא עדיין קיים.</p>`
-   +ks.map(k=>`<div class="kr" id="kr_${k}"><div class="q">${esc(itemText(k))}<small>מדווח מ-${fmtTs(known[k].since)}</small></div><div class="opts">
-     <button type="button" class="bad${kAns[k]==='still'?' on':''}" data-kn="${k}" data-v="still">עדיין קיים</button><button type="button" class="ok${kAns[k]==='gone'?' on':''}" data-kn="${k}" data-v="gone">כבר לא קיים</button></div></div>`).join('')}
+  $('known').innerHTML=`<div class="kh">ליקויים ידועים ברכב הזה</div><p class="kp">כבר דווחו וממתינים לתיקון. אין צורך לדווח עליהם שוב.</p>`
+   +ks.map(k=>`<div class="kr" id="kr_${k}"><div class="q">${esc(itemText(k))}<small>מדווח מ-${fmtTs(known[k].since)}</small></div></div>`).join('')}
 let lkSeq=0;
 async function loadKnown(){const key=vKey(curVehicle()),seq=++lkSeq;let o={};
   if(key){await ready.catch(()=>{});o=await Store.openIssues(key)}
-  if(seq!==lkSeq)return;known=o||{};for(const k in kAns)if(!known[k])delete kAns[k];renderKnown();paintRows()}
+  if(seq!==lkSeq)return;
+  for(const k in known)if(!o?.[k]&&ans[k]==='bad')delete ans[k]; // רכב אחר: משחררים סעיפים שננעלו
+  known=o||{};for(const k in known)if(CHECKS.some(c=>c.k===k))ans[k]='bad';
+  renderKnown();paintRows()}
 
 // ----- רכב: הרכב הקבוע בחור מראש, "רכב אחר" פותח שדה טקסט -----
 const OTHERV='__other';let draftVeh=null;
@@ -211,15 +214,11 @@ async function loadVehicles(){await ready.catch(()=>{});VEH=await Store.vehicles
 $('vehicleSel').addEventListener('change',()=>{draftVeh=$('vehicleSel').value;$('vehicleSel').classList.remove('invalid');paintVehicle(true);loadKnown()});
 let vT=0;$('vehicle').addEventListener('input',()=>{clearTimeout(vT);vT=setTimeout(loadKnown,600)});
 document.addEventListener('click',e=>{
-  const kb=e.target.closest('[data-kn]');
-  if(kb){const k=kb.dataset.kn;kAns[k]=kb.dataset.v;ans[k]=kb.dataset.v==='still'?'bad':'ok';$('row_'+k).classList.remove('invalid');
-    renderKnown();paintRows();saveDraft();return}
   const rm=e.target.closest('[data-rmph]');
   if(rm){photos[rm.dataset.rmph].splice(+rm.dataset.i,1);paintRows();saveDraft();return}
   const b=e.target.closest('[data-k],[data-fuel]');if(!b)return;
   if(b.dataset.fuel){fuel=fuel===b.dataset.fuel?'':b.dataset.fuel;$('row_fuel').classList.remove('invalid')}
-  else{const k=b.dataset.k;ans[k]=ans[k]===b.dataset.v?undefined:b.dataset.v;$('row_'+k).classList.remove('invalid');
-    if(known[k]){kAns[k]=ans[k]==='bad'?'still':ans[k]==='ok'?'gone':undefined;if(!kAns[k])delete kAns[k];renderKnown()}}
+  else{const k=b.dataset.k;if(known[k])return;ans[k]=ans[k]===b.dataset.v?undefined:b.dataset.v;$('row_'+k).classList.remove('invalid')}
   paintRows();saveDraft()});
 
 // ----- חתימות -----
@@ -249,14 +248,14 @@ document.querySelectorAll('.clear').forEach(b=>b.onclick=()=>pads[b.dataset.pad]
 
 // ----- טיוטה (רק במכשיר הזה, בלי חתימות) -----
 const TXT=['shift','shiftOther','vehicle','giver','receiver','vNotes','details','reportedTo','reportTime','reportMethod'];
-function saveDraft(){try{const d={ans,fuel,kAns,np,npOn,vehicleSel:$('vehicleSel').hidden?draftVeh:$('vehicleSel').value,status:(document.querySelector('[name=status]:checked')||{}).value};TXT.forEach(k=>d[k]=$(k).value);
+function saveDraft(){try{const d={ans,fuel,np,npOn,vehicleSel:$('vehicleSel').hidden?draftVeh:$('vehicleSel').value,status:(document.querySelector('[name=status]:checked')||{}).value};TXT.forEach(k=>d[k]=$(k).value);
   // תמונות נשמרות בטיוטה אם יש מקום בזיכרון הדפדפן
   try{localStorage.setItem('handoverDraft',JSON.stringify({...d,photos}))}catch(e){localStorage.setItem('handoverDraft',JSON.stringify(d))}}catch(e){}}
 function loadDraft(){try{const d=JSON.parse(localStorage.getItem('handoverDraft')||'null');if(!d)return;
   TXT.forEach(k=>{if(d[k])$(k).value=d[k]});Object.assign(ans,d.ans||{});fuel=d.fuel||'';
-  Object.assign(kAns,d.kAns||{});Object.assign(photos,d.photos||{});Object.assign(np,d.np||{});Object.assign(npOn,d.npOn||{});draftVeh=d.vehicleSel??null;
+  Object.assign(photos,d.photos||{});Object.assign(np,d.np||{});Object.assign(npOn,d.npOn||{});draftVeh=d.vehicleSel??null;
   if(d.status){const r=document.querySelector(`[name=status][value="${d.status}"]`);if(r)r.checked=true}}catch(e){}}
-function resetForm(){$('form').reset();for(const o of [ans,kAns,photos,np,npOn])for(const k in o)delete o[k];fuel='';draftVeh=null;Object.values(pads).forEach(p=>p.clear());
+function resetForm(){$('form').reset();known={};for(const o of [ans,photos,np,npOn])for(const k in o)delete o[k];fuel='';draftVeh=null;Object.values(pads).forEach(p=>p.clear());
   pickVehicle(VEH);paintVehicle();loadKnown();
   $('date').value=todayISO();$('time').value=nowHM();try{localStorage.removeItem('handoverDraft')}catch(e){}paintRows();paintShift()}
 $('form').addEventListener('change',async e=>{const t=e.target;
@@ -278,9 +277,7 @@ function validate(){
   if(!fuel){$('row_fuel').classList.add('invalid');miss.push('מצב מיכל הדלק')}
   const status=(document.querySelector('[name=status]:checked')||{}).value;
   if(!status)miss.push('סטטוס כשירות (סעיף 05)');
-  const ku=Object.keys(known).filter(k=>!kAns[k]);ku.forEach(k=>$('kr_'+k)?.classList.add('invalid'));
-  if(ku.length)miss.push('לסמן "עדיין קיים" או "כבר לא קיים" בליקויים הידועים (סעיף 04)');
-  // ליקוי ידוע שעדיין קיים הוא לא ליקוי חדש: לא דורש פירוט, צילום, ולא סותר "ללא ליקויים חדשים"
+  // ליקוי ידוע הוא לא ליקוי חדש: לא דורש פירוט, צילום, ולא סותר "ללא ליקויים חדשים"
   const bad=CHECKS.filter(c=>ans[c.k]==='bad'&&!known[c.k]);
   if(bad.length&&status==='ok')miss.push('סומן ליקוי חדש ("לא תקין") אבל הסטטוס הוא "ללא ליקויים חדשים" – יש לתקן');
   if(bad.length&&!$('vNotes').value.trim()&&!$('details').value.trim()){$('details').classList.add('invalid');miss.push('פירוט הליקויים שסומנו "לא תקין"')}
@@ -308,7 +305,7 @@ $('form').addEventListener('submit',async e=>{
     checks:{...ans},fuel,vNotes:$('vNotes').value.trim(),details:$('details').value.trim(),reportedTo:$('reportedTo').value.trim(),reportTime:$('reportTime').value,reportMethod:$('reportMethod').value.trim(),
     status,receiverOk:true,sigReceiver:pads.padReceiver.data,createdAt:Date.now()};
   r.defects=CHECKS.filter(c=>r.checks[c.k]==='bad').length;r.newDefects=bad.length;
-  r.known={};Object.keys(known).forEach(k=>{if(kAns[k])r.known[k]=kAns[k]});
+  r.known={};Object.keys(known).forEach(k=>{if(CHECKS.some(c=>c.k===k))r.known[k]='open'});
   const pics=bad.flatMap(c=>(photos[c.k]||[]).map(d=>({item:c.k,data:d})));r.photoCount=pics.length;
   r.noPhoto={};bad.forEach(c=>{if(c.photo&&!(photos[c.k]||[]).length&&npOn[c.k])r.noPhoto[c.k]=np[c.k].trim()});
   $('send').disabled=true;$('send').textContent='שולח...';
