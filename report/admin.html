@@ -260,8 +260,8 @@ const slowT=setTimeout(()=>{$('slow').hidden=false},12000);
 function showLogin(){clearTimeout(slowT);$('loading').hidden=true;$('app').hidden=true;$('login').hidden=false;fillRemembered()}
 function start(){clearTimeout(slowT);$('loading').hidden=true;$('login').hidden=true;$('app').hidden=false;
   unsub=Store.subscribe(list=>{ALL=list;render()},e=>{
-    showLogin();
-    $('loginMsg').textContent=e.code==='permission-denied'?'למשתמש הזה אין הרשאה לאתר המנהל. בקשו ממנהל להוסיף אתכם ב"ניהול גישה".':'שגיאה בטעינת הדוחות: '+e.message})}
+    unsub=null;showLogin();
+    $('loginMsg').textContent=(e.code==='permission-denied'?`למשתמש ${me()} אין הרשאה לאתר המנהל. בקשו מהבעלים להוסיף אתכם ב"ניהול גישה", או לחצו "יציאה" והיכנסו עם משתמש אחר.`:'שגיאה בטעינת הדוחות: '+e.message)+(e.code?` (${e.code})`:'')})}
 (async()=>{
   if(!Store.cloud){$('localBanner').hidden=false;start();return}
   try{await Store.init(true)}catch(e){clearTimeout(slowT);$('loading').hidden=true;$('localBanner').hidden=false;$('localBanner').textContent='אין חיבור למערכת: '+e.message;return}
@@ -273,7 +273,8 @@ function start(){clearTimeout(slowT);$('loading').hidden=true;$('login').hidden=
     if(u)start();else showLogin()});
   $('login').onsubmit=async e=>{e.preventDefault();$('loginMsg').textContent='';
     const em=$('email').value.trim(),pw=$('pass').value;
-    try{touch(true);await Store.auth.signInWithEmailAndPassword(em,pw);saveRemembered(em,pw);$('pass').value=''}
+    try{touch(true);await Store.auth.signInWithEmailAndPassword(em,pw);saveRemembered(em,pw);$('pass').value='';
+      if(Store.auth.currentUser&&!unsub)start()}
     catch(err){$('loginMsg').textContent=/invalid|wrong|not-found|credential/.test(err.code||'')?'אימייל או סיסמה שגויים':'הכניסה נכשלה: '+err.message}};
   $('logout').onclick=()=>{try{localStorage.removeItem(ACT_KEY)}catch(e){}Store.auth.signOut()};
   Store.auth.languageCode='he';
