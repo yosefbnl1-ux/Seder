@@ -285,9 +285,10 @@ function start(){clearTimeout(slowT);$('loading').hidden=true;$('login').hidden=
 
 // ----- ניתוק אוטומטי אחרי זמן ללא פעילות -----
 const IDLE_MIN=30,ACT_KEY='adminLastActive';
-let lastTouch=0;
-function touch(force){const n=Date.now();if(!force&&n-lastTouch<30000)return;lastTouch=n;try{localStorage.setItem(ACT_KEY,n)}catch(e){}}
-function idleExpired(){let t=0;try{t=+localStorage.getItem(ACT_KEY)||0}catch(e){}return Date.now()-t>IDLE_MIN*60000}
+// זמן הפעילות נשמר גם בזיכרון: אם הדפדפן חוסם שמירה, אסור שזה ינתק מיד אחרי כניסה
+let lastTouch=0,memAct=0;
+function touch(force){const n=Date.now();memAct=n;if(!force&&n-lastTouch<30000)return;lastTouch=n;try{localStorage.setItem(ACT_KEY,n)}catch(e){}}
+function idleExpired(){let t=0;try{t=+localStorage.getItem(ACT_KEY)||0}catch(e){}return Date.now()-Math.max(t,memAct)>IDLE_MIN*60000}
 function checkIdle(){if(Store.auth?.currentUser&&idleExpired())Store.auth.signOut()}
 ['pointerdown','keydown','scroll','touchstart'].forEach(ev=>addEventListener(ev,()=>{if(!idleExpired())touch()},{passive:true}));
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)checkIdle()});
@@ -302,7 +303,7 @@ async function fillRemembered(){let on=false;try{on=localStorage.getItem('adminR
   $('remember').checked=on;if(!on)return;
   if(!$('email').value)$('email').value=localStorage.getItem('adminEmail')||'';
   try{if(window.PasswordCredential&&!$('pass').value){const c=await navigator.credentials.get({password:true,mediation:'silent'});
-    if(c&&c.password){$('email').value=c.id;$('pass').value=c.password}}}catch(e){}}
+    if(c&&c.password&&!$('pass').value){$('email').value=c.id;$('pass').value=c.password}}}catch(e){}}
 
 // ----- ניהול גישה: רשימת מנהלים נשמרת ב-Firestore (admins/<email>) -----
 const OWNERS=(window.OWNER_EMAILS||[]).map(e=>e.toLowerCase());
