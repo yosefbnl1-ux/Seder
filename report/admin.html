@@ -15,11 +15,11 @@
 body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.5 "Segoe UI",Arial,"Helvetica Neue",system-ui,sans-serif}
 button{font:inherit;cursor:pointer;color:inherit}
 .top{background:var(--ink);color:#fff;padding:calc(env(safe-area-inset-top,0px) + 12px) 16px 12px}
-.top .in{max-width:1100px;margin:0 auto;display:flex;align-items:center;gap:12px}
+.top .in{max-width:1280px;margin:0 auto;display:flex;align-items:center;gap:12px}
 .top img{width:44px;height:44px;background:#fff;border-radius:10px;padding:3px;object-fit:contain}
 .top h1{margin:0;font-size:1.15rem;flex:1;line-height:1.2}.top h1 small{display:block;font-weight:400;opacity:.75;font-size:.8rem}
 .top button{background:rgba(255,255,255,.14);border:0;color:#fff;border-radius:10px;padding:8px 12px;font-weight:700;font-size:.85rem}
-main{max-width:1100px;margin:0 auto;padding:16px 16px 60px}
+main{max-width:1280px;margin:0 auto;padding:16px 16px 60px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px}
 .login{max-width:380px;margin:40px auto}
 .login h2{margin:0 0 12px;color:var(--ink)}
@@ -36,7 +36,6 @@ label.f{display:block;font-weight:700;font-size:.85rem;margin:10px 0 4px;color:#
 .btn:disabled{opacity:.5;cursor:default}
 .msg{margin-top:10px;color:var(--bad);font-weight:700;font-size:.9rem}
 .banner{background:var(--warnbg);color:var(--warn);border-radius:12px;padding:10px 14px;margin-bottom:14px;font-size:.9rem;font-weight:600}
-.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:14px}
 .top .in{flex-wrap:wrap}
 .itog{display:flex;gap:8px;margin-bottom:12px}
 .itog button{border:1.5px solid var(--line);background:#fff;border-radius:20px;padding:8px 16px;font-weight:700}
@@ -52,25 +51,9 @@ label.f{display:block;font-weight:700;font-size:.85rem;margin:10px 0 4px;color:#
 #imgDlg{max-width:min(900px,96vw);background:#111}#imgDlg img{display:block;max-width:100%;max-height:86vh;margin:auto}
 #vehDlg{max-width:min(480px,96vw);background:#fff}
 .vstar{background:none;border:0;font-size:1.3rem;padding:0 4px;min-height:36px}
-.stat{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px 14px}
-.stat b{display:block;font-size:1.7rem;line-height:1.1;color:var(--ink);font-variant-numeric:tabular-nums}
-.stat span{color:var(--mut);font-size:.85rem;font-weight:600}
-.stat.bad b{color:var(--bad)}
-button.stat{font:inherit;text-align:right;cursor:pointer;position:relative}
-button.stat::after{content:"‹";position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:1.6rem;color:#a9b6c6}
-button.stat:hover{border-color:var(--acc);background:#f6f9fd}
-button.stat.on{border-color:var(--ink);box-shadow:0 0 0 2px var(--ink) inset}
-.filters{display:grid;grid-template-columns:2fr 1fr 1fr 1fr auto;gap:10px;align-items:end;margin-bottom:12px}
-.folders{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px}
-.folder{display:flex;align-items:center;gap:12px;text-align:right;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 16px;min-height:76px}
-.folder:hover{border-color:var(--acc);background:#f6f9fd}
-.folder .ic{font-size:2rem;line-height:1}
-.folder b{display:block;font-size:1.05rem;color:var(--ink)}
-.folder span{color:var(--mut);font-size:.85rem}.folder .bd{color:var(--bad);font-weight:700}
 .crumbs{display:flex;align-items:center;gap:10px;margin-bottom:10px;font-size:1.1rem}
 .crumbs b{color:var(--ink)}
 .lnk{background:none;border:0;color:var(--acc);font-weight:800;padding:6px 0}
-.filters label.f{margin-top:0}
 .filters>*,.filters input,.filters select{min-width:0}
 .tog{display:flex;align-items:center;gap:8px;min-height:44px;font-weight:700;font-size:.9rem;white-space:nowrap;cursor:pointer}
 .tog input{width:20px;height:20px;min-height:0}
@@ -100,12 +83,67 @@ dialog::backdrop{background:rgba(10,20,35,.55)}
 .alist .tag{direction:rtl}
 .okmsg{color:var(--ok);font-weight:700;font-size:.9rem;margin-top:10px}
 .dview{padding:14px;overflow:auto;display:flex;justify-content:center}
+.df{position:sticky;bottom:0;display:flex;gap:8px;padding:10px 12px;background:#fff;border-top:1px solid var(--line)}.df .btn{flex:1}
+/* ---- מסך ראשי ---- */
+.row1{display:grid;grid-template-columns:1.1fr 1fr;gap:14px;margin-bottom:14px}
+.row1.solo{grid-template-columns:1fr}
+.attn{display:flex;align-items:center;gap:14px;background:var(--badbg);border:1.5px solid #f0b8b2;border-radius:16px;padding:14px 18px}
+.attn .ic{font-size:1.8rem;line-height:1}.attn>div{flex:1}.attn b{display:block;color:var(--bad);font-size:1.05rem}.attn span{color:#7a3a33}
+.attn .go{background:var(--bad);color:#fff;border:0;border-radius:10px;padding:8px 14px;font-weight:800;white-space:nowrap}
+.today{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px 16px}
+.today h3{margin:0 0 8px;font-size:.95rem;color:var(--ink);display:flex;justify-content:space-between;gap:8px}.today h3 small{color:var(--mut);font-weight:600}
+.slots{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px}
+.slot{border:0;border-radius:12px;padding:8px;text-align:center;font-weight:800;font-size:.95rem;line-height:1.35}
+.slot small{display:block;font-weight:600;font-size:.78rem}
+.slot.ok{background:var(--okbg);color:var(--ok);cursor:pointer}.slot.wait{background:#f1f4f8;color:var(--mut)}.slot.miss{background:var(--warnbg);color:var(--warn)}
+.last{margin-top:8px;font-size:.85rem;font-weight:700;border-radius:10px;padding:5px 10px;display:inline-block;color:var(--mut);background:#f1f4f8}
+.last.bad{color:var(--bad);background:var(--badbg)}
+.tools{display:flex;gap:10px;align-items:end;margin-bottom:14px;flex-wrap:wrap}
+.chips{display:flex;gap:8px;flex-wrap:wrap;align-items:center;min-height:44px}
+.chip{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:6px 14px;font-size:.88rem;font-weight:700;color:var(--mut)}
+.chip b{color:var(--ink);margin-inline-start:6px}.chip.r b{color:var(--bad)}
+.chip:hover{border-color:var(--acc)}.chip.on{border-color:var(--ink);box-shadow:0 0 0 1.5px var(--ink) inset;color:var(--ink)}
+.srch{display:flex;gap:8px;margin-inline-start:auto;width:300px}.srch input{flex:1;background:#fff}
+#fBtn{display:none}
+.filters{display:flex;gap:8px;align-items:end}
+.filters>div{width:150px}.filters label.f{margin:0 0 2px;font-size:.75rem}
+.filters input,.filters select{background:#fff;min-width:0}
+#fClear{display:none}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:16px;align-items:start}
+.lhead{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.lhead b{font-size:1.05rem;color:var(--ink)}.lhead .cnt{flex:1;color:var(--mut);font-size:.9rem;font-weight:600}
+.scard{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px 14px;margin-bottom:14px}
+.scard h3{margin:0 0 6px;font-size:.95rem;color:var(--ink);display:flex;justify-content:space-between;align-items:center}
+.siss{display:flex;align-items:center;gap:8px;border-top:1px solid #edf1f5;padding:8px 0}.siss:first-child{border-top:0}
+.siss div{flex:1;min-width:0}.siss b{display:block;font-size:.9rem}.siss small{color:var(--mut);font-size:.8rem}
+.siss .btn{min-height:34px;padding:0 10px;font-size:.82rem}
+.folder{display:flex;justify-content:space-between;gap:8px;width:100%;background:none;border:0;border-top:1px solid #edf1f5;padding:8px 4px;text-align:right;font-size:.9rem}
+.folder:first-child{border-top:0}.folder:hover{background:#f6f9fd}.folder.on{background:#eef4fb;border-radius:8px}
+.folder .bd{color:var(--bad);font-weight:700}
+.list tbody tr{--c:#2e9d5b}.list tbody tr td:first-child{box-shadow:inset -5px 0 0 var(--c)}
+.list tbody tr.sel td{background:#eef4fb}
+#setDlg{max-width:min(380px,94vw);background:#fff}.setb{display:block;width:100%;text-align:right;margin-top:10px;min-height:52px}
+/* ---- דוח בטלפון ---- */
+.mrep{width:100%;max-width:520px}.mhd{display:flex;align-items:center;gap:10px;margin:2px 0 10px}.mhd b{flex:1;font-size:1.05rem}
+.mc{background:#fff;border:1px solid var(--line);border-radius:16px;padding:12px 14px;margin-bottom:10px}
+.mc h4{margin:0 0 6px;font-size:.92rem;color:var(--ink)}.mc p{margin:4px 0;white-space:pre-wrap}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:2px 12px;font-size:.95rem}.kv b{color:var(--mut);font-weight:700}
+.it{display:flex;justify-content:space-between;gap:8px;padding:6px 0;border-top:1px solid #edf1f5}.it:first-of-type{border-top:0}
+.mut{color:var(--mut);font-size:.85rem;margin-top:4px}
+.mph{display:grid;grid-template-columns:1fr 1fr;gap:8px}.mph figure{margin:0}.mph img{width:100%;height:130px;object-fit:cover;border-radius:10px;cursor:zoom-in}
+.mph figcaption{font-size:.78rem;color:var(--mut);font-weight:700}
+.msig{display:block;width:100%;max-height:110px;object-fit:contain;border:1px dashed #b9c5d3;border-radius:10px}
 .busy{position:fixed;inset:0;background:rgba(255,255,255,.7);display:flex;align-items:center;justify-content:center;font-weight:800;color:var(--ink);font-size:1.1rem;z-index:50}
 @media (max-width:760px){
  .dh .btn{padding:0 11px;min-height:40px;font-size:.88rem}
- .stats{grid-template-columns:repeat(2,1fr)}.stats>:last-child{grid-column:1/-1}
- .filters{grid-template-columns:1fr 1fr}.filters .q{grid-column:1/-1}
- .folders{grid-template-columns:1fr 1fr}.folder{flex-direction:column;align-items:flex-start;gap:4px}
+ .row1,.grid{grid-template-columns:1fr}
+ .tools{display:block}.chips{flex-wrap:nowrap;overflow-x:auto;margin-bottom:10px;padding-bottom:2px}.chip{flex:none}
+ .srch{width:auto}#fBtn{display:block}
+ .filters{display:none;background:#fff;border:1px solid var(--line);border-radius:16px;padding:12px;margin-top:10px;grid-template-columns:1fr 1fr;gap:8px}
+ .filters.open{display:grid}.filters>div{width:auto}.filters .tog{grid-column:1/-1}#fClear{display:block;grid-column:1/-1}
+ .attn{padding:12px 14px}.attn .go{padding:8px 10px}
+ .list tr{box-shadow:inset -6px 0 0 var(--c)}.list tbody tr td:first-child{box-shadow:none}
+ #dlg.mob{max-width:100vw;max-height:100vh;height:100%;border-radius:0;margin:0}#dlg.mob .dview{padding:12px}
  .list thead{display:none}.list,.list tbody,.list tr,.list td{display:block}
  .list tr{position:relative;padding:10px 46px 10px 12px;border-bottom:1px solid var(--line)}
  .list td{border:0;padding:1px 0}.list td.cb{position:absolute;right:10px;top:12px;width:auto}
@@ -116,7 +154,7 @@ dialog::backdrop{background:rgba(10,20,35,.55)}
 </head>
 <body>
 <header class="top"><div class="in"><img src="logo.jpg" alt=""><h1>ניהול דוחות העברת משמרת<small id="who"></small></h1>
- <button id="vehBtn" hidden>רכבים</button><button id="accBtn" hidden>ניהול גישה</button><button id="logout" hidden>יציאה</button></div></header>
+ <button id="setBtn" hidden>⚙️ הגדרות</button><button id="logout" hidden>יציאה</button></div></header>
 <main>
  <div class="banner" id="localBanner" hidden>⚠️ מצב ניסיון: לא הוגדר Firebase בקובץ config.js, ולכן מוצגים רק דוחות שמולאו בדפדפן הזה. ראו README.md להפעלה.</div>
 
@@ -135,31 +173,37 @@ dialog::backdrop{background:rgba(10,20,35,.55)}
  </form>
 
  <div id="app" hidden>
-  <div class="stats">
-   <div class="stat"><b id="sAll">0</b><span>דוחות בתצוגה</span></div>
-   <button class="stat" id="qToday" type="button"><b id="sToday">0</b><span>דוחות היום</span></button>
-   <button class="stat bad" id="qBad" type="button"><b id="sBad">0</b><span>דוחות עם ליקויים</span></button>
-   <div class="stat bad"><b id="sUnrep">0</b><span>ליקויים שטרם דווחו</span></div>
-   <button class="stat bad" id="qOpen" type="button"><b id="sOpen">0</b><span>ליקויים פתוחים (לא תוקנו)</span></button>
+  <div class="row1" id="row1">
+   <div class="attn" id="attn" hidden><span class="ic">⚠️</span><div><b>דורש טיפול</b><span id="attnTxt"></span></div><button class="go" id="attnGo" type="button">לטיפול ›</button></div>
+   <div class="today"><h3><span>הדוחות של היום</span><small id="todayDate"></small></h3><div class="slots" id="slots"></div><div class="last" id="lastRep" hidden></div></div>
   </div>
-  <div class="filters" id="filters">
-   <div class="q"><label class="f" for="q">חיפוש</label><input id="q" type="search" placeholder="מספר רכב, שם מאבטח, טקסט חופשי"></div>
-   <div><label class="f" for="from">מתאריך</label><input id="from" type="date"></div>
-   <div><label class="f" for="to">עד תאריך</label><input id="to" type="date"></div>
-   <div><label class="f" for="fShift">משמרת</label><select id="fShift"><option value="">הכל</option></select></div>
-   <label class="tog"><input type="checkbox" id="onlyBad">רק עם ליקויים</label>
+  <div class="tools">
+   <div class="chips">
+    <button class="chip" id="qMonth" type="button">החודש<b id="sMonth">0</b></button>
+    <button class="chip" id="qToday" type="button">היום<b id="sToday">0</b></button>
+    <button class="chip r" id="qBad" type="button">עם ליקויים<b id="sBad">0</b></button>
+    <button class="chip r" id="qOpen" type="button">ליקויים פתוחים<b id="sOpen">0</b></button>
+   </div>
+   <div class="srch"><input id="q" type="search" placeholder="🔍 חיפוש: רכב, שם מאבטח, טקסט" aria-label="חיפוש"><button class="btn sec" id="fBtn" type="button">סינון ▾</button></div>
+   <div class="filters" id="filters">
+    <div><label class="f" for="from">מתאריך</label><input id="from" type="date"></div>
+    <div><label class="f" for="to">עד תאריך</label><input id="to" type="date"></div>
+    <div><label class="f" for="fShift">משמרת</label><select id="fShift"><option value="">הכל</option></select></div>
+    <label class="tog"><input type="checkbox" id="onlyBad">רק עם ליקויים</label>
+    <button class="btn sec" id="fClear" type="button">ניקוי הסינון</button>
+   </div>
   </div>
-  <div class="crumbs" id="crumbs" hidden><button class="lnk" id="back">→ כל התיקיות</button><span>/</span><b id="crumbName"></b></div>
+  <div class="grid">
+  <div class="mainc">
+  <div class="crumbs" id="crumbs" hidden><button class="lnk" id="back">→ חזרה</button><span>/</span><b id="crumbName"></b></div>
   <div id="issuesView" hidden>
    <div class="itog"><button type="button" id="iOpenBtn" class="on">פתוחים</button><button type="button" id="iFixedBtn">תוקנו</button></div>
    <div class="banner" id="issErr" hidden>כדי לראות ליקויים צריך לעדכן את כללי האבטחה ב-Firebase (ראו README).</div>
    <div id="issList"></div>
   </div>
-  <div class="folders" id="folders"></div>
-  <div class="empty" id="noFolders" hidden>אין עדיין דוחות</div>
   <div id="listWrap">
-  <div class="bar">
-   <span class="cnt" id="cnt"></span>
+  <div class="lhead">
+   <b id="listTitle"></b><span class="cnt" id="cnt"></span>
    <button class="btn sec" id="csv">ייצוא לאקסל (CSV)</button>
    <button class="btn" id="pdfSel" disabled>הורדת PDF</button>
   </div>
@@ -169,12 +213,23 @@ dialog::backdrop{background:rgba(10,20,35,.55)}
   </table>
   <div class="empty" id="empty" hidden>אין דוחות שתואמים לסינון</div>
   </div>
+  </div>
+  <aside class="side">
+   <div class="scard" id="sideIssCard" hidden><h3><span>ליקויים פתוחים</span><button class="lnk" id="sideIssAll" type="button">הכל ›</button></h3><div id="sideIss"></div></div>
+   <div class="scard"><h3><span>📁 תיקיות לפי חודש</span></h3><div id="folders"></div><div class="mut" id="noFolders" hidden>אין עדיין דוחות</div></div>
+  </aside>
+  </div>
  </div>
 </main>
 
 <dialog id="dlg">
- <div class="dh"><button class="btn" id="dPdf">הורדת PDF</button><button class="btn sec" id="dPrint">הדפסה</button><span class="sp"></span><button class="btn red" id="dDel">מחיקה</button><button class="btn sec" id="dClose">סגירה</button></div>
+ <div class="dh"><button class="btn sec" id="dClose">→ חזרה</button><span class="sp"></span><button class="btn red" id="dDel">מחיקה</button></div>
  <div class="dview"><div class="scaler" id="dBody"></div></div>
+ <div class="df"><button class="btn sec" id="dPrint">הדפסה</button><button class="btn" id="dPdf">הורדת PDF</button></div>
+</dialog>
+<dialog id="setDlg">
+ <div class="dh"><b>⚙️ הגדרות</b><span class="sp"></span><button class="btn sec" id="setClose">סגירה</button></div>
+ <div class="acc"><button class="btn sec setb" id="vehBtn">🚗 רכבים</button><button class="btn sec setb" id="accBtn">👥 ניהול גישה</button></div>
 </dialog>
 <dialog id="imgDlg"><img id="bigImg" alt=""></dialog>
 <dialog id="vehDlg">
@@ -219,43 +274,88 @@ function statusTag(r){
   if(r.status==='unreported')return'<span class="tag bad">טרם דווח</span>';
   if(r.status==='reported')return'<span class="tag warn">דווח</span>';
   return n?'<span class="tag warn">ליקויים</span>':'<span class="tag ok">תקין</span>'}
+const curM=()=>todayISO().slice(0,7);
+// החודש שמוצג כברירת מחדל: החודש הנוכחי, או החודש האחרון שיש בו דוחות
+function homeMonth(){const ms=[...new Set(ALL.map(monthOf))].sort();return !ms.length||ms.includes(curM())?curM():ms[ms.length-1]}
 function render(){
   const q=$('q').value.trim().toLowerCase(),f=$('from').value,t=$('to').value,sh=$('fShift').value,ob=$('onlyBad').checked;
   const base=ALL.filter(r=>(!f||r.date>=f)&&(!t||r.date<=t)&&shiftOk(r,sh)&&(!ob||hasIssue(r))
     &&(!q||[r.vehicle,r.giver,r.receiver,r.vNotes,r.details,r.reportedTo].join(' ').toLowerCase().includes(q)));
-  // בלי חודש נבחר ובלי חיפוש/תאריכים - מציגים תיקיות; חיפוש ותאריכים מחפשים בכל החודשים
-  const today=f&&f===todayISO()&&t===f,allBad=ob&&quickBad;
-  const folderMode=!curMonth&&!q&&!f&&!t&&!allBad&&!issMode;
-  $('sOpen').textContent=ISSUES.filter(i=>i.status==='open').length;$('qOpen').classList.toggle('on',!!issMode);
-  $('issuesView').hidden=!issMode;$('filters').hidden=!!issMode;if(issMode)renderIssues();
-  $('qToday').classList.toggle('on',!!today&&!curMonth);$('qBad').classList.toggle('on',allBad&&!curMonth);
-  $('folders').hidden=!folderMode;$('listWrap').hidden=folderMode||!!issMode;$('crumbs').hidden=folderMode;
-  $('crumbName').textContent=issMode?'ליקויים':curMonth?monthName(curMonth):today?'דוחות היום':allBad&&!f&&!t?'כל הדוחות עם ליקויים':(f||t)?`דוחות ${f?'מ-'+fmtDate(f):''} ${t?'עד '+fmtDate(t):''}`.trim():'תוצאות חיפוש בכל החודשים';
-  const groups={};base.forEach(r=>{(groups[monthOf(r)]??=[]).push(r)});
+  // חיפוש, תאריכים או "עם ליקויים" - מחפשים בכל החודשים; אחרת מציגים חודש אחד
+  const today=f&&f===todayISO()&&t===f,allBad=ob&&quickBad,listAll=!!(q||f||t||allBad);
+  const home=homeMonth(),month=curMonth||home,isHome=!issMode&&!listAll&&month===home;
+  $('qMonth').classList.toggle('on',isHome);$('qToday').classList.toggle('on',!!today&&!issMode);
+  $('qBad').classList.toggle('on',allBad&&!issMode);$('qOpen').classList.toggle('on',!!issMode);
+  $('issuesView').hidden=!issMode;$('listWrap').hidden=!!issMode;$('crumbs').hidden=isHome;
+  if(issMode)renderIssues();
+  $('crumbName').textContent=issMode?'ליקויים':!listAll?monthName(month):today?'דוחות היום':allBad&&!f&&!t?'כל הדוחות עם ליקויים':(f||t)?`דוחות ${f?'מ-'+fmtDate(f):''} ${t?'עד '+fmtDate(t):''}`.trim():'תוצאות חיפוש בכל החודשים';
+  const groups={};ALL.filter(r=>shiftOk(r,sh)).forEach(r=>{(groups[monthOf(r)]??=[]).push(r)});
   $('folders').innerHTML=Object.keys(groups).sort().reverse().map(m=>{const L=groups[m],nb=L.filter(hasIssue).length;
-    return`<button class="folder" data-month="${esc(m)}"><span class="ic">📁</span><div><b>${esc(monthName(m))}</b><span>${L.length} דוחות</span>${nb?` · <span class="bd">${nb} עם ליקויים</span>`:''}</div></button>`}).join('');
-  $('noFolders').hidden=!folderMode||Object.keys(groups).length>0;
-  VIEW=(folderMode?base:base.filter(r=>!curMonth||monthOf(r)===curMonth))
-    .sort((a,b)=>(b.date+b.time).localeCompare(a.date+a.time)||b.createdAt-a.createdAt);
+    return`<button class="folder${!listAll&&!issMode&&m===month?' on':''}" data-month="${esc(m)}"><span><b>${esc(monthName(m))}</b> · ${L.length}</span>${nb?`<span class="bd">${nb} עם ליקויים</span>`:''}</button>`}).join('');
+  $('noFolders').hidden=Object.keys(groups).length>0;
+  VIEW=(listAll?base:base.filter(r=>monthOf(r)===month)).sort((a,b)=>(b.date+b.time).localeCompare(a.date+a.time)||b.createdAt-a.createdAt);
   const ids=new Set(VIEW.map(r=>r.id));sel.forEach(id=>{if(!ids.has(id))sel.delete(id)});
-  $('sAll').textContent=VIEW.length;$('sToday').textContent=ALL.filter(r=>r.date===todayISO()&&shiftOk(r,sh)).length;
-  $('sBad').textContent=VIEW.filter(hasIssue).length;$('sUnrep').textContent=VIEW.filter(r=>r.status==='unreported').length;
-  $('rows').innerHTML=VIEW.map(r=>`<tr data-id="${esc(r.id)}">
+  $('sMonth').textContent=ALL.filter(r=>monthOf(r)===curM()&&shiftOk(r,sh)).length;
+  $('sToday').textContent=ALL.filter(r=>r.date===todayISO()&&shiftOk(r,sh)).length;
+  $('sBad').textContent=ALL.filter(r=>shiftOk(r,sh)&&hasIssue(r)).length;
+  $('sOpen').textContent=ISSUES.filter(i=>i.status==='open').length;
+  $('listTitle').textContent=listAll?$('crumbName').textContent:monthName(month);
+  const color=r=>r.status==='unreported'?'#c8372d':hasIssue(r)?'#e9a43a':'#2e9d5b';
+  $('rows').innerHTML=VIEW.map(r=>`<tr data-id="${esc(r.id)}" style="--c:${color(r)}"${sel.has(r.id)?' class="sel"':''}>
    <td class="cb"><input type="checkbox" data-sel="${esc(r.id)}" ${sel.has(r.id)?'checked':''} aria-label="בחירה"></td>
    <td class="num"><b>${fmtDate(r.date)}</b> ${esc(r.time)}</td><td data-l="משמרת">${esc(r.shift)}</td>
    <td data-l="רכב" class="num">${esc(r.vehicle)}</td><td>${esc(r.giver)} ← ${esc(r.receiver)}</td>
-   <td data-l="ליקויים">${defects(r)?`<span class="sub2">${badList(r).map(c=>esc(c.t.split(' – ')[0])).join(', ')}</span>`:'—'}</td>
+   <td data-l="ליקויים">${defects(r)?`<span class="sub2">${badList(r).map(c=>esc(shortText(c.k))+(r.known?.[c.k]?' (ידוע)':'')).join(', ')}</span>`:'—'}</td>
    <td class="st">${statusTag(r)}</td></tr>`).join('');
   $('empty').hidden=VIEW.length>0;
   $('cnt').textContent=`${VIEW.length} דוחות`+(sel.size?` · ${sel.size} נבחרו`:'');
-  $('pdfSel').disabled=!VIEW.length;$('pdfSel').textContent=sel.size?`הורדת PDF (${sel.size} נבחרים)`:`הורדת PDF (כל ה-${VIEW.length})`;
-  $('all').checked=VIEW.length>0&&sel.size===VIEW.length}
+  $('pdfSel').disabled=!VIEW.length;$('pdfSel').textContent=sel.size?`הורדת PDF (${sel.size})`:`הורדת PDF (כל ה-${VIEW.length})`;
+  $('all').checked=VIEW.length>0&&sel.size===VIEW.length;
+  renderTop()}
+
+// ----- "דורש טיפול", "הדוחות של היום" וליקויים פתוחים בצד -----
+const daysSince=t=>Math.floor((Date.now()-t)/864e5);
+const RECENT=3*864e5; // ליקוי שטרם דווח נחשב "דורש טיפול" 3 ימים
+// שעות החילוף. אם הגיע היום דוח "שלדי יום" - יום שלדי (2 חילופים), אחרת יום רגיל (3 חילופים)
+const SLOTS={reg:[['בוקר','06:50'],['צהריים','14:50'],['לילה','21:50']],shl:[['שלדי יום','06:50'],['שלדי לילה','18:50']]};
+const MISS_AFTER=60,LATE_H=13; // "לא התקבל דוח" שעה אחרי זמן החילוף; שורת "דוח אחרון" אדומה מעל 13 שעות
+const hm2m=s=>{const[h,m]=String(s||'0:0').split(':');return +h*60+ +m};
+function renderTop(){
+  const openIs=ISSUES.filter(i=>i.status==='open'),unrep=ALL.filter(r=>r.status==='unreported'&&Date.now()-r.createdAt<RECENT);
+  const vehs=[...new Set(openIs.map(i=>i.vehicle))];
+  const parts=[openIs.length&&`${openIs.length} ליקויים פתוחים${vehs.length===1?' ברכב '+vehs[0]:''}`,unrep.length&&`${unrep.length===1?'דוח אחד':unrep.length+' דוחות'} עם ליקוי שטרם דווח`].filter(Boolean);
+  $('attn').hidden=!parts.length;$('row1').classList.toggle('solo',!parts.length);$('attnTxt').textContent=parts.join(' · ');
+  // הדוחות של היום
+  const d=todayISO(),R=ALL.filter(r=>r.date===d).sort((a,b)=>(a.time||'').localeCompare(b.time||''));
+  const S=(R.some(r=>r.shift==='שלדי יום')?SLOTS.shl:SLOTS.reg).map(([n,at])=>({n,at,r:R.filter(r=>r.shift===n).pop()}));
+  const extra=R.filter(r=>!S.some(x=>x.n===r.shift)).map(r=>({n:r.shift||OTHER,at:r.time,r}));
+  const now=new Date(),nm=now.getHours()*60+now.getMinutes();
+  $('todayDate').textContent=now.toLocaleDateString('he-IL',{weekday:'long'})+' '+fmtDate(d);
+  $('slots').innerHTML=[...S,...extra].sort((a,b)=>(a.r?.time||a.at).localeCompare(b.r?.time||b.at)).map(x=>x.r
+    ?`<button class="slot ok" data-id="${esc(x.r.id)}" type="button">✓ ${esc(x.n)}<small>${esc(x.r.time)} · ${esc(x.r.giver)} → ${esc(x.r.receiver)}</small></button>`
+    :nm>hm2m(x.at)+MISS_AFTER?`<div class="slot miss">${esc(x.n)}<small>לא התקבל דוח</small></div>`
+    :`<div class="slot wait">${esc(x.n)}<small>ממתין · החילוף ב-${esc(x.at)}</small></div>`).join('');
+  const lastT=Math.max(0,...ALL.map(r=>r.createdAt||0)),mins=Math.max(0,Math.floor((Date.now()-lastT)/60000));
+  $('lastRep').hidden=!lastT;
+  if(lastT){const h=Math.floor(mins/60),m=mins%60,late=mins>LATE_H*60;
+    $('lastRep').classList.toggle('bad',late);
+    $('lastRep').textContent=`🕒 דוח אחרון לפני ${h?(h===1?'שעה':h+' שעות')+(m?' ו-':''):''}${m||!h?m+' דקות':''}${late?` – מעל ${LATE_H} שעות`:''}`}
+  // ליקויים פתוחים בצד
+  $('sideIssCard').hidden=!openIs.length;
+  $('sideIss').innerHTML=openIs.sort((a,b)=>a.openedAt-b.openedAt).slice(0,6).map(is=>`<div class="siss"><div><b>${esc(is.itemText||itemText(is.item))}</b>
+    <small>${esc(is.vehicle)} · ${daysSince(is.openedAt)?'פתוח '+daysSince(is.openedAt)+' ימים':'נפתח היום'}</small></div><button class="btn" data-fix="${esc(is.id)}" type="button">✓ תוקן</button></div>`).join('')}
+setInterval(()=>{if(!$('app').hidden)renderTop()},60000);
+$('slots').addEventListener('click',e=>{const b=e.target.closest('[data-id]');if(b)openReport(ALL.find(r=>r.id===b.dataset.id))});
+$('attnGo').onclick=()=>{if(ISSUES.some(i=>i.status==='open'))$('qOpen').click();else $('qBad').click()};
+$('sideIssAll').onclick=()=>$('qOpen').click();
+$('fBtn').onclick=()=>{const o=$('filters').classList.toggle('open');$('fBtn').textContent=o?'סינון ▴':'סינון ▾'};
 ['q','from','to','fShift','onlyBad'].forEach(id=>$(id).addEventListener('input',render));
-$('folders').addEventListener('click',e=>{const f=e.target.closest('[data-month]');if(!f)return;issMode=null;curMonth=f.dataset.month;sel.clear();render();scrollTo(0,0)});
-$('back').onclick=()=>{issMode=null;curMonth=null;quickBad=false;$('onlyBad').checked=false;$('q').value=$('from').value=$('to').value='';sel.clear();render()};
-// לחיצה על הכרטיסים למעלה: דוחות היום / כל הדוחות עם ליקויים (מכל החודשים)
-$('qToday').onclick=()=>{issMode=null;curMonth=null;quickBad=false;$('onlyBad').checked=false;$('q').value='';$('from').value=$('to').value=todayISO();sel.clear();render();scrollTo(0,0)};
-$('qBad').onclick=()=>{issMode=null;curMonth=null;quickBad=true;$('onlyBad').checked=true;$('q').value=$('from').value=$('to').value='';sel.clear();render();scrollTo(0,0)};
+$('folders').addEventListener('click',e=>{const f=e.target.closest('[data-month]');if(!f)return;goHome();curMonth=f.dataset.month;render();$('listWrap').scrollIntoView({block:'start'})});
+function goHome(){issMode=null;curMonth=null;quickBad=false;$('onlyBad').checked=false;$('q').value=$('from').value=$('to').value='';sel.clear()}
+$('back').onclick=$('qMonth').onclick=$('fClear').onclick=()=>{goHome();render()};
+// לחיצה על המספרים: דוחות היום / כל הדוחות עם ליקויים (מכל החודשים)
+$('qToday').onclick=()=>{goHome();$('from').value=$('to').value=todayISO();render()};
+$('qBad').onclick=()=>{goHome();quickBad=true;$('onlyBad').checked=true;render()};
 $('onlyBad').addEventListener('change',()=>{if(!$('onlyBad').checked)quickBad=false});
 $('all').onchange=()=>{sel=new Set($('all').checked?VIEW.map(r=>r.id):[]);render()};
 $('rows').addEventListener('click',e=>{
@@ -278,10 +378,29 @@ $('csv').onclick=()=>{
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.download=`shift-handover-reports_${fileTag()}.csv`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),2000)};
 
 // ----- צפייה בדוח -----
-function fit(){const s=Math.min(1,($('dlg').clientWidth-28)/794);$('dBody').style.zoom=s}
-function openReport(r){if(!r)return;cur=r;$('dBody').innerHTML=reportHTML(r,r._photos);$('dlg').showModal();fit();$('dlg').scrollTop=0;
+// בטלפון: דוח בגרסה קריאה (כרטיסים). במחשב: עמוד A4 כמו ב-PDF
+const isPhone=()=>matchMedia('(max-width:760px)').matches;
+function reportMobileHTML(r,P){
+  const bad=badList(r),known=r.known||{},noPh=r.noPhoto||{};
+  const card=(t,b)=>`<div class="mc"><h4>${t}</h4>${b}</div>`,kv=(k,v)=>v?`<b>${k}</b><span>${esc(v)}</span>`:'';
+  return `<div class="mrep"><div class="mhd"><b>דוח ${esc(fmtDate(r.date))} · ${esc(r.shift)}</b>${bad.length?`<span class="tag bad">${bad.length} ליקויים</span>`:'<span class="tag ok">תקין</span>'}</div>
+   ${card('פרטי המשמרת',`<div class="kv">${kv('שעה',r.time)}${kv('רכב',r.vehicle)}${kv('מוסר',r.giver)}${kv('מקבל',r.receiver)}</div>`)}
+   ${card('ליקויים',(bad.length?bad.map(c=>`<div class="it"><span>${esc(shortText(c.k))}</span><span class="tag ${known[c.k]?'warn':'bad'}">${known[c.k]?'ידוע':'חדש'}</span></div>`).join(''):'<div class="it"><span>אין ליקויים</span></div>')
+     +`<div class="mut">כל שאר ${CHECKS.length-bad.length} הסעיפים: תקין ✓ · דלק: ${esc(r.fuel||'—')}</div>`)}
+   ${r.vNotes||r.details?card('פירוט',(r.vNotes?`<p>${esc(r.vNotes)}</p>`:'')+(r.details?`<p>${esc(r.details)}</p>`:'')):''}
+   ${r.reportedTo||r.reportTime||r.reportMethod?card('דיווח',`<div class="kv">${kv('דווח ל',r.reportedTo)}${kv('בשעה',r.reportTime)}${kv('אופן',r.reportMethod)}</div>`):''}
+   ${card('סטטוס',`<div>${esc(statusText(r.status))||'—'}</div>`)}
+   ${(P||[]).length||Object.keys(noPh).length?card('תמונות',`<div class="mph">${(P||[]).map(p=>`<figure><img src="${esc(p.data)}" alt=""><figcaption>${esc(shortText(p.item))}</figcaption></figure>`).join('')}</div>`
+     +Object.keys(noPh).map(k=>`<div class="mut">${esc(shortText(k))}: לא ניתן לצלם – ${esc(noPh[k])}</div>`).join('')):''}
+   ${card('חתימת המקבל',r.sigReceiver?`<img class="msig" src="${esc(r.sigReceiver)}" alt="">`:'<div class="mut">לא נחתם</div>')}
+   <div class="mut" style="text-align:center">נשלח ${r.createdAt?new Date(r.createdAt).toLocaleString('he-IL'):''}</div></div>`}
+function paintReport(){const r=cur,ph=isPhone();$('dlg').classList.toggle('mob',ph);
+  $('dBody').innerHTML=ph?reportMobileHTML(r,r._photos):reportHTML(r,r._photos);$('dBody').style.zoom=ph?1:Math.min(1,($('dlg').clientWidth-28)/794)}
+function fit(){if(cur&&$('dlg').open)paintReport()}
+function openReport(r){if(!r)return;cur=r;$('dlg').showModal();paintReport();$('dlg').scrollTop=0;
   // התמונות נטענות רק כשפותחים דוח
-  if(!r._photos)Store.photosFor(r.id).then(P=>{r._photos=P;if(cur===r&&$('dlg').open&&P.length){$('dBody').innerHTML=reportHTML(r,P);fit()}}).catch(()=>{})}
+  if(!r._photos)Store.photosFor(r.id).then(P=>{r._photos=P;if(cur===r&&$('dlg').open&&P.length)paintReport()}).catch(()=>{})}
+$('dBody').addEventListener('click',e=>{const im=e.target.closest('.mph img');if(im){$('bigImg').src=im.src;$('imgDlg').showModal()}});
 addEventListener('resize',()=>{if($('dlg').open)fit()});
 $('dClose').onclick=()=>$('dlg').close();
 $('dPdf').onclick=()=>busy('מכין PDF...',()=>reportsToPDF([cur],pdfName(cur)));
@@ -294,7 +413,7 @@ $('dDel').onclick=async()=>{if(!confirm(`למחוק לצמיתות את הדוח
 let unsub=null,issUnsub=null,authChecked=false;
 const slowT=setTimeout(()=>{$('slow').hidden=false},12000);
 function showLogin(){clearTimeout(slowT);$('loading').hidden=true;$('app').hidden=true;$('login').hidden=false;fillRemembered()}
-function start(){clearTimeout(slowT);$('loading').hidden=true;$('login').hidden=true;$('app').hidden=false;$('vehBtn').hidden=false;
+function start(){clearTimeout(slowT);$('loading').hidden=true;$('login').hidden=true;$('app').hidden=false;$('setBtn').hidden=false;
   if(issUnsub){issUnsub();issUnsub=null}
   issUnsub=Store.subscribeIssues(list=>{ISSUES=list;$('issErr').hidden=true;render()},()=>{ISSUES=[];$('issErr').hidden=false;render()});
   unsub=Store.subscribe(list=>{ALL=list;authChecked=false;render()},e=>{
@@ -310,8 +429,7 @@ function start(){clearTimeout(slowT);$('loading').hidden=true;$('login').hidden=
   try{await Store.init(true)}catch(e){clearTimeout(slowT);$('loading').hidden=true;$('localBanner').hidden=false;$('localBanner').textContent='אין חיבור למערכת: '+e.message;return}
   Store.auth.onAuthStateChanged(u=>{
     if(unsub){unsub();unsub=null}if(issUnsub){issUnsub();issUnsub=null}
-    if(!u)$('vehBtn').hidden=true;
-    $('logout').hidden=$('accBtn').hidden=!u;$('who').textContent=u?u.email:'';
+    $('logout').hidden=$('setBtn').hidden=!u;$('who').textContent=u?u.email:'';
     if(!u&&accUnsub){accUnsub();accUnsub=null;ADMINS=[]}
     if(u&&idleExpired()){Store.auth.signOut();return}
     if(u)start();else showLogin()});
@@ -329,7 +447,6 @@ function start(){clearTimeout(slowT);$('loading').hidden=true;$('login').hidden=
 })();
 
 // ----- ליקויים פתוחים / שתוקנו -----
-const daysSince=t=>Math.floor((Date.now()-t)/864e5);
 function renderIssues(){
   const open=ISSUES.filter(i=>i.status==='open'),fixed=ISSUES.filter(i=>i.status==='fixed');
   $('iOpenBtn').textContent=`פתוחים (${open.length})`;$('iFixedBtn').textContent=`תוקנו (${fixed.length})`;
@@ -344,9 +461,9 @@ function renderIssues(){
      ${is.status==='open'?`<button class="btn" data-fix="${esc(is.id)}">✓ תוקן</button>`:''}</div>
     <div class="ithumbs" id="ith_${esc(is.id)}"></div></div>`}).join('')
    :`<div class="empty">${issMode==='open'?'אין ליקויים פתוחים 👍':'עוד לא סומנו ליקויים כמתוקנים'}</div>`}
-$('qOpen').onclick=()=>{issMode='open';curMonth=null;quickBad=false;sel.clear();render();scrollTo(0,0)};
+$('qOpen').onclick=()=>{goHome();issMode='open';render()};
 $('iOpenBtn').onclick=()=>{issMode='open';render()};$('iFixedBtn').onclick=()=>{issMode='fixed';render()};
-$('issList').addEventListener('click',async e=>{
+async function issClick(e){
   const b=e.target.closest('[data-iph],[data-irep],[data-fix]');
   if(!b){const im=e.target.closest('.ithumbs img');if(im){$('bigImg').src=im.src;$('imgDlg').showModal()}return}
   if(b.dataset.irep!==undefined){const r=ALL.find(x=>x.id===b.dataset.irep);r?openReport(r):alert('הדוח המקורי לא נמצא (אולי נמחק)');return}
@@ -357,7 +474,8 @@ $('issList').addEventListener('click',async e=>{
     catch(err){box.textContent='שגיאה בטעינת התמונות'}return}
   const note=prompt(`לסמן את "${is.itemText||itemText(is.item)}" ברכב ${is.vehicle} כתוקן?\nאפשר לכתוב הערה (לא חובה), למשל "הוחלף במוסך":`,'');
   if(note===null)return;
-  await busy('שומר...',async()=>{await Store.fixIssue(is,note.trim(),me());if(!Store.cloud){ISSUES=lsGet('handoverIssues',[]);render()}})});
+  await busy('שומר...',async()=>{await Store.fixIssue(is,note.trim(),me());if(!Store.cloud){ISSUES=lsGet('handoverIssues',[]);render()}})}
+$('issList').addEventListener('click',issClick);$('sideIss').addEventListener('click',issClick);
 $('imgDlg').addEventListener('click',()=>$('imgDlg').close());
 
 // ----- רכבים: הרשימה שמופיעה בטופס, והרכב הקבוע -----
@@ -368,7 +486,9 @@ function paintVeh(){$('vehList').innerHTML=VEH.list.length?VEH.list.map(v=>`<li>
 async function saveVeh(){if(!VEH.list.includes(VEH.main))VEH.main=VEH.list[0]||'';paintVeh();
   try{await Store.saveVehicles({list:VEH.list,main:VEH.main});$('vehMsg').textContent=''}
   catch(e){$('vehMsg').textContent=e.code==='permission-denied'?'כדי לשמור רכבים צריך לעדכן את כללי האבטחה ב-Firebase (ראו README).':'השמירה נכשלה: '+e.message}}
-$('vehBtn').onclick=async()=>{$('vehMsg').textContent='';VEH=await Store.vehicles();paintVeh();$('vehDlg').showModal()};
+$('setBtn').onclick=()=>{$('accBtn').hidden=!Store.cloud;$('setDlg').showModal()};
+$('setClose').onclick=()=>$('setDlg').close();
+$('vehBtn').onclick=async()=>{$('setDlg').close();$('vehMsg').textContent='';VEH=await Store.vehicles();paintVeh();$('vehDlg').showModal()};
 $('vehClose').onclick=()=>$('vehDlg').close();
 $('vehForm').onsubmit=e=>{e.preventDefault();const v=$('vehNew').value.trim();if(!v)return;
   if(VEH.list.some(x=>vKey(x)===vKey(v))){$('vehMsg').textContent='הרכב הזה כבר ברשימה';return}
@@ -406,7 +526,7 @@ function me(){return(Store.auth?.currentUser?.email||'').toLowerCase()}
 function paintAdmins(){
   const rows=[...OWNERS.map(e=>({e,owner:true})),...ADMINS.filter(a=>!OWNERS.includes(a.e))];
   $('accList').innerHTML=rows.map(a=>`<li>${a.owner?'<span class="tag ok">בעלים</span>':a.e===me()?'<span class="tag">זה אתה</span>':`<button class="btn red" data-rm="${esc(a.e)}" style="min-height:36px">הסרה</button>`}<span>${esc(a.e)}</span></li>`).join('')}
-$('accBtn').onclick=()=>{$('accMsg').textContent=$('accOk').textContent='';$('accDlg').showModal();
+$('accBtn').onclick=()=>{$('setDlg').close();$('accMsg').textContent=$('accOk').textContent='';$('accDlg').showModal();
   if(!accUnsub)accUnsub=Store.db.collection('admins').onSnapshot(s=>{ADMINS=s.docs.map(d=>({e:d.id}));paintAdmins()},
     e=>{$('accMsg').textContent=e.code==='permission-denied'?'כדי לנהל גישה צריך לעדכן את כללי האבטחה ב-Firebase (ראו README).':e.message});
   paintAdmins()};
