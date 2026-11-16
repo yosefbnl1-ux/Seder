@@ -451,8 +451,9 @@ $('dClose').onclick=()=>$('dlg').close();
 $('dPdf').onclick=()=>busy('מכין PDF...',()=>reportsToPDF([cur],pdfName(cur)));
 $('dPrint').onclick=()=>{const w=open('','_blank');if(!w)return alert('הדפדפן חסם חלון קופץ');
   w.document.write(`<!DOCTYPE html><html lang="he" dir="rtl"><head><meta charset="utf-8"><base href="${location.href}"><title>${esc(pdfName(cur))}</title><style>${REPORT_CSS}@page{size:A4;margin:0}body{margin:0}.rep{width:auto}</style></head><body>${reportHTML(cur,cur._photos)}<script>onload=()=>{print()}<\/script></body></html>`);w.document.close()};
-$('dDel').onclick=async()=>{if(!confirm(`למחוק לצמיתות את הדוח מ-${fmtDate(cur.date)} ${cur.time} (רכב ${cur.vehicle})?`))return;
-  await busy('מוחק...',async()=>{await Store.remove(cur.id);if(!Store.cloud){ALL=localGet();render()}});$('dlg').close()};
+$('dDel').onclick=async()=>{const n=ISSUES.filter(i=>i.reportId===cur.id).length;
+  if(!confirm(`למחוק לצמיתות את הדוח מ-${fmtDate(cur.date)} ${cur.time} (רכב ${cur.vehicle})?${n?`\nיימחקו גם ${n===1?'הליקוי שנפתח':n+' הליקויים שנפתחו'} מהדוח הזה.`:''}`))return;
+  await busy('מוחק...',async()=>{await Store.remove(cur.id);if(!Store.cloud){ALL=localGet();ISSUES=lsGet('handoverIssues',[]);render()}});$('dlg').close()};
 
 // ----- התחברות וטעינה -----
 let unsub=null,issUnsub=null,authChecked=false;
@@ -509,7 +510,7 @@ function renderIssues(){
    <td class="st">${o?`<span class="tag bad">פתוח ${daysSince(is.openedAt)?daysSince(is.openedAt)+' ימים':'היום'}</span>`:'<span class="tag ok">תוקן</span>'}</td>
    <td data-l="תוקן ע&quot;י">${o?'—':esc(fixer(is))||'—'}</td><td data-l="אושר ע&quot;י">${o?'—':esc(approver(is))||'—'}</td>
    <td data-l="תאריך תיקון" class="num">${o||!is.fixedAt?'—':fmtTs(is.fixedAt)}</td>
-   <td class="acts"><button class="btn sec" data-iph="${esc(is.id)}" type="button" title="תמונות">📷</button><button class="btn sec" data-irep="${esc(is.reportId)}" type="button" title="הדוח המקורי">📄</button>${o?`<button class="btn" data-fix="${esc(is.id)}" type="button">✓ תוקן</button>`:''}</td></tr>`}).join('');
+   <td class="acts"><button class="btn sec" data-iph="${esc(is.id)}" type="button" title="תמונות">📷</button><button class="btn sec" data-irep="${esc(is.reportId)}" type="button" title="הדוח המקורי">📄</button>${o?`<button class="btn" data-fix="${esc(is.id)}" type="button">✓ תוקן</button>`:''}<button class="btn red" data-idel="${esc(is.id)}" type="button" title="מחיקת הליקוי">🗑</button></td></tr>`}).join('');
   $('issEmpty').hidden=list.length>0;$('issTable').hidden=!list.length;
   $('issEmpty').textContent=issMode==='open'?'אין ליקויים פתוחים 👍':issMode==='fixed'?'עוד לא סומנו ליקויים כמתוקנים':'עוד לא דווחו ליקויים'}
 $('qOpen').onclick=()=>{goHome();issMode='open';render()};
@@ -521,9 +522,12 @@ $('issCsv').onclick=()=>{const{list}=issRows();
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.download=`defects_${todayISO()}.csv`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),2000)};
 let fixing=null;
 async function issClick(e){
-  const b=e.target.closest('[data-iph],[data-irep],[data-fix]');if(!b)return;
+  const b=e.target.closest('[data-iph],[data-irep],[data-fix],[data-idel]');if(!b)return;
   if(b.dataset.irep!==undefined){const r=ALL.find(x=>x.id===b.dataset.irep);r?openReport(r):alert('הדוח המקורי לא נמצא (אולי נמחק)');return}
-  const is=ISSUES.find(x=>x.id===(b.dataset.iph||b.dataset.fix));if(!is)return;
+  const is=ISSUES.find(x=>x.id===(b.dataset.iph||b.dataset.fix||b.dataset.idel));if(!is)return;
+  if(b.dataset.idel){
+    if(!confirm(`למחוק לגמרי את הליקוי "${shortText(is.item)}" ברכב ${is.vehicle}?\n\nזה מיועד לליקוי שנפתח בטעות - הוא יימחק מהרשימה ולא יישאר בהיסטוריה.\nאם הליקוי תוקן, עדיף ללחוץ "✓ תוקן".`))return;
+    await busy('מוחק...',async()=>{await Store.deleteIssue(is);if(!Store.cloud){ISSUES=lsGet('handoverIssues',[]);render()}});return}
   if(b.dataset.iph){$('phTitle').textContent=`${shortText(is.item)} · רכב ${is.vehicle}`;$('phGrid').textContent='טוען...';$('phDlg').showModal();
     try{const P=(await Store.photosFor(is.reportId)).filter(p=>p.item===is.item),np=(ALL.find(x=>x.id===is.reportId)?.noPhoto||{})[is.item];
       $('phGrid').innerHTML=P.length?P.map(p=>`<img src="${esc(p.data)}" alt="">`).join(''):`<div class="mut">אין תמונות לליקוי הזה${np?` (לא ניתן לצלם: ${esc(np)})`:''}</div>`}

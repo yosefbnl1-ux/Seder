@@ -150,15 +150,35 @@ const Store = {
     const s = await this.db.collection('photos').where('reportId', '==', reportId).get();
     return s.docs.map(d => ({ ...d.data(), id: d.id }));
   },
+  // מחיקת דוח מוחקת גם את התמונות שלו ואת הליקויים שנפתחו ממנו
   async remove(id) {
     if (!this.cloud) {
       lsSet(LOCAL_KEY, localGet().filter(r => r.id !== id));
-      lsSet('handoverPhotos', lsGet('handoverPhotos', []).filter(p => p.reportId !== id)); return;
+      lsSet('handoverPhotos', lsGet('handoverPhotos', []).filter(p => p.reportId !== id));
+      lsGet('handoverIssues', []).filter(i => i.reportId === id).forEach(i => this.deleteIssue(i)); return;
+    }
+    const db = this.db, b = db.batch();
+    (await db.collection('photos').where('reportId', '==', id).get()).docs.forEach(d => b.delete(d.ref));
+    for (const d of (await db.collection('issues').where('reportId', '==', id).get()).docs) await this._dropIssue(b, { ...d.data(), id: d.id });
+    b.delete(db.collection('reports').doc(id));
+    await b.commit();
+  },
+  // מחיקת ליקוי (למשל שנפתח בטעות) - נעלם לגמרי, וגם מהטופס
+  async deleteIssue(is) {
+    if (!this.cloud) {
+      lsSet('handoverIssues', lsGet('handoverIssues', []).filter(x => x.id !== is.id));
+      const O = lsGet('handoverOpen', {}), it = O[is.vehicleKey]?.items;
+      if (it && it[is.item]?.issueId === is.id) { delete it[is.item]; lsSet('handoverOpen', O) }
+      return;
     }
     const b = this.db.batch();
-    (await this.db.collection('photos').where('reportId', '==', id).get()).docs.forEach(d => b.delete(d.ref));
-    b.delete(this.db.collection('reports').doc(id));
+    await this._dropIssue(b, is);
     await b.commit();
+  },
+  async _dropIssue(b, is) {
+    const oref = this.db.collection('openByVehicle').doc(is.vehicleKey), o = await oref.get();
+    b.delete(this.db.collection('issues').doc(is.id));
+    if (o.exists && o.data().items?.[is.item]?.issueId === is.id) b.update(oref, { ['items.' + is.item]: firebase.firestore.FieldValue.delete() });
   },
 };
 function lsGet(k, def) { try { return JSON.parse(localStorage.getItem(k) || 'null') ?? def } catch (e) { return def } }
