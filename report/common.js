@@ -121,9 +121,10 @@ const Store = {
     return this.db.collection('issues').orderBy('openedAt', 'desc').limit(1000)
       .onSnapshot(s => cb(s.docs.map(d => ({ ...d.data(), id: d.id }))), onErr);
   },
-  // המנהל מסמן ליקוי כתוקן: הוא עובר להיסטוריה ונעלם מהטופס
-  async fixIssue(is, note, by) {
-    const upd = { status: 'fixed', fixedAt: Date.now(), fixedBy: by || '', fixNote: note || '' };
+  // המנהל מסמן ליקוי כתוקן: הוא עובר להיסטוריה ונעלם מהטופס.
+  // fix = {by: מי תיקן, at: תאריך התיקון, note}; approver = המנהל שאישר
+  async fixIssue(is, fix, approver) {
+    const upd = { status: 'fixed', fixedAt: fix.at || Date.now(), fixedBy: fix.by || '', fixNote: fix.note || '', approvedBy: approver || '', approvedAt: Date.now() };
     if (!this.cloud) {
       lsSet('handoverIssues', lsGet('handoverIssues', []).map(x => x.id === is.id ? { ...x, ...upd } : x));
       const O = lsGet('handoverOpen', {}), it = O[is.vehicleKey]?.items;
@@ -135,6 +136,14 @@ const Store = {
     const o = await oref.get();
     if (o.exists && o.data().items?.[is.item]?.issueId === is.id) b.update(oref, { ['items.' + is.item]: firebase.firestore.FieldValue.delete() });
     await b.commit();
+  },
+  // כל התמונות, מהחדשה לישנה, 24 בכל פעם (after = createdAt של האחרונה שנטענה)
+  async photosPage(after, n = 24) {
+    if (!this.cloud) return lsGet('handoverPhotos', []).sort((a, b) => b.createdAt - a.createdAt).filter(p => !after || p.createdAt < after).slice(0, n);
+    let q = this.db.collection('photos').orderBy('createdAt', 'desc');
+    if (after) q = q.startAfter(after);
+    const s = await q.limit(n).get();
+    return s.docs.map(d => ({ ...d.data(), id: d.id }));
   },
   async photosFor(reportId) {
     if (!this.cloud) return lsGet('handoverPhotos', []).filter(p => p.reportId === reportId);

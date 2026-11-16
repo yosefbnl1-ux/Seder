@@ -122,7 +122,22 @@ dialog::backdrop{background:rgba(10,20,35,.55)}
 .folder .bd{color:var(--bad);font-weight:700}
 .list tbody tr{--c:#2e9d5b}.list tbody tr td:first-child{box-shadow:inset -5px 0 0 var(--c)}
 .list tbody tr.sel td{background:#eef4fb}
-#setDlg{max-width:min(380px,94vw);background:#fff}.setb{display:block;width:100%;text-align:right;margin-top:10px;min-height:52px}
+.top #menuBtn{font-size:1.35rem;line-height:1;padding:6px 12px}
+#menuDlg{inset:0 0 0 auto;margin:0;height:100dvh;max-height:none;width:min(300px,86vw);border-radius:0;background:#fff}
+.mh{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:var(--ink);color:#fff}.mh b{font-size:1.05rem}
+.mh button{background:rgba(255,255,255,.15);border:0;color:#fff;border-radius:10px;width:38px;height:38px;font-size:1.1rem}
+.mnav button{display:block;width:100%;text-align:right;padding:16px 18px;border:0;border-bottom:1px solid var(--line);background:#fff;font-weight:700;font-size:1.02rem;color:var(--ink)}
+.mnav button:hover{background:#f6f9fd}
+#issTable td small{display:block;color:var(--mut);font-size:.8rem}#issTable .num{white-space:nowrap}
+.grid.wide{grid-template-columns:1fr}
+#issTable .acts{white-space:nowrap}#issTable .acts .btn{min-height:34px;padding:0 10px;font-size:.82rem;margin-inline-start:4px}
+.gal{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px}
+.gc{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.gc img{display:block;width:100%;height:160px;object-fit:cover;cursor:zoom-in;background:#dfe6ee}
+.gc div{padding:8px 10px;font-size:.85rem}.gc b{display:block;color:var(--ink)}.gc .lnk{font-size:.82rem;padding:2px 0}
+#phDlg{max-width:min(760px,96vw);background:#fff}.phg{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;padding:14px}
+.phg img{width:100%;height:200px;object-fit:cover;border-radius:10px;cursor:zoom-in}
+#fixDlg{max-width:min(440px,96vw);background:#fff}
 /* ---- דוח בטלפון ---- */
 .mrep{width:100%;max-width:520px}.mhd{display:flex;align-items:center;gap:10px;margin:2px 0 10px}.mhd b{flex:1;font-size:1.05rem}
 .mc{background:#fff;border:1px solid var(--line);border-radius:16px;padding:12px 14px;margin-bottom:10px}
@@ -143,6 +158,7 @@ dialog::backdrop{background:rgba(10,20,35,.55)}
  .filters.open{display:grid}.filters>div{width:auto}.filters .tog{grid-column:1/-1}#fClear{display:block;grid-column:1/-1}
  .attn{padding:12px 14px}.attn .go{padding:8px 10px}
  .list tr{box-shadow:inset -6px 0 0 var(--c)}.list tbody tr td:first-child{box-shadow:none}
+ #issTable tr{padding-right:14px}#issTable td.acts{padding-top:6px}.gal{grid-template-columns:1fr 1fr}.gc img{height:130px}
  #dlg.mob{max-width:100vw;max-height:100vh;height:100%;border-radius:0;margin:0}#dlg.mob .dview{padding:12px}
  .list thead{display:none}.list,.list tbody,.list tr,.list td{display:block}
  .list tr{position:relative;padding:10px 46px 10px 12px;border-bottom:1px solid var(--line)}
@@ -153,8 +169,8 @@ dialog::backdrop{background:rgba(10,20,35,.55)}
 </style>
 </head>
 <body>
-<header class="top"><div class="in"><img src="logo.jpg" alt=""><h1>ניהול דוחות העברת משמרת<small id="who"></small></h1>
- <button id="setBtn" hidden>⚙️ הגדרות</button><button id="logout" hidden>יציאה</button></div></header>
+<header class="top"><div class="in"><button id="menuBtn" hidden aria-label="תפריט">☰</button><img src="logo.jpg" alt=""><h1>ניהול דוחות העברת משמרת<small id="who"></small></h1>
+ <button id="logout" hidden>יציאה</button></div></header>
 <main>
  <div class="banner" id="localBanner" hidden>⚠️ מצב ניסיון: לא הוגדר Firebase בקובץ config.js, ולכן מוצגים רק דוחות שמולאו בדפדפן הזה. ראו README.md להפעלה.</div>
 
@@ -197,9 +213,20 @@ dialog::backdrop{background:rgba(10,20,35,.55)}
   <div class="mainc">
   <div class="crumbs" id="crumbs" hidden><button class="lnk" id="back">→ חזרה</button><span>/</span><b id="crumbName"></b></div>
   <div id="issuesView" hidden>
-   <div class="itog"><button type="button" id="iOpenBtn" class="on">פתוחים</button><button type="button" id="iFixedBtn">תוקנו</button></div>
+   <div class="lhead"><b>ריכוז ליקויים</b><span class="cnt" id="issCnt"></span><button class="btn sec" id="issCsv" type="button">ייצוא לאקסל (CSV)</button></div>
+   <div class="itog"><button type="button" id="iAllBtn">הכל</button><button type="button" id="iOpenBtn">פתוחים</button><button type="button" id="iFixedBtn">תוקנו</button></div>
    <div class="banner" id="issErr" hidden>כדי לראות ליקויים צריך לעדכן את כללי האבטחה ב-Firebase (ראו README).</div>
-   <div id="issList"></div>
+   <table class="list" id="issTable">
+    <thead><tr><th>ליקוי</th><th>רכב</th><th>נפתח</th><th>דווח ע"י</th><th>סטטוס</th><th>תוקן ע"י</th><th>אושר ע"י</th><th>תאריך תיקון</th><th></th></tr></thead>
+    <tbody id="issList"></tbody>
+   </table>
+   <div class="empty" id="issEmpty" hidden></div>
+  </div>
+  <div id="photosView" hidden>
+   <div class="lhead"><b>תמונות ליקויים</b><span class="cnt" id="phCnt"></span></div>
+   <div class="gal" id="gal"></div>
+   <div class="empty" id="phEmpty" hidden>עוד אין תמונות</div>
+   <button class="btn sec" id="phMore" type="button" hidden style="display:block;margin:14px auto 0">טען עוד תמונות</button>
   </div>
   <div id="listWrap">
   <div class="lhead">
@@ -227,9 +254,25 @@ dialog::backdrop{background:rgba(10,20,35,.55)}
  <div class="dview"><div class="scaler" id="dBody"></div></div>
  <div class="df"><button class="btn sec" id="dPrint">הדפסה</button><button class="btn" id="dPdf">הורדת PDF</button></div>
 </dialog>
-<dialog id="setDlg">
- <div class="dh"><b>⚙️ הגדרות</b><span class="sp"></span><button class="btn sec" id="setClose">סגירה</button></div>
- <div class="acc"><button class="btn sec setb" id="vehBtn">🚗 רכבים</button><button class="btn sec setb" id="accBtn">👥 ניהול גישה</button></div>
+<dialog id="menuDlg">
+ <div class="mh"><b>תפריט</b><button id="menuClose" type="button" aria-label="סגירה">✕</button></div>
+ <nav class="mnav"><button id="accBtn" type="button">👥 ניהול גישה</button><button id="vehBtn" type="button">🚗 רכבים</button>
+  <button id="mIss" type="button">🛠️ ריכוז ליקויים</button><button id="mPhotos" type="button">📷 תמונות</button></nav>
+</dialog>
+<dialog id="fixDlg">
+ <div class="dh"><b>סימון ליקוי כתוקן</b><span class="sp"></span><button class="btn sec" id="fixClose" type="button">ביטול</button></div>
+ <form class="acc" id="fixForm">
+  <p id="fixWhat"></p>
+  <label class="f" for="fixBy">מי תיקן? (למשל: מוסך, שם הטכנאי)</label><input id="fixBy" required maxlength="80">
+  <label class="f" for="fixDate">תאריך התיקון</label><input id="fixDate" type="date" required>
+  <label class="f" for="fixNote">הערה (לא חובה)</label><input id="fixNote" maxlength="200" placeholder="למשל: הוחלף פנס">
+  <p class="mut">אושר על ידי: <b id="fixMe"></b></p>
+  <button class="btn" style="width:100%;margin-top:6px">✓ סימון כתוקן</button>
+ </form>
+</dialog>
+<dialog id="phDlg">
+ <div class="dh"><b id="phTitle">תמונות</b><span class="sp"></span><button class="btn sec" id="phClose" type="button">סגירה</button></div>
+ <div class="phg" id="phGrid"></div>
 </dialog>
 <dialog id="imgDlg"><img id="bigImg" alt=""></dialog>
 <dialog id="vehDlg">
@@ -260,7 +303,7 @@ dialog::backdrop{background:rgba(10,20,35,.55)}
 <script>
 const st=document.createElement('style');st.textContent=REPORT_CSS;document.head.appendChild(st);
 SHIFTS.forEach(s=>$('fShift').add(new Option(s,s)));$('fShift').add(new Option(OTHER,OTHER));
-let ALL=[],VIEW=[],sel=new Set(),cur=null,curMonth=null,quickBad=false,ISSUES=[],issMode=null;
+let ALL=[],VIEW=[],sel=new Set(),cur=null,curMonth=null,quickBad=false,ISSUES=[],issMode=null,photoMode=false;
 // תיקייה לכל חודש לפי תאריך הדוח
 const monthOf=r=>(r.date||'').slice(0,7);
 const monthName=m=>{const[y,mo]=m.split('-');return new Date(+y,mo-1,1).toLocaleDateString('he-IL',{month:'long',year:'numeric'})};
@@ -283,15 +326,17 @@ function render(){
     &&(!q||[r.vehicle,r.giver,r.receiver,r.vNotes,r.details,r.reportedTo].join(' ').toLowerCase().includes(q)));
   // חיפוש, תאריכים או "עם ליקויים" - מחפשים בכל החודשים; אחרת מציגים חודש אחד
   const today=f&&f===todayISO()&&t===f,allBad=ob&&quickBad,listAll=!!(q||f||t||allBad);
-  const home=homeMonth(),month=curMonth||home,isHome=!issMode&&!listAll&&month===home;
-  $('qMonth').classList.toggle('on',isHome);$('qToday').classList.toggle('on',!!today&&!issMode);
-  $('qBad').classList.toggle('on',allBad&&!issMode);$('qOpen').classList.toggle('on',!!issMode);
-  $('issuesView').hidden=!issMode;$('listWrap').hidden=!!issMode;$('crumbs').hidden=isHome;
-  if(issMode)renderIssues();
-  $('crumbName').textContent=issMode?'ליקויים':!listAll?monthName(month):today?'דוחות היום':allBad&&!f&&!t?'כל הדוחות עם ליקויים':(f||t)?`דוחות ${f?'מ-'+fmtDate(f):''} ${t?'עד '+fmtDate(t):''}`.trim():'תוצאות חיפוש בכל החודשים';
+  const home=homeMonth(),month=curMonth||home,other=!!issMode||photoMode,isHome=!other&&!listAll&&month===home;
+  $('qMonth').classList.toggle('on',isHome);$('qToday').classList.toggle('on',!!today&&!other);
+  $('qBad').classList.toggle('on',allBad&&!other);$('qOpen').classList.toggle('on',issMode==='open');
+  $('issuesView').hidden=!issMode;$('photosView').hidden=!photoMode;$('listWrap').hidden=other;$('crumbs').hidden=isHome;
+  // בריכוז ליקויים ובתמונות - בלי העמודה שבצד, כדי שהטבלה תקבל את כל הרוחב
+  document.querySelector('.grid').classList.toggle('wide',other);document.querySelector('.side').hidden=other;
+  if(issMode)renderIssues();if(photoMode)renderPhotos();
+  $('crumbName').textContent=issMode?'ריכוז ליקויים':photoMode?'תמונות':!listAll?monthName(month):today?'דוחות היום':allBad&&!f&&!t?'כל הדוחות עם ליקויים':(f||t)?`דוחות ${f?'מ-'+fmtDate(f):''} ${t?'עד '+fmtDate(t):''}`.trim():'תוצאות חיפוש בכל החודשים';
   const groups={};ALL.filter(r=>shiftOk(r,sh)).forEach(r=>{(groups[monthOf(r)]??=[]).push(r)});
   $('folders').innerHTML=Object.keys(groups).sort().reverse().map(m=>{const L=groups[m],nb=L.filter(hasIssue).length;
-    return`<button class="folder${!listAll&&!issMode&&m===month?' on':''}" data-month="${esc(m)}"><span><b>${esc(monthName(m))}</b> · ${L.length}</span>${nb?`<span class="bd">${nb} עם ליקויים</span>`:''}</button>`}).join('');
+    return`<button class="folder${!listAll&&!other&&m===month?' on':''}" data-month="${esc(m)}"><span><b>${esc(monthName(m))}</b> · ${L.length}</span>${nb?`<span class="bd">${nb} עם ליקויים</span>`:''}</button>`}).join('');
   $('noFolders').hidden=Object.keys(groups).length>0;
   VIEW=(listAll?base:base.filter(r=>monthOf(r)===month)).sort((a,b)=>(b.date+b.time).localeCompare(a.date+a.time)||b.createdAt-a.createdAt);
   const ids=new Set(VIEW.map(r=>r.id));sel.forEach(id=>{if(!ids.has(id))sel.delete(id)});
@@ -351,7 +396,7 @@ $('sideIssAll').onclick=()=>$('qOpen').click();
 $('fBtn').onclick=()=>{const o=$('filters').classList.toggle('open');$('fBtn').textContent=o?'סינון ▴':'סינון ▾'};
 ['q','from','to','fShift','onlyBad'].forEach(id=>$(id).addEventListener('input',render));
 $('folders').addEventListener('click',e=>{const f=e.target.closest('[data-month]');if(!f)return;goHome();curMonth=f.dataset.month;render();$('listWrap').scrollIntoView({block:'start'})});
-function goHome(){issMode=null;curMonth=null;quickBad=false;$('onlyBad').checked=false;$('q').value=$('from').value=$('to').value='';sel.clear()}
+function goHome(){issMode=null;photoMode=false;curMonth=null;quickBad=false;$('onlyBad').checked=false;$('q').value=$('from').value=$('to').value='';sel.clear()}
 $('back').onclick=$('qMonth').onclick=$('fClear').onclick=()=>{goHome();render()};
 // לחיצה על המספרים: דוחות היום / כל הדוחות עם ליקויים (מכל החודשים)
 $('qToday').onclick=()=>{goHome();$('from').value=$('to').value=todayISO();render()};
@@ -413,7 +458,7 @@ $('dDel').onclick=async()=>{if(!confirm(`למחוק לצמיתות את הדוח
 let unsub=null,issUnsub=null,authChecked=false;
 const slowT=setTimeout(()=>{$('slow').hidden=false},12000);
 function showLogin(){clearTimeout(slowT);$('loading').hidden=true;$('app').hidden=true;$('login').hidden=false;fillRemembered()}
-function start(){clearTimeout(slowT);$('loading').hidden=true;$('login').hidden=true;$('app').hidden=false;$('setBtn').hidden=false;
+function start(){clearTimeout(slowT);$('loading').hidden=true;$('login').hidden=true;$('app').hidden=false;$('menuBtn').hidden=false;
   if(issUnsub){issUnsub();issUnsub=null}
   issUnsub=Store.subscribeIssues(list=>{ISSUES=list;$('issErr').hidden=true;render()},()=>{ISSUES=[];$('issErr').hidden=false;render()});
   unsub=Store.subscribe(list=>{ALL=list;authChecked=false;render()},e=>{
@@ -429,7 +474,7 @@ function start(){clearTimeout(slowT);$('loading').hidden=true;$('login').hidden=
   try{await Store.init(true)}catch(e){clearTimeout(slowT);$('loading').hidden=true;$('localBanner').hidden=false;$('localBanner').textContent='אין חיבור למערכת: '+e.message;return}
   Store.auth.onAuthStateChanged(u=>{
     if(unsub){unsub();unsub=null}if(issUnsub){issUnsub();issUnsub=null}
-    $('logout').hidden=$('setBtn').hidden=!u;$('who').textContent=u?u.email:'';
+    $('logout').hidden=$('menuBtn').hidden=!u;$('who').textContent=u?u.email:'';
     if(!u&&accUnsub){accUnsub();accUnsub=null;ADMINS=[]}
     if(u&&idleExpired()){Store.auth.signOut();return}
     if(u)start();else showLogin()});
@@ -446,36 +491,76 @@ function start(){clearTimeout(slowT);$('loading').hidden=true;$('login').hidden=
     $('loginMsg').textContent='אם האימייל רשום במערכת, נשלח אליו קישור לקביעת סיסמה (לבדוק גם בספאם).'};
 })();
 
-// ----- ליקויים פתוחים / שתוקנו -----
+// ----- ריכוז ליקויים: כל הליקויים, פתוחים ושתוקנו, מי תיקן ומי אישר -----
+// ליקויים שסומנו לפני שנוסף "מי תיקן": השדה fixedBy הכיל את המנהל שאישר
+const fixer=is=>is.approvedBy?is.fixedBy:'',approver=is=>is.approvedBy||is.fixedBy||'';
+function issRows(){const open=ISSUES.filter(i=>i.status==='open').sort((a,b)=>a.openedAt-b.openedAt),
+  fixed=ISSUES.filter(i=>i.status==='fixed').sort((a,b)=>(b.fixedAt||0)-(a.fixedAt||0));
+  return{open,fixed,list:issMode==='open'?open:issMode==='fixed'?fixed:[...open,...fixed]}}
 function renderIssues(){
-  const open=ISSUES.filter(i=>i.status==='open'),fixed=ISSUES.filter(i=>i.status==='fixed');
-  $('iOpenBtn').textContent=`פתוחים (${open.length})`;$('iFixedBtn').textContent=`תוקנו (${fixed.length})`;
-  $('iOpenBtn').classList.toggle('on',issMode==='open');$('iFixedBtn').classList.toggle('on',issMode==='fixed');
-  const L=(issMode==='open'?open:fixed).sort((a,b)=>issMode==='open'?a.openedAt-b.openedAt:b.fixedAt-a.fixedAt);
-  $('issList').innerHTML=L.length?L.map(is=>{return`<div class="iss${is.status==='fixed'?' fixed':''}">
-    <div class="ih"><b>${esc(is.itemText||itemText(is.item))}</b><span class="tag warn">רכב ${esc(is.vehicle)}</span></div>
-    <div class="im">נפתח ${fmtTs(is.openedAt)} · דיווחו: ${esc(is.giver)} ← ${esc(is.receiver)}</div>
-    ${is.status==='open'?`<div class="im">פתוח ${daysSince(is.openedAt)} ימים</div>`:''}
-    ${is.status==='fixed'?`<div class="iok">✓ תוקן ${fmtTs(is.fixedAt)}${is.fixedBy?' · '+esc(is.fixedBy):''}${is.fixNote?' · '+esc(is.fixNote):''}</div>`:''}
-    <div class="ia"><button class="btn sec" data-iph="${esc(is.id)}">תמונות</button><button class="btn sec" data-irep="${esc(is.reportId)}">הדוח המקורי</button>
-     ${is.status==='open'?`<button class="btn" data-fix="${esc(is.id)}">✓ תוקן</button>`:''}</div>
-    <div class="ithumbs" id="ith_${esc(is.id)}"></div></div>`}).join('')
-   :`<div class="empty">${issMode==='open'?'אין ליקויים פתוחים 👍':'עוד לא סומנו ליקויים כמתוקנים'}</div>`}
+  const{open,fixed,list}=issRows();
+  $('iAllBtn').textContent=`הכל (${ISSUES.length})`;$('iOpenBtn').textContent=`פתוחים (${open.length})`;$('iFixedBtn').textContent=`תוקנו (${fixed.length})`;
+  [['iAllBtn','all'],['iOpenBtn','open'],['iFixedBtn','fixed']].forEach(([b,m])=>$(b).classList.toggle('on',issMode===m));
+  $('issCnt').textContent=`${list.length} ליקויים`;
+  $('issList').innerHTML=list.map(is=>{const o=is.status==='open';return`<tr style="--c:${o?'#c8372d':'#2e9d5b'}">
+   <td><b>${esc(shortText(is.item))}</b>${is.fixNote?`<small>${esc(is.fixNote)}</small>`:''}</td>
+   <td data-l="רכב" class="num">${esc(is.vehicle)}</td><td data-l="נפתח" class="num">${fmtTs(is.openedAt)}</td>
+   <td data-l="דווח ע&quot;י">${esc(is.giver)} ← ${esc(is.receiver)}</td>
+   <td class="st">${o?`<span class="tag bad">פתוח ${daysSince(is.openedAt)?daysSince(is.openedAt)+' ימים':'היום'}</span>`:'<span class="tag ok">תוקן</span>'}</td>
+   <td data-l="תוקן ע&quot;י">${o?'—':esc(fixer(is))||'—'}</td><td data-l="אושר ע&quot;י">${o?'—':esc(approver(is))||'—'}</td>
+   <td data-l="תאריך תיקון" class="num">${o||!is.fixedAt?'—':fmtTs(is.fixedAt)}</td>
+   <td class="acts"><button class="btn sec" data-iph="${esc(is.id)}" type="button" title="תמונות">📷</button><button class="btn sec" data-irep="${esc(is.reportId)}" type="button" title="הדוח המקורי">📄</button>${o?`<button class="btn" data-fix="${esc(is.id)}" type="button">✓ תוקן</button>`:''}</td></tr>`}).join('');
+  $('issEmpty').hidden=list.length>0;$('issTable').hidden=!list.length;
+  $('issEmpty').textContent=issMode==='open'?'אין ליקויים פתוחים 👍':issMode==='fixed'?'עוד לא סומנו ליקויים כמתוקנים':'עוד לא דווחו ליקויים'}
 $('qOpen').onclick=()=>{goHome();issMode='open';render()};
-$('iOpenBtn').onclick=()=>{issMode='open';render()};$('iFixedBtn').onclick=()=>{issMode='fixed';render()};
+$('iAllBtn').onclick=()=>{issMode='all';render()};$('iOpenBtn').onclick=()=>{issMode='open';render()};$('iFixedBtn').onclick=()=>{issMode='fixed';render()};
+$('issCsv').onclick=()=>{const{list}=issRows();
+  const head=['ליקוי','רכב','נפתח','מוסר','מקבל','סטטוס','תוקן ע"י','אושר ע"י','תאריך תיקון','הערה'];
+  const lines=list.map(is=>[itemText(is.item),is.vehicle,fmtTs(is.openedAt),is.giver,is.receiver,is.status==='open'?'פתוח':'תוקן',fixer(is),approver(is),is.fixedAt&&is.status!=='open'?fmtTs(is.fixedAt):'',is.fixNote]);
+  const csv='﻿'+[head,...lines].map(l=>l.map(x=>'"'+String(x??'').replace(/"/g,'""')+'"').join(',')).join('\r\n');
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.download=`defects_${todayISO()}.csv`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),2000)};
+let fixing=null;
 async function issClick(e){
-  const b=e.target.closest('[data-iph],[data-irep],[data-fix]');
-  if(!b){const im=e.target.closest('.ithumbs img');if(im){$('bigImg').src=im.src;$('imgDlg').showModal()}return}
+  const b=e.target.closest('[data-iph],[data-irep],[data-fix]');if(!b)return;
   if(b.dataset.irep!==undefined){const r=ALL.find(x=>x.id===b.dataset.irep);r?openReport(r):alert('הדוח המקורי לא נמצא (אולי נמחק)');return}
   const is=ISSUES.find(x=>x.id===(b.dataset.iph||b.dataset.fix));if(!is)return;
-  if(b.dataset.iph){const box=$('ith_'+is.id);box.textContent='טוען...';
-    try{const P=(await Store.photosFor(is.reportId)).filter(p=>p.item===is.item);
-      box.innerHTML=P.length?P.map(p=>`<img src="${esc(p.data)}" alt="">`).join(''):'אין תמונות לליקוי הזה'+((ALL.find(x=>x.id===is.reportId)?.noPhoto||{})[is.item]?` (לא ניתן לצלם: ${esc(ALL.find(x=>x.id===is.reportId).noPhoto[is.item])})`:'')}
-    catch(err){box.textContent='שגיאה בטעינת התמונות'}return}
-  const note=prompt(`לסמן את "${is.itemText||itemText(is.item)}" ברכב ${is.vehicle} כתוקן?\nאפשר לכתוב הערה (לא חובה), למשל "הוחלף במוסך":`,'');
-  if(note===null)return;
-  await busy('שומר...',async()=>{await Store.fixIssue(is,note.trim(),me());if(!Store.cloud){ISSUES=lsGet('handoverIssues',[]);render()}})}
+  if(b.dataset.iph){$('phTitle').textContent=`${shortText(is.item)} · רכב ${is.vehicle}`;$('phGrid').textContent='טוען...';$('phDlg').showModal();
+    try{const P=(await Store.photosFor(is.reportId)).filter(p=>p.item===is.item),np=(ALL.find(x=>x.id===is.reportId)?.noPhoto||{})[is.item];
+      $('phGrid').innerHTML=P.length?P.map(p=>`<img src="${esc(p.data)}" alt="">`).join(''):`<div class="mut">אין תמונות לליקוי הזה${np?` (לא ניתן לצלם: ${esc(np)})`:''}</div>`}
+    catch(err){$('phGrid').textContent='שגיאה בטעינת התמונות'}return}
+  fixing=is;$('fixWhat').textContent=`${itemText(is.item)} · רכב ${is.vehicle} · נפתח ${fmtTs(is.openedAt)}`;
+  $('fixBy').value=$('fixNote').value='';$('fixDate').value=$('fixDate').max=todayISO();$('fixMe').textContent=me()||'מנהל';$('fixDlg').showModal();$('fixBy').focus()}
+$('fixClose').onclick=()=>$('fixDlg').close();
+$('fixForm').onsubmit=async e=>{e.preventDefault();const is=fixing;if(!is)return;
+  const fix={by:$('fixBy').value.trim(),at:Date.parse($('fixDate').value+'T12:00'),note:$('fixNote').value.trim()};$('fixDlg').close();
+  await busy('שומר...',async()=>{await Store.fixIssue(is,fix,me()||'מנהל');if(!Store.cloud){ISSUES=lsGet('handoverIssues',[]);render()}})};
 $('issList').addEventListener('click',issClick);$('sideIss').addEventListener('click',issClick);
+$('phClose').onclick=()=>$('phDlg').close();
+$('phGrid').addEventListener('click',e=>{const im=e.target.closest('img');if(im){$('bigImg').src=im.src;$('imgDlg').showModal()}});
+
+// ----- תמונות: כל תמונות הליקויים, מהחדשה לישנה -----
+let PHOTOS=[],phDone=false,phBusy=false;
+async function loadPhotos(reset){if(phBusy)return;phBusy=true;if(reset){PHOTOS=[];phDone=false}
+  try{const P=await Store.photosPage(PHOTOS.length?PHOTOS[PHOTOS.length-1].createdAt:null);PHOTOS.push(...P);phDone=P.length<24}
+  catch(e){phDone=true;$('phEmpty').textContent='שגיאה בטעינת התמונות: '+(e.code||e.message)}
+  phBusy=false;if(photoMode)renderPhotos()}
+function renderPhotos(){
+  $('gal').innerHTML=PHOTOS.map(p=>{const r=ALL.find(x=>x.id===p.reportId),is=ISSUES.find(i=>i.reportId===p.reportId&&i.item===p.item);
+    return`<div class="gc"><img src="${esc(p.data)}" alt="" loading="lazy"><div><b>${esc(shortText(p.item))}</b>${r?`רכב ${esc(r.vehicle)} · `:''}${fmtTs(p.createdAt)}
+     ${is?` · <span class="tag ${is.status==='open'?'bad':'ok'}">${is.status==='open'?'פתוח':'תוקן'}</span>`:''}
+     ${r?`<br><button class="lnk" data-prep="${esc(r.id)}" type="button">פתיחת הדוח ›</button>`:''}</div></div>`}).join('');
+  $('phCnt').textContent=PHOTOS.length?`${PHOTOS.length}${phDone?'':'+'} תמונות`:'';
+  $('phEmpty').hidden=PHOTOS.length>0||phBusy;$('phMore').hidden=phDone}
+$('phMore').onclick=()=>loadPhotos(false);
+$('gal').addEventListener('click',e=>{const im=e.target.closest('img');if(im){$('bigImg').src=im.src;$('imgDlg').showModal();return}
+  const b=e.target.closest('[data-prep]');if(b)openReport(ALL.find(r=>r.id===b.dataset.prep))});
+
+// ----- תפריט ☰ -----
+$('menuBtn').onclick=()=>{$('accBtn').hidden=!Store.cloud;$('menuDlg').showModal()};
+$('menuClose').onclick=()=>$('menuDlg').close();
+$('menuDlg').addEventListener('click',e=>{if(e.target===$('menuDlg'))$('menuDlg').close()});
+$('mIss').onclick=()=>{$('menuDlg').close();goHome();issMode='all';render();scrollTo(0,0)};
+$('mPhotos').onclick=()=>{$('menuDlg').close();goHome();photoMode=true;render();scrollTo(0,0);loadPhotos(true)};
 $('imgDlg').addEventListener('click',()=>$('imgDlg').close());
 
 // ----- רכבים: הרשימה שמופיעה בטופס, והרכב הקבוע -----
@@ -486,9 +571,7 @@ function paintVeh(){$('vehList').innerHTML=VEH.list.length?VEH.list.map(v=>`<li>
 async function saveVeh(){if(!VEH.list.includes(VEH.main))VEH.main=VEH.list[0]||'';paintVeh();
   try{await Store.saveVehicles({list:VEH.list,main:VEH.main});$('vehMsg').textContent=''}
   catch(e){$('vehMsg').textContent=e.code==='permission-denied'?'כדי לשמור רכבים צריך לעדכן את כללי האבטחה ב-Firebase (ראו README).':'השמירה נכשלה: '+e.message}}
-$('setBtn').onclick=()=>{$('accBtn').hidden=!Store.cloud;$('setDlg').showModal()};
-$('setClose').onclick=()=>$('setDlg').close();
-$('vehBtn').onclick=async()=>{$('setDlg').close();$('vehMsg').textContent='';VEH=await Store.vehicles();paintVeh();$('vehDlg').showModal()};
+$('vehBtn').onclick=async()=>{$('menuDlg').close();$('vehMsg').textContent='';VEH=await Store.vehicles();paintVeh();$('vehDlg').showModal()};
 $('vehClose').onclick=()=>$('vehDlg').close();
 $('vehForm').onsubmit=e=>{e.preventDefault();const v=$('vehNew').value.trim();if(!v)return;
   if(VEH.list.some(x=>vKey(x)===vKey(v))){$('vehMsg').textContent='הרכב הזה כבר ברשימה';return}
@@ -526,7 +609,7 @@ function me(){return(Store.auth?.currentUser?.email||'').toLowerCase()}
 function paintAdmins(){
   const rows=[...OWNERS.map(e=>({e,owner:true})),...ADMINS.filter(a=>!OWNERS.includes(a.e))];
   $('accList').innerHTML=rows.map(a=>`<li>${a.owner?'<span class="tag ok">בעלים</span>':a.e===me()?'<span class="tag">זה אתה</span>':`<button class="btn red" data-rm="${esc(a.e)}" style="min-height:36px">הסרה</button>`}<span>${esc(a.e)}</span></li>`).join('')}
-$('accBtn').onclick=()=>{$('setDlg').close();$('accMsg').textContent=$('accOk').textContent='';$('accDlg').showModal();
+$('accBtn').onclick=()=>{$('menuDlg').close();$('accMsg').textContent=$('accOk').textContent='';$('accDlg').showModal();
   if(!accUnsub)accUnsub=Store.db.collection('admins').onSnapshot(s=>{ADMINS=s.docs.map(d=>({e:d.id}));paintAdmins()},
     e=>{$('accMsg').textContent=e.code==='permission-denied'?'כדי לנהל גישה צריך לעדכן את כללי האבטחה ב-Firebase (ראו README).':e.message});
   paintAdmins()};

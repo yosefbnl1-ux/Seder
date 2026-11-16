@@ -169,15 +169,15 @@ $('statusRows').innerHTML=STATUS.map(s=>`<label class="chk"><input type="radio" 
 function paintRows(){
   document.querySelectorAll('[data-k]').forEach(b=>b.classList.toggle('on',ans[b.dataset.k]===b.dataset.v));
   document.querySelectorAll('[data-fuel]').forEach(b=>b.classList.toggle('on',fuel===b.dataset.fuel));
-  CHECKS.forEach(c=>{$('kt_'+c.k).hidden=!known[c.k];$('row_'+c.k).querySelectorAll('[data-k]').forEach(b=>b.disabled=!!known[c.k]);const show=ans[c.k]==='bad'&&!known[c.k];$('ph_'+c.k).hidden=!show;if(show)renderPh(c)})}
+  CHECKS.forEach(c=>{$('kt_'+c.k).hidden=!known[c.k];$('row_'+c.k).querySelectorAll('[data-k]').forEach(b=>b.disabled=!!known[c.k]);const show=ans[c.k]==='bad'&&!known[c.k]&&!!c.photo;$('ph_'+c.k).hidden=!show;if(show)renderPh(c)})}
 
 // ----- צילום ליקויים: ליקוי חדש בסעיף שרואים בעין חייב תמונה, או סיבה למה אי אפשר -----
 const photos={},np={},npOn={};
 function renderPh(c){const k=c.k,L=photos[k]||[];
-  $('ph_'+k).innerHTML=`<div class="phl">${c.photo?'צילום הליקוי (חובה)':'צילום הליקוי (לא חובה)'}</div>
+  $('ph_'+k).innerHTML=`<div class="phl">📷 חובת צילום</div>
    <div class="thumbs">${L.map((d,i)=>`<span class="th"><img src="${d}" alt=""><button type="button" data-rmph="${k}" data-i="${i}" aria-label="מחיקת תמונה">✕</button></span>`).join('')}
    ${L.length<3?`<label class="shot">📷 צילום ליקוי<input class="vh" type="file" accept="image/*" capture="environment" data-ph="${k}"></label>`:''}</div>
-   ${c.photo&&!L.length?`<label class="np"><input type="checkbox" data-np="${k}" ${npOn[k]?'checked':''}>לא ניתן לצלם</label>${npOn[k]?`<input class="npr" data-npr="${k}" placeholder="למה? (למשל: חושך)" value="${esc(np[k]||'')}">`:''}`:''}`}
+   ${!L.length?`<label class="np"><input type="checkbox" data-np="${k}" ${npOn[k]?'checked':''}>לא ניתן לצלם</label>${npOn[k]?`<input class="npr" data-npr="${k}" placeholder="למה? (למשל: חושך)" value="${esc(np[k]||'')}">`:''}`:''}`}
 // מקטין את התמונה בטלפון לפני השמירה (צלע ארוכה עד 1280, בערך 150-250KB)
 async function shrink(file){const url=URL.createObjectURL(file);try{
   const im=await new Promise((ok,bad)=>{const i=new Image();i.onload=()=>ok(i);i.onerror=()=>bad(new Error('img'));i.src=url});
