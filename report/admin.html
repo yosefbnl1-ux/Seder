@@ -256,7 +256,7 @@ dialog::backdrop{background:rgba(10,20,35,.55)}
 </dialog>
 <dialog id="menuDlg">
  <div class="mh"><b>תפריט</b><button id="menuClose" type="button" aria-label="סגירה">✕</button></div>
- <nav class="mnav"><button id="accBtn" type="button">👥 ניהול גישה</button><button id="vehBtn" type="button">🚗 רכבים</button>
+ <nav class="mnav"><button id="mHome" type="button">🏠 דף הבית</button><button id="accBtn" type="button">👥 ניהול גישה</button><button id="vehBtn" type="button">🚗 רכבים</button>
   <button id="mIss" type="button">🛠️ ריכוז ליקויים</button><button id="mPhotos" type="button">📷 תמונות</button></nav>
 </dialog>
 <dialog id="fixDlg">
@@ -559,6 +559,7 @@ $('gal').addEventListener('click',e=>{const im=e.target.closest('img');if(im){$(
 $('menuBtn').onclick=()=>{$('accBtn').hidden=!Store.cloud;$('menuDlg').showModal()};
 $('menuClose').onclick=()=>$('menuDlg').close();
 $('menuDlg').addEventListener('click',e=>{if(e.target===$('menuDlg'))$('menuDlg').close()});
+$('mHome').onclick=()=>{$('menuDlg').close();goHome();render();scrollTo(0,0)};
 $('mIss').onclick=()=>{$('menuDlg').close();goHome();issMode='all';render();scrollTo(0,0)};
 $('mPhotos').onclick=()=>{$('menuDlg').close();goHome();photoMode=true;render();scrollTo(0,0);loadPhotos(true)};
 $('imgDlg').addEventListener('click',()=>$('imgDlg').close());
