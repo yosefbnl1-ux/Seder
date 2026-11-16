@@ -94,7 +94,7 @@ function loadScript(src) {
 function reportHTML(r) {
   const mark = v => v === 'ok' ? '<b class="rk ok">✓ תקין</b>' : v === 'bad' ? '<b class="rk bad">✗ לא תקין</b>' : '<b class="rk">—</b>';
   const rows = list => list.map(c => `<tr><td>${esc(c.t)}</td><td>${c.type === 'fuel' ? `<b class="rk">${esc(r.fuel || '—')}</b>` : mark(r.checks?.[c.k])}</td></tr>`).join('');
-  const sig = (img, ok, who) => `<div class="rsig"><div class="rsl">חתימת ${who}</div>${img ? `<img src="${img}" alt="">` : '<div class="rnone">לא נחתם</div>'}<div class="rsc">${ok ? '☑' : '☐'} מאשר שביצע את הבדיקות וקיבל את המידע הנדרש</div></div>`;
+  const sig = (img, ok, who) => `<div class="rsig"><div class="rsl">חתימת ${who}</div>${img ? `<img src="${esc(img)}" alt="">` : '<div class="rnone">לא נחתם</div>'}<div class="rsc">${ok ? '☑' : '☐'} מאשר שביצע את הבדיקות וקיבל את המידע הנדרש</div></div>`;
   const bad = badList(r).length;
   return `<div class="rep">
   <div class="rh"><img src="logo.jpg" alt=""><div><div class="ro">${ORG}</div><div class="rt">${TITLE}</div><div class="rst">${SUBTITLE}</div></div>
